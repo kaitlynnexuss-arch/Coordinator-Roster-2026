@@ -518,7 +518,66 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <button class="btn btn-outline" onclick="loadOnline()">↻ Load Online</button>
       <button class="btn btn-outline" onclick="saveToLocal()">💾 Save Local</button>
       <button class="btn btn-outline" onclick="loadFromLocal()">📂 Load Local</button>
+      <button class="btn btn-outline" onclick="exportBackupJSON()">⬇ Export Backup JSON</button>
+      <button class="btn btn-outline" onclick="document.getElementById('backupFileInput').click()">⬆ Import Backup JSON</button>
+      <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none" onchange="importBackupJSON(event)">
       <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
+      function exportBackupJSON(){
+  const backup = {
+    exportedAt:new Date().toISOString(),
+    app:'Coordinator Roster 2026',
+    version:'backup_v1',
+    state:getState()
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(backup,null,2)],
+    {type:'application/json;charset=utf-8;'}
+  );
+
+  const a=document.createElement('a');
+  const date=fmtDate(new Date());
+  a.href=URL.createObjectURL(blob);
+  a.download=`coordinator_roster_backup_${date}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importBackupJSON(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(){
+    try{
+      const data = JSON.parse(reader.result);
+
+      const state = data.state || data;
+
+      if(!state.patterns || !state.shifts || !state.employees || !state.scheduleData){
+        alert('Invalid backup file. Please select a valid Coordinator Roster backup JSON file.');
+        return;
+      }
+
+      if(!confirm('Import this backup and replace the current roster data?')){
+        return;
+      }
+
+      applyState(state);
+      markDirty();
+
+      alert('Backup imported successfully. It has also been saved online.');
+    }catch(err){
+      console.error(err);
+      alert('Failed to import backup JSON. Please check the file format.');
+    }finally{
+      event.target.value = '';
+    }
+  };
+
+  reader.readAsText(file);
+}
       <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
     </div>
   </div>
@@ -936,10 +995,10 @@ async function saveOnlineNow(){
       state:getState()
     };
     const res = await fetch(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`,{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
+  method:'PUT',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(payload)
+});
     if(!res.ok) throw new Error('Firebase write failed');
     setSyncStatus('online','Online');
   }catch(err){
