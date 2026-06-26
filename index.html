@@ -1,72 +1,505 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Coordinator Roster 2026</title>
 <style>
 :root{
-  --bg:#f0f2f5;--card:#fff;--primary:#1677ff;--text:#1f2937;--muted:#6b7280;
-  --border:#e5e7eb;--red:#ef4444;--green:#22c55e;--orange:#f59e0b;
-  --radius:12px;--shadow:0 1px 3px rgba(0,0,0,.08)
+  --bg:#f0f2f5;
+  --card:#fff;
+  --primary:#1677ff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --red:#ef4444;
+  --green:#22c55e;
+  --orange:#f59e0b;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);padding:20px;font-size:13px}
+body{
+  font-family:"Segoe UI",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:20px;
+  font-size:13px;
+}
 .app{max-width:1900px;margin:0 auto}
 .app-header{
   background:linear-gradient(135deg,#1a1a2e,#16213e 55%,#0f3460);
-  color:#fff;border-radius:var(--radius);padding:22px 28px;margin-bottom:14px;
-  display:flex;justify-content:space-between;align-items:center;gap:16px
+  color:#fff;
+  border-radius:var(--radius);
+  padding:22px 28px;
+  margin-bottom:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
 }
-.app-header h1{font-size:22px;letter-spacing:.5px}.sub{font-size:12px;opacity:.78;margin-top:4px}
+.app-header h1{font-size:22px;letter-spacing:.5px}
+.sub{font-size:12px;opacity:.78;margin-top:4px;line-height:1.5}
 .header-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn{border:none;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:600;white-space:nowrap}
-.btn-primary{background:var(--primary);color:#fff}.btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}
-.btn-ghost{background:#fff;color:var(--muted);border:1px solid var(--border)}.btn-danger{background:var(--red);color:#fff}.btn-sm{padding:5px 10px;font-size:11px}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
-.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.card-header h2{font-size:15px}.card-body{padding:16px}
-.note{font-size:12px;color:var(--muted);background:#fffbe6;border-bottom:1px solid #ffe58f;padding:9px 14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.status{font-size:11px;padding:3px 8px;border-radius:999px;font-weight:700}.status.online{background:#dcfce7;color:#15803d}.status.offline{background:#fee2e2;color:#b91c1c}.status.syncing{background:#e0f2fe;color:#0369a1}
-input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;background:#fff}input[type=color]{padding:1px;width:34px;height:28px}
-.pattern-row,.shift-row,.employee-card{display:flex;align-items:center;gap:8px;background:#f8fafc;border-radius:8px;padding:8px 10px;margin-bottom:7px;flex-wrap:wrap}
-.pcolor,.shift-color-dot{width:16px;height:16px;border-radius:4px;flex-shrink:0}.day-checks{display:flex;gap:4px;flex-wrap:wrap}.day-check{cursor:pointer}
-.dbox{width:36px;height:24px;border-radius:5px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
-.day-check.work .dbox{background:#dcfce7;border-color:#86efac;color:#15803d}.day-check.rest .dbox{background:#fee2e2;border-color:#fca5a5;color:#b91c1c}
-.help-text{font-size:11px;color:var(--muted);margin-bottom:8px}.del{cursor:pointer;color:#9ca3af;font-weight:900;padding:2px 6px}.del:hover{color:var(--red)}
-.add-line{border:2px dashed var(--border);border-radius:8px;padding:9px 12px;text-align:center;color:var(--muted);cursor:pointer;font-weight:700}.add-line:hover{border-color:var(--primary);color:var(--primary)}
-.employee-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:8px}.idx{width:26px;height:26px;border-radius:50%;background:#e5e7eb;color:#6b7280;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
-.emp-name{width:120px;font-weight:700}.pattern-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:800;white-space:nowrap}
-.period-info{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.period-info label{font-size:11px;color:var(--muted)}
-.schedule-wrap{overflow:auto;max-height:690px;border:1px solid var(--border);border-radius:8px}.copy-tip{font-size:11px;color:var(--muted);padding:7px 10px;background:#fafafa;border-bottom:1px solid var(--border)}
-.schedule-table{border-collapse:collapse;font-size:11px;min-width:100%}.schedule-table th,.schedule-table td{border:1px solid var(--border);padding:5px 6px;text-align:center;vertical-align:middle}
-.schedule-table thead th{background:#f8fafc;position:sticky;top:0;z-index:6}.emp-col{position:sticky;left:0;background:#f8fafc!important;z-index:7;min-width:150px;text-align:left!important;font-weight:800}
-.region-col{position:sticky;left:150px;background:#f8fafc!important;z-index:7;min-width:82px}.pattern-col{position:sticky;left:232px;background:#f8fafc!important;z-index:7;min-width:96px}
-.day-col{min-width:88px;font-size:10px}.schedule-cell{min-width:88px;height:52px;cursor:pointer;position:relative;user-select:text}.schedule-cell:hover{background:#eff6ff}
-.schedule-cell.rest-cell{background:#fff1f2}.schedule-cell.rest-cell:hover{background:#ffe4e6}.schedule-cell.selected{outline:2px solid var(--primary);outline-offset:-2px;box-shadow:inset 0 0 0 2px rgba(22,119,255,.22)}
-.schedule-cell.manual-cell::after{content:"MAN";position:absolute;right:3px;bottom:1px;font-size:8px;color:#1677ff;font-weight:900}.schedule-cell.auto-cell::after{content:"AUTO";position:absolute;right:3px;bottom:1px;font-size:8px;color:#9ca3af;font-weight:800}
-.off-label,.leave-label,.holiday-label,.ot-label{display:inline-block;font-size:9px;font-weight:900;border-radius:999px;padding:1px 6px;margin:1px}.off-label{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca}.leave-label{color:#7c3aed;background:#ede9fe;border:1px solid #c4b5fd}.holiday-label{color:#d97706;background:#fffbeb;border:1px solid #fde68a}.ot-label{color:#d97706;background:#fff7ed;border:1px solid #fed7aa}.cell-hint{font-size:9px;color:var(--muted)}.shift-dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin:1px}
-.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:1000;display:flex;align-items:center;justify-content:center}.popup-box{background:#fff;border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,.25);padding:20px;min-width:430px;max-width:640px}
-.popup-box h3{font-size:16px;margin-bottom:5px}.popup-sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}.shift-check-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
-.shift-option{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;transition:.15s}.shift-option:hover{border-color:var(--primary);background:#eff6ff}.shift-option.checked{border:2px solid #0f172a;background:#dbeafe;box-shadow:0 0 0 2px rgba(22,119,255,.18)}.shift-option input{display:none}.shift-option .dot{width:11px;height:11px;border-radius:3px}.shift-option .time{font-size:10px;color:var(--muted);margin-left:auto}
-.leave-box{border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;background:#fafafa}.leave-box-title{font-size:12px;font-weight:800;margin-bottom:8px}.popup-actions{display:flex;gap:8px;justify-content:flex-end}
-.day-picker{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;background:#fafafa;border-bottom:1px solid var(--border)}.day-tags{display:flex;gap:4px;flex-wrap:wrap}.day-tag{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:800}
-.gap-warning{padding:7px 18px;font-size:12px;font-weight:800}.gap-warning.ok{background:#f0fdf4;color:#15803d}.gap-warning.err{background:#fef2f2;color:#dc2626}
-.coverage-section{padding:16px 18px}.coverage-section h3{font-size:13px;margin-bottom:8px}.coverage-timeline{background:#f8fafc;border-radius:8px;padding:14px 0 10px;margin-bottom:16px}.coverage-bar-wrap{position:relative;height:32px;margin:0 60px;background:#e5e7eb;border-radius:4px}.coverage-bar{display:flex;height:100%;overflow:hidden;border-radius:4px}.cover-0{background:#ef4444}.cover-1{background:#22c55e}.cover-2{background:#1677ff}.cover-3{background:#7c3aed}.cover-4p{background:#f59e0b}.coverage-labels{display:flex;justify-content:space-between;margin:4px 60px 0;font-size:10px;color:var(--muted)}
-.gap-marker{position:absolute;top:-4px;height:40px;background:rgba(239,68,68,.18);border-left:2px solid #ef4444;border-right:2px solid #ef4444;z-index:2}.gap-label{position:absolute;top:-18px;font-size:9px;color:#dc2626;font-weight:900;white-space:nowrap;transform:translateX(-50%)}
-.legend{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:3px 8px;background:#fff}.legend-dot{width:10px;height:10px;border-radius:3px}
-.slot-table{width:100%;border-collapse:collapse;font-size:12px}.slot-table th,.slot-table td{border:1px solid var(--border);padding:8px 10px;text-align:center}.slot-table th{background:#f8fafc}.empty-cell{color:#9ca3af;font-style:italic}.emp-cell{font-weight:800;color:var(--primary)}
-@media print{body{background:#fff;padding:0}.app-header,.btn,.note,.add-line,.day-picker,.popup-overlay{display:none!important}.card{box-shadow:none;border:1px solid #ddd}@page{size:A3 landscape;margin:8mm}}
+.btn{
+  border:none;
+  border-radius:8px;
+  padding:7px 14px;
+  font-size:12px;
+  cursor:pointer;
+  font-weight:600;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}
+.btn-ghost{background:#fff;color:var(--muted);border:1px solid var(--border)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-sm{padding:5px 10px;font-size:11px}
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.card-header{
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.card-header h2{font-size:15px}
+.card-body{padding:16px}
+.note{
+  font-size:12px;
+  color:var(--muted);
+  background:#fffbe6;
+  border-bottom:1px solid #ffe58f;
+  padding:9px 14px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.status{
+  font-size:11px;
+  padding:3px 8px;
+  border-radius:999px;
+  font-weight:700;
+}
+.status.online{background:#dcfce7;color:#15803d}
+.status.offline{background:#fee2e2;color:#b91c1c}
+.status.syncing{background:#e0f2fe;color:#0369a1}
+input,select{
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:5px 8px;
+  font-size:12px;
+  background:#fff;
+}
+input[type="color"]{padding:1px;width:34px;height:28px}
+.pattern-row,.shift-row,.employee-card{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#f8fafc;
+  border-radius:8px;
+  padding:8px 10px;
+  margin-bottom:7px;
+  flex-wrap:wrap;
+}
+.pcolor,.shift-color-dot{
+  width:16px;
+  height:16px;
+  border-radius:4px;
+  flex-shrink:0;
+}
+.day-checks{display:flex;gap:4px;flex-wrap:wrap}
+.day-check{cursor:pointer}
+.dbox{
+  width:36px;
+  height:24px;
+  border-radius:5px;
+  border:1px solid var(--border);
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:10px;
+  font-weight:800;
+}
+.day-check.work .dbox{
+  background:#dcfce7;
+  border-color:#86efac;
+  color:#15803d;
+}
+.day-check.rest .dbox{
+  background:#fee2e2;
+  border-color:#fca5a5;
+  color:#b91c1c;
+}
+.help-text{font-size:11px;color:var(--muted);margin-bottom:8px}
+.del{
+  cursor:pointer;
+  color:#9ca3af;
+  font-weight:900;
+  padding:2px 6px;
+}
+.del:hover{color:var(--red)}
+.add-line{
+  border:2px dashed var(--border);
+  border-radius:8px;
+  padding:9px 12px;
+  text-align:center;
+  color:var(--muted);
+  cursor:pointer;
+  font-weight:700;
+}
+.add-line:hover{border-color:var(--primary);color:var(--primary)}
+.employee-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(390px,1fr));
+  gap:8px;
+}
+.idx{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:#e5e7eb;
+  color:#6b7280;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:800;
+  flex-shrink:0;
+}
+.emp-name{width:120px;font-weight:700}
+.pattern-badge{
+  font-size:10px;
+  padding:2px 7px;
+  border-radius:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.period-info{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.period-info label{font-size:11px;color:var(--muted)}
+.schedule-wrap{
+  overflow:auto;
+  max-height:690px;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.copy-tip{
+  font-size:11px;
+  color:var(--muted);
+  padding:7px 10px;
+  background:#fafafa;
+  border-bottom:1px solid var(--border);
+}
+.schedule-table{
+  border-collapse:collapse;
+  font-size:11px;
+  min-width:100%;
+}
+.schedule-table th,.schedule-table td{
+  border:1px solid var(--border);
+  padding:5px 6px;
+  text-align:center;
+  vertical-align:middle;
+}
+.schedule-table thead th{
+  background:#f8fafc;
+  position:sticky;
+  top:0;
+  z-index:6;
+}
+.emp-col{
+  position:sticky;
+  left:0;
+  background:#f8fafc!important;
+  z-index:7;
+  min-width:150px;
+  text-align:left!important;
+  font-weight:800;
+}
+.region-col{
+  position:sticky;
+  left:150px;
+  background:#f8fafc!important;
+  z-index:7;
+  min-width:82px;
+}
+.pattern-col{
+  position:sticky;
+  left:232px;
+  background:#f8fafc!important;
+  z-index:7;
+  min-width:96px;
+}
+.day-col{min-width:88px;font-size:10px}
+.schedule-cell{
+  min-width:88px;
+  height:52px;
+  cursor:pointer;
+  position:relative;
+  user-select:text;
+}
+.schedule-cell:hover{background:#eff6ff}
+.schedule-cell.rest-cell{background:#fff1f2}
+.schedule-cell.rest-cell:hover{background:#ffe4e6}
+.schedule-cell.selected{
+  outline:2px solid var(--primary);
+  outline-offset:-2px;
+  box-shadow:inset 0 0 0 2px rgba(22,119,255,.22);
+}
+.schedule-cell.manual-cell::after{
+  content:"MAN";
+  position:absolute;
+  right:3px;
+  bottom:1px;
+  font-size:8px;
+  color:#1677ff;
+  font-weight:900;
+}
+.schedule-cell.auto-cell::after{
+  content:"AUTO";
+  position:absolute;
+  right:3px;
+  bottom:1px;
+  font-size:8px;
+  color:#9ca3af;
+  font-weight:800;
+}
+.off-label,.leave-label,.holiday-label,.ot-label{
+  display:inline-block;
+  font-size:9px;
+  font-weight:900;
+  border-radius:999px;
+  padding:1px 6px;
+  margin:1px;
+}
+.off-label{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca}
+.leave-label{color:#7c3aed;background:#ede9fe;border:1px solid #c4b5fd}
+.holiday-label{color:#d97706;background:#fffbeb;border:1px solid #fde68a}
+.ot-label{color:#d97706;background:#fff7ed;border:1px solid #fed7aa}
+.cell-hint{font-size:9px;color:var(--muted)}
+.shift-dot{
+  width:8px;
+  height:8px;
+  border-radius:2px;
+  display:inline-block;
+  margin:1px;
+}
+.popup-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.42);
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.popup-box{
+  background:#fff;
+  border-radius:var(--radius);
+  box-shadow:0 8px 40px rgba(0,0,0,.25);
+  padding:20px;
+  min-width:430px;
+  max-width:640px;
+}
+.popup-box h3{font-size:16px;margin-bottom:5px}
+.popup-sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+.shift-check-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-bottom:14px;
+}
+.shift-option{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+  font-size:12px;
+  transition:.15s;
+}
+.shift-option:hover{
+  border-color:var(--primary);
+  background:#eff6ff;
+}
+.shift-option.checked{
+  border:2px solid #0f172a;
+  background:#dbeafe;
+  box-shadow:0 0 0 2px rgba(22,119,255,.18);
+}
+.shift-option input{display:none}
+.shift-option .dot{
+  width:11px;
+  height:11px;
+  border-radius:3px;
+}
+.shift-option .time{
+  font-size:10px;
+  color:var(--muted);
+  margin-left:auto;
+}
+.leave-box{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  margin-bottom:12px;
+  background:#fafafa;
+}
+.leave-box-title{
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+.popup-actions{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+}
+.day-picker{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:10px 18px;
+  background:#fafafa;
+  border-bottom:1px solid var(--border);
+}
+.day-tags{display:flex;gap:4px;flex-wrap:wrap}
+.day-tag{
+  font-size:10px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-weight:800;
+}
+.gap-warning{
+  padding:7px 18px;
+  font-size:12px;
+  font-weight:800;
+}
+.gap-warning.ok{background:#f0fdf4;color:#15803d}
+.gap-warning.warn{background:#fffbeb;color:#d97706}
+.gap-warning.err{background:#fef2f2;color:#dc2626}
+.coverage-section{padding:16px 18px}
+.coverage-section h3{font-size:13px;margin-bottom:8px}
+.coverage-timeline{
+  background:#f8fafc;
+  border-radius:8px;
+  padding:14px 0 10px;
+  margin-bottom:16px;
+}
+.coverage-bar-wrap{
+  position:relative;
+  height:32px;
+  margin:0 60px;
+  background:#e5e7eb;
+  border-radius:4px;
+}
+.coverage-bar{
+  display:flex;
+  height:100%;
+  overflow:hidden;
+  border-radius:4px;
+}
+.coverage-seg.cover-0{background:#ef4444}
+.coverage-seg.cover-1{background:#22c55e}
+.coverage-seg.cover-2{background:#1677ff}
+.coverage-seg.cover-3{background:#7c3aed}
+.coverage-seg.cover-4p{background:#f59e0b}
+.coverage-labels{
+  display:flex;
+  justify-content:space-between;
+  margin:4px 60px 0;
+  font-size:10px;
+  color:var(--muted);
+}
+.gap-marker{
+  position:absolute;
+  top:-4px;
+  height:40px;
+  background:rgba(239,68,68,.18);
+  border-left:2px solid #ef4444;
+  border-right:2px solid #ef4444;
+  z-index:2;
+}
+.gap-label{
+  position:absolute;
+  top:-18px;
+  font-size:9px;
+  color:#dc2626;
+  font-weight:900;
+  white-space:nowrap;
+  transform:translateX(-50%);
+}
+.legend{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:4px 0 12px;
+}
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:11px;
+  color:var(--muted);
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:3px 8px;
+  background:#fff;
+}
+.legend-dot{
+  width:10px;
+  height:10px;
+  border-radius:3px;
+}
+.slot-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+.slot-table th,.slot-table td{
+  border:1px solid var(--border);
+  padding:8px 10px;
+  text-align:center;
+}
+.slot-table th{background:#f8fafc}
+.empty-cell{color:#9ca3af;font-style:italic}
+.emp-cell{font-weight:800;color:var(--primary)}
+@media print{
+  body{background:#fff;padding:0}
+  .app-header,.btn,.note,.add-line,.day-picker,.popup-overlay{display:none!important}
+  .card{box-shadow:none;border:1px solid #ddd}
+  @page{size:A3 landscape;margin:8mm}
+}
 </style>
 </head>
-
 <body>
 <div class="app">
   <div class="app-header">
     <div>
       <h1>Coordinator Roster 2026</h1>
-      <div class="sub">Shared Manpower Arrangement · Shift Pattern Manager · Leave Tracking · 24-Hour Coverage</div>
+      <div class="sub">
+        Shared Manpower Arrangement · Shift Pattern Manager · Leave Tracking · 24-Hour Coverage
+      </div>
     </div>
+
     <div class="header-actions">
       <span id="syncStatus" class="status syncing">Connecting</span>
       <button class="btn btn-outline" onclick="saveOnlineNow()">☁ Save Online</button>
@@ -83,15 +516,21 @@ input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;fo
 
   <div class="card">
     <div class="note">
-      <span>Tip: Configure shift patterns, add employees, assign employee regions, then double-click any date cell to arrange shifts or leave.</span>
+      <span>
+        Tip: Configure shift patterns, add employees, assign employee regions, then double-click any date cell to arrange shifts or leave.
+      </span>
       <span>Employees: <b id="empCount">0</b></span>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-header"><h2>🔀 Shift Pattern Manager</h2></div>
+    <div class="card-header">
+      <h2>🔀 Shift Pattern Manager</h2>
+    </div>
     <div class="card-body">
-      <div class="help-text">Green = working day. Red = rest day. Click weekdays to change rest days.</div>
+      <div class="help-text">
+        Green = working day. Red = rest day. Click weekdays to change rest days.
+      </div>
       <div id="patternEditor"></div>
       <div class="add-line" onclick="addPattern()">+ Add New Shift Pattern</div>
     </div>
@@ -103,7 +542,9 @@ input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;fo
       <button class="btn btn-sm btn-primary" onclick="addShift()">+ Add Shift</button>
     </div>
     <div class="card-body">
-      <div class="help-text">You can edit shift names, time ranges and colors. Use the format HH:MM-HH:MM.</div>
+      <div class="help-text">
+        You can edit shift names, time ranges and colors. Use the format HH:MM-HH:MM.
+      </div>
       <div id="shiftEditor"></div>
     </div>
   </div>
@@ -117,11 +558,15 @@ input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;fo
         <button class="btn btn-sm btn-ghost" onclick="addBatchEmployees()">Batch Add</button>
       </div>
     </div>
-    <div class="card-body"><div class="employee-grid" id="employeeGrid"></div></div>
+    <div class="card-body">
+      <div class="employee-grid" id="employeeGrid"></div>
+    </div>
   </div>
 
   <div class="card">
-    <div class="card-header"><h2>📆 Date Range</h2></div>
+    <div class="card-header">
+      <h2>📆 Date Range</h2>
+    </div>
     <div class="card-body">
       <div class="period-info">
         <label>Start Date</label>
@@ -139,20 +584,24 @@ input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;fo
       <h2>📋 Manpower Arrangement</h2>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span style="font-size:11px;color:var(--muted);">
-          Click to select. Ctrl/⌘ + click multiple. Shift + click range. Double-click edit. Press Delete to remove selected data.
+          Click to select. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit. Press Delete to remove selected data.
         </span>
         <button class="btn btn-sm btn-ghost" onclick="copySelectedCellWithFeedback()">Copy Selected Cell</button>
         <button class="btn btn-sm btn-primary" onclick="pasteToSelectedCellsWithFeedback()">Paste to Selected Cells</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteSelectedCellsWithConfirm()">Delete Selected Data</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteSelectedArrangementsWithConfirm()">Delete Selected</button>
         <button class="btn btn-sm btn-ghost" onclick="clearSelectedCells()">Clear Selection</button>
         <button class="btn btn-sm btn-ghost" onclick="clearAllSchedule()">Clear All</button>
       </div>
     </div>
-    <div class="card-body" style="padding:8px;"><div class="schedule-wrap" id="scheduleWrap"></div></div>
+    <div class="card-body" style="padding:8px;">
+      <div class="schedule-wrap" id="scheduleWrap"></div>
+    </div>
   </div>
 
   <div class="card" id="dailyCard">
-    <div class="card-header"><h2>🔍 Daily Coverage Detail</h2></div>
+    <div class="card-header">
+      <h2>🔍 Daily Coverage Detail</h2>
+    </div>
     <div class="day-picker">
       <button class="btn btn-sm btn-ghost" onclick="shiftDay(-1)">◀ Prev Day</button>
       <button class="btn btn-sm btn-ghost" onclick="shiftDay(-7)">◀ Prev Week</button>
@@ -171,6 +620,7 @@ input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;fo
   <div class="popup-box" onclick="event.stopPropagation()">
     <h3 id="popupTitle">Edit Arrangement</h3>
     <div class="popup-sub" id="popupSub"></div>
+
     <div class="leave-box">
       <div class="leave-box-title">Leave</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -186,8 +636,10 @@ input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;fo
         </select>
       </div>
     </div>
+
     <div class="shift-check-list" id="shiftCheckList"></div>
     <div id="restDayOtBox" style="margin-bottom:12px;"></div>
+
     <div class="popup-actions">
       <button class="btn btn-sm btn-ghost" id="popupClearBtn">Clear</button>
       <button class="btn btn-sm btn-ghost" onclick="closeShiftPopup()">Cancel</button>
@@ -197,295 +649,1522 @@ input,select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;fo
 </div>
 
 <script>
-const FIREBASE_DB_URL='https://coordinator-roster-2026-default-rtdb.asia-southeast1.firebasedatabase.app';
-const FIREBASE_PATH='sharedRoster2026';
-const CLIENT_ID='client_'+Math.random().toString(36).slice(2)+Date.now();
-const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const PATTERN_COLORS=['#1677ff','#52c41a','#fa8c16','#722ed1','#13c2c2','#eb2f96','#2f54eb','#d46b08','#389e0d','#c41d7f'];
+const FIREBASE_DB_URL = 'https://coordinator-roster-2026-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FIREBASE_PATH = 'sharedRoster2026';
+const LOCAL_KEY = 'coordinator_roster_2026_shared_v3';
 
-const HK_HOLIDAYS_2026=new Set(['2026-01-01','2026-02-17','2026-02-18','2026-02-19','2026-04-03','2026-04-04','2026-04-05','2026-04-06','2026-05-01','2026-05-24','2026-06-19','2026-07-01','2026-09-27','2026-10-01','2026-10-18','2026-12-25','2026-12-26']);
-const CN_HOLIDAYS_2026=new Set(['2026-01-01','2026-01-02','2026-01-03','2026-02-17','2026-02-18','2026-02-19','2026-02-20','2026-02-21','2026-02-22','2026-02-23','2026-04-05','2026-04-07','2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05','2026-06-19','2026-06-20','2026-06-21','2026-09-25','2026-09-26','2026-09-27','2026-10-01','2026-10-02','2026-10-03','2026-10-04','2026-10-05','2026-10-06','2026-10-07']);
-const HOLIDAY_NAMES={
-'2026-01-01':"New Year's Day",'2026-01-02':'New Year Holiday','2026-01-03':'New Year Holiday',
-'2026-02-17':'Chinese New Year Day 1','2026-02-18':'Chinese New Year Day 2','2026-02-19':'Chinese New Year Day 3','2026-02-20':'Spring Festival Holiday','2026-02-21':'Spring Festival Holiday','2026-02-22':'Spring Festival Holiday','2026-02-23':'Spring Festival Holiday',
-'2026-04-03':'Good Friday','2026-04-04':'Holy Saturday','2026-04-05':'Ching Ming Festival','2026-04-06':'Easter Monday','2026-04-07':'Qingming Holiday',
-'2026-05-01':'Labour Day','2026-05-02':'Labour Day Holiday','2026-05-03':'Labour Day Holiday','2026-05-04':'Labour Day Holiday','2026-05-05':'Labour Day Holiday','2026-05-24':"Buddha's Birthday",
-'2026-06-19':'Dragon Boat Festival','2026-06-20':'Dragon Boat Festival Holiday','2026-06-21':'Dragon Boat Festival Holiday',
-'2026-07-01':'HKSAR Establishment Day',
-'2026-09-25':'Mid-Autumn Festival Holiday','2026-09-26':'Mid-Autumn Festival Holiday','2026-09-27':'Mid-Autumn Festival',
-'2026-10-01':'National Day','2026-10-02':'Golden Week Holiday','2026-10-03':'Golden Week Holiday','2026-10-04':'Golden Week Holiday','2026-10-05':'Golden Week Holiday','2026-10-06':'Golden Week Holiday','2026-10-07':'Golden Week Holiday','2026-10-18':'Chung Yeung Festival',
-'2026-12-25':'Christmas Day','2026-12-26':'Boxing Day'
+const CLIENT_ID = 'client_' + Math.random().toString(36).slice(2) + Date.now();
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const PATTERN_COLORS = ['#1677ff','#52c41a','#fa8c16','#722ed1','#13c2c2','#eb2f96','#2f54eb','#d46b08','#389e0d','#c41d7f'];
+
+const HK_HOLIDAYS_2026 = new Set([
+  '2026-01-01','2026-02-17','2026-02-18','2026-02-19',
+  '2026-04-03','2026-04-04','2026-04-05','2026-04-06',
+  '2026-05-01','2026-05-24','2026-06-19','2026-07-01',
+  '2026-09-27','2026-10-01','2026-10-18','2026-12-25','2026-12-26'
+]);
+
+const CN_HOLIDAYS_2026 = new Set([
+  '2026-01-01','2026-01-02','2026-01-03',
+  '2026-02-17','2026-02-18','2026-02-19','2026-02-20','2026-02-21','2026-02-22','2026-02-23',
+  '2026-04-05','2026-04-07',
+  '2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05',
+  '2026-06-19','2026-06-20','2026-06-21',
+  '2026-09-25','2026-09-26','2026-09-27',
+  '2026-10-01','2026-10-02','2026-10-03','2026-10-04','2026-10-05','2026-10-06','2026-10-07'
+]);
+
+const HOLIDAY_NAMES = {
+  '2026-01-01':"New Year's Day",
+  '2026-01-02':'New Year Holiday',
+  '2026-01-03':'New Year Holiday',
+  '2026-02-17':'Chinese New Year Day 1',
+  '2026-02-18':'Chinese New Year Day 2',
+  '2026-02-19':'Chinese New Year Day 3',
+  '2026-02-20':'Spring Festival Holiday',
+  '2026-02-21':'Spring Festival Holiday',
+  '2026-02-22':'Spring Festival Holiday',
+  '2026-02-23':'Spring Festival Holiday',
+  '2026-04-03':'Good Friday',
+  '2026-04-04':'Holy Saturday',
+  '2026-04-05':'Ching Ming Festival',
+  '2026-04-06':'Easter Monday',
+  '2026-04-07':'Qingming Holiday',
+  '2026-05-01':'Labour Day',
+  '2026-05-02':'Labour Day Holiday',
+  '2026-05-03':'Labour Day Holiday',
+  '2026-05-04':'Labour Day Holiday',
+  '2026-05-05':'Labour Day Holiday',
+  '2026-05-24':"Buddha's Birthday",
+  '2026-06-19':'Dragon Boat Festival',
+  '2026-06-20':'Dragon Boat Festival Holiday',
+  '2026-06-21':'Dragon Boat Festival Holiday',
+  '2026-07-01':'HKSAR Establishment Day',
+  '2026-09-25':'Mid-Autumn Festival Holiday',
+  '2026-09-26':'Mid-Autumn Festival Holiday',
+  '2026-09-27':'Mid-Autumn Festival',
+  '2026-10-01':'National Day',
+  '2026-10-02':'Golden Week Holiday',
+  '2026-10-03':'Golden Week Holiday',
+  '2026-10-04':'Golden Week Holiday',
+  '2026-10-05':'Golden Week Holiday',
+  '2026-10-06':'Golden Week Holiday',
+  '2026-10-07':'Golden Week Holiday',
+  '2026-10-18':'Chung Yeung Festival',
+  '2026-12-25':'Christmas Day',
+  '2026-12-26':'Boxing Day'
 };
 
-let patterns=[],shifts=[],employees=[],days=[],scheduleData={};
-let selectedCells=new Set(),lastSelectedCell=null,copiedCellData=null;
-let currentEditEmpId=null,currentEditDate=null;
-let patternIdCounter=0,shiftIdCounter=0,employeeIdCounter=0;
-let saveTimer=null,realtimeSource=null,applyingRemote=false;
+let patterns = [];
+let shifts = [];
+let employees = [];
+let days = [];
+let scheduleData = {};
 
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function fmtDate(d){const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10)}
-function parseDate(s){return new Date(s+'T00:00:00')}
-function dow(ds){return parseDate(ds).getDay()}
-function newPatternId(){return'p'+(++patternIdCounter)}
-function newShiftId(){return's'+(++shiftIdCounter)}
-function newEmployeeId(){return'e'+(++employeeIdCounter)}
-function hexToRgba(hex,a){if(!hex||!hex.startsWith('#'))return`rgba(0,0,0,${a})`;const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`}
-function setSyncStatus(type,text){const el=document.getElementById('syncStatus');el.className='status '+type;el.textContent=text}
-function findPattern(id){return patterns.find(p=>p.id===id)}
-function findShift(id){return shifts.find(s=>s.id===id)}
-function findEmployee(id){return employees.find(e=>e.id===id)}
-function getPatternName(id){return findPattern(id)?.name||'Unknown'}
-function getPatternColor(id){return findPattern(id)?.color||'#999'}
-function getHolidayInfo(ds,region){const hk=region==='HK'&&HK_HOLIDAYS_2026.has(ds),cn=region==='CN'&&CN_HOLIDAYS_2026.has(ds);if(!hk&&!cn)return null;return{flag:region,name:HOLIDAY_NAMES[ds]||'Public Holiday'}}
-function getAnyHolidayInfo(ds){const hk=HK_HOLIDAYS_2026.has(ds),cn=CN_HOLIDAYS_2026.has(ds);if(!hk&&!cn)return null;return{label:hk&&cn?'HK / CN Public Holiday':hk?'HK Public Holiday':'CN Public Holiday',name:HOLIDAY_NAMES[ds]||'Public Holiday'}}
-function isPatternRestDay(emp,ds){const p=findPattern(emp.patternId);return p?p.restDays.includes(dow(ds)):false}
-function parseTimeRange(range){const m=String(range||'').replace(/[–—]/g,'-').trim().match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);if(!m)return null;const sh=+m[1],sm=+m[2],eh=+m[3],em=+m[4];if(sh>23||eh>23||sm>59||em>59)return null;const startMin=sh*60+sm,endMin=eh*60+em;return{time:`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}-${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`,startMin,endMin,overnight:endMin<=startMin}}
-function getEntry(empId,ds){if(!scheduleData[empId])scheduleData[empId]={};const e=scheduleData[empId][ds];if(!e)return{shifts:[],overtime:false,manual:false,leave:null};return{shifts:Array.isArray(e.shifts)?e.shifts:[],overtime:!!e.overtime,manual:!!e.manual,leave:e.leave||null}}
-function setEntry(empId,ds,entry){if(!scheduleData[empId])scheduleData[empId]={};const n={shifts:Array.isArray(entry.shifts)?[...entry.shifts]:[],overtime:!!entry.overtime,manual:!!entry.manual,leave:entry.leave||null};if(!n.shifts.length&&!n.overtime&&!n.manual&&!n.leave)delete scheduleData[empId][ds];else scheduleData[empId][ds]=n}
-function clearEntry(empId,ds){if(scheduleData[empId])delete scheduleData[empId][ds]}
+let selectedCells = new Set();
+let lastSelectedCell = null;
+let copiedCellData = null;
 
-function getState(){return{patterns,shifts,employees,scheduleData,cfgStart:cfgStart.value,cfgEnd:cfgEnd.value,counters:{patternIdCounter,shiftIdCounter,employeeIdCounter}}}
+let currentEditEmpId = null;
+let currentEditDate = null;
+
+let patternIdCounter = 0;
+let shiftIdCounter = 0;
+let employeeIdCounter = 0;
+
+let saveTimer = null;
+let realtimeSource = null;
+let applyingRemote = false;
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g,m=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[m]));
+}
+
+function fmtDate(d){
+  const x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return x.toISOString().slice(0,10);
+}
+
+function parseDate(s){
+  return new Date(s + 'T00:00:00');
+}
+
+function dow(ds){
+  return parseDate(ds).getDay();
+}
+
+function newPatternId(){
+  return 'p' + (++patternIdCounter);
+}
+
+function newShiftId(){
+  return 's' + (++shiftIdCounter);
+}
+
+function newEmployeeId(){
+  return 'e' + (++employeeIdCounter);
+}
+
+function hexToRgba(hex,a){
+  if(!hex || !hex.startsWith('#')) return `rgba(0,0,0,${a})`;
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function setSyncStatus(type,text){
+  const el = document.getElementById('syncStatus');
+  el.className = 'status ' + type;
+  el.textContent = text;
+}
+
+function getHolidayInfo(ds,region){
+  const isHK = region === 'HK' && HK_HOLIDAYS_2026.has(ds);
+  const isCN = region === 'CN' && CN_HOLIDAYS_2026.has(ds);
+  if(!isHK && !isCN) return null;
+  return {
+    region,
+    flag: region === 'HK' ? 'HK' : 'CN',
+    name: HOLIDAY_NAMES[ds] || 'Public Holiday'
+  };
+}
+
+function getAnyHolidayInfo(ds){
+  const hk = HK_HOLIDAYS_2026.has(ds);
+  const cn = CN_HOLIDAYS_2026.has(ds);
+  if(!hk && !cn) return null;
+  return {
+    label: hk && cn ? 'HK / CN Public Holiday' : hk ? 'HK Public Holiday' : 'CN Public Holiday',
+    name: HOLIDAY_NAMES[ds] || 'Public Holiday'
+  };
+}
+
+function findPattern(id){
+  return patterns.find(p=>p.id===id);
+}
+
+function findShift(id){
+  return shifts.find(s=>s.id===id);
+}
+
+function findEmployee(id){
+  return employees.find(e=>e.id===id);
+}
+
+function getPatternName(id){
+  const p = findPattern(id);
+  return p ? p.name : 'Unknown';
+}
+
+function getPatternColor(id){
+  const p = findPattern(id);
+  return p ? p.color : '#999';
+}
+
+function isPatternRestDay(emp,ds){
+  const p = findPattern(emp.patternId);
+  return p ? p.restDays.includes(dow(ds)) : false;
+}
+
+function parseTimeRange(range){
+  const clean = String(range || '').replace(/[–—]/g,'-').trim();
+  const m = clean.match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
+  if(!m) return null;
+
+  const sh = parseInt(m[1],10);
+  const sm = parseInt(m[2],10);
+  const eh = parseInt(m[3],10);
+  const em = parseInt(m[4],10);
+
+  if(sh > 23 || eh > 23 || sm > 59 || em > 59) return null;
+
+  const startMin = sh * 60 + sm;
+  const endMin = eh * 60 + em;
+
+  return {
+    time:`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}-${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`,
+    startMin,
+    endMin,
+    overnight:endMin <= startMin
+  };
+}
+
+function getEntry(empId,ds){
+  if(!scheduleData[empId]) scheduleData[empId] = {};
+  const e = scheduleData[empId][ds];
+
+  if(!e){
+    return {
+      shifts:[],
+      overtime:false,
+      manual:false,
+      leave:null
+    };
+  }
+
+  return {
+    shifts:Array.isArray(e.shifts) ? e.shifts : [],
+    overtime:!!e.overtime,
+    manual:!!e.manual,
+    leave:e.leave || null
+  };
+}
+
+function setEntry(empId,ds,entry){
+  if(!scheduleData[empId]) scheduleData[empId] = {};
+
+  const normalized = {
+    shifts:Array.isArray(entry.shifts) ? [...entry.shifts] : [],
+    overtime:!!entry.overtime,
+    manual:!!entry.manual,
+    leave:entry.leave || null
+  };
+
+  if(!normalized.shifts.length && !normalized.overtime && !normalized.manual && !normalized.leave){
+    delete scheduleData[empId][ds];
+  }else{
+    scheduleData[empId][ds] = normalized;
+  }
+}
+
+function clearEntry(empId,ds){
+  if(scheduleData[empId]){
+    delete scheduleData[empId][ds];
+  }
+}
+
+/* ---------- State / Backup ---------- */
+function getState(){
+  return {
+    patterns,
+    shifts,
+    employees,
+    scheduleData,
+    cfgStart:document.getElementById('cfgStart').value,
+    cfgEnd:document.getElementById('cfgEnd').value,
+    counters:{
+      patternIdCounter,
+      shiftIdCounter,
+      employeeIdCounter
+    }
+  };
+}
+
 function applyState(state){
-  if(!state)return;applyingRemote=true;
-  patterns=Array.isArray(state.patterns)?state.patterns:patterns;
-  shifts=Array.isArray(state.shifts)?state.shifts:shifts;
-  employees=Array.isArray(state.employees)?state.employees:employees;
-  scheduleData=state.scheduleData||{};
-  if(state.cfgStart)cfgStart.value=state.cfgStart;if(state.cfgEnd)cfgEnd.value=state.cfgEnd;
-  patternIdCounter=state.counters?.patternIdCounter??Math.max(0,...patterns.map(p=>parseInt(String(p.id).slice(1))||0));
-  shiftIdCounter=state.counters?.shiftIdCounter??Math.max(0,...shifts.map(s=>parseInt(String(s.id).slice(1))||0));
-  employeeIdCounter=state.counters?.employeeIdCounter??Math.max(0,...employees.map(e=>parseInt(String(e.id).slice(1))||0));
-  employees.forEach(e=>{if(!scheduleData[e.id])scheduleData[e.id]={};if(!e.region)e.region='HK'});
-  rebuildDaysOnly();refreshAll();saveToLocal(false);applyingRemote=false;
+  if(!state) return;
+
+  applyingRemote = true;
+
+  patterns = Array.isArray(state.patterns) ? state.patterns : patterns;
+  shifts = Array.isArray(state.shifts) ? state.shifts : shifts;
+  employees = Array.isArray(state.employees) ? state.employees : employees;
+  scheduleData = state.scheduleData || {};
+
+  if(state.cfgStart) document.getElementById('cfgStart').value = state.cfgStart;
+  if(state.cfgEnd) document.getElementById('cfgEnd').value = state.cfgEnd;
+
+  patternIdCounter = state.counters?.patternIdCounter ?? Math.max(0,...patterns.map(p=>parseInt(String(p.id).slice(1),10)||0));
+  shiftIdCounter = state.counters?.shiftIdCounter ?? Math.max(0,...shifts.map(s=>parseInt(String(s.id).slice(1),10)||0));
+  employeeIdCounter = state.counters?.employeeIdCounter ?? Math.max(0,...employees.map(e=>parseInt(String(e.id).slice(1),10)||0));
+
+  employees.forEach(e=>{
+    if(!scheduleData[e.id]) scheduleData[e.id] = {};
+    if(!e.region) e.region = 'HK';
+  });
+
+  rebuildDaysOnly();
+  refreshAll();
+  saveToLocal(false);
+
+  applyingRemote = false;
 }
-async function saveOnlineNow(){
-  if(applyingRemote)return;
-  try{
-    setSyncStatus('syncing','Saving');
-    const res=await fetch(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientId:CLIENT_ID,updatedAt:new Date().toISOString(),state:getState()})});
-    if(!res.ok)throw new Error('Firebase write failed');
-    setSyncStatus('online','Online');
-  }catch(err){console.error(err);setSyncStatus('offline','Offline')}
-}
-function scheduleOnlineSave(){if(applyingRemote)return;clearTimeout(saveTimer);saveTimer=setTimeout(saveOnlineNow,600)}
-async function loadOnline(){
-  try{
-    setSyncStatus('syncing','Loading');
-    const res=await fetch(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
-    if(!res.ok)throw new Error('Firebase read failed');
-    const data=await res.json();if(data&&data.state)applyState(data.state);
-    setSyncStatus('online','Online');
-  }catch(err){console.error(err);setSyncStatus('offline','Offline')}
-}
-function connectRealtime(){
-  try{
-    if(realtimeSource)realtimeSource.close();
-    realtimeSource=new EventSource(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
-    realtimeSource.onopen=()=>setSyncStatus('online','Online');
-    realtimeSource.onerror=()=>setSyncStatus('offline','Offline');
-    realtimeSource.onmessage=e=>{try{const msg=JSON.parse(e.data);const payload=msg?.data;if(!payload||payload.clientId===CLIENT_ID)return;if(payload.state)applyState(payload.state);setSyncStatus('online','Online')}catch(err){console.warn(err)}};
-  }catch(err){console.error(err);setSyncStatus('offline','Offline')}
-}
-function markDirty(){refreshAll();saveToLocal(false);scheduleOnlineSave()}
-function saveToLocal(showAlert=true){localStorage.setItem('coordinator_roster_2026_shared_v2',JSON.stringify(getState()));if(showAlert)alert('Saved locally.')}
-function loadFromLocal(){const raw=localStorage.getItem('coordinator_roster_2026_shared_v2');if(!raw)return alert('No local data found.');applyState(JSON.parse(raw))}
 
 function exportBackupJSON(){
-  const backup={exportedAt:new Date().toISOString(),app:'Coordinator Roster 2026',version:'backup_v2',state:getState()};
-  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8;'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`coordinator_roster_backup_${fmtDate(new Date())}.json`;a.click();URL.revokeObjectURL(a.href);
-}
-function importBackupJSON(event){
-  const file=event.target.files&&event.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(){
-    try{
-      const data=JSON.parse(reader.result),state=data.state||data;
-      if(!state.patterns||!state.shifts||!state.employees||!state.scheduleData)return alert('Invalid backup file.');
-      if(!confirm('Import this backup and replace the current roster data?'))return;
-      applyState(state);markDirty();alert('Backup imported successfully.');
-    }catch(err){console.error(err);alert('Failed to import backup JSON.')}
-    finally{event.target.value=''}
+  const backup = {
+    exportedAt:new Date().toISOString(),
+    app:'Coordinator Roster 2026',
+    version:'backup_v1',
+    state:getState()
   };
+
+  const blob = new Blob(
+    [JSON.stringify(backup,null,2)],
+    {type:'application/json;charset=utf-8;'}
+  );
+
+  const a = document.createElement('a');
+  const date = fmtDate(new Date());
+
+  a.href = URL.createObjectURL(blob);
+  a.download = `coordinator_roster_backup_${date}.json`;
+  a.click();
+
+  URL.revokeObjectURL(a.href);
+}
+
+function importBackupJSON(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(){
+    try{
+      const data = JSON.parse(reader.result);
+      const state = data.state || data;
+
+      if(!state.patterns || !state.shifts || !state.employees || !state.scheduleData){
+        alert('Invalid backup file. Please select a valid Coordinator Roster backup JSON file.');
+        return;
+      }
+
+      if(!confirm('Import this backup and replace the current roster data?')){
+        return;
+      }
+
+      applyState(state);
+      markDirty();
+
+      alert('Backup imported successfully.');
+    }catch(err){
+      console.error(err);
+      alert('Failed to import backup JSON. Please check the file format.');
+    }finally{
+      event.target.value = '';
+    }
+  };
+
   reader.readAsText(file);
 }
 
-function addPattern(){patterns.push({id:newPatternId(),name:'Custom Pattern',restDays:[0,6],color:PATTERN_COLORS[patterns.length%PATTERN_COLORS.length]});markDirty()}
-function removePattern(id){if(patterns.length<=1)return alert('At least one pattern is required.');if(!confirm('Delete this shift pattern?'))return;patterns=patterns.filter(p=>p.id!==id);employees.forEach(e=>{if(e.patternId===id)e.patternId=patterns[0].id});markDirty()}
-function updatePattern(id,key,value){const p=findPattern(id);if(!p)return;if(key==='name')p.name=value.trim()||p.name;if(key==='color')p.color=value;markDirty()}
-function togglePatternRestDay(id,d){const p=findPattern(id);if(!p)return;p.restDays=p.restDays.includes(d)?p.restDays.filter(x=>x!==d):[...p.restDays,d];p.restDays.sort((a,b)=>a-b);markDirty()}
+/* ---------- Firebase sharing ---------- */
+async function saveOnlineNow(){
+  if(applyingRemote) return;
+
+  try{
+    setSyncStatus('syncing','Saving');
+
+    const payload = {
+      clientId:CLIENT_ID,
+      updatedAt:new Date().toISOString(),
+      state:getState()
+    };
+
+    const res = await fetch(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+
+    if(!res.ok) throw new Error('Firebase write failed');
+
+    setSyncStatus('online','Online');
+  }catch(err){
+    console.error(err);
+    setSyncStatus('offline','Offline');
+  }
+}
+
+function scheduleOnlineSave(){
+  if(applyingRemote) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveOnlineNow,600);
+}
+
+async function loadOnline(){
+  try{
+    setSyncStatus('syncing','Loading');
+
+    const res = await fetch(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
+    if(!res.ok) throw new Error('Firebase read failed');
+
+    const data = await res.json();
+
+    if(data && data.state){
+      applyState(data.state);
+    }
+
+    setSyncStatus('online','Online');
+  }catch(err){
+    console.error(err);
+    setSyncStatus('offline','Offline');
+  }
+}
+
+function connectRealtime(){
+  try{
+    if(realtimeSource) realtimeSource.close();
+
+    realtimeSource = new EventSource(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
+
+    realtimeSource.onopen = () => setSyncStatus('online','Online');
+
+    realtimeSource.onerror = () => setSyncStatus('offline','Offline');
+
+    const handle = e => {
+      try{
+        const msg = JSON.parse(e.data);
+        const payload = msg.data;
+
+        if(!payload || !payload.state) return;
+        if(payload.clientId === CLIENT_ID) return;
+
+        applyState(payload.state);
+        setSyncStatus('online','Online');
+      }catch(err){
+        console.warn(err);
+      }
+    };
+
+    realtimeSource.addEventListener('put',handle);
+    realtimeSource.addEventListener('patch',handle);
+  }catch(err){
+    console.error(err);
+    setSyncStatus('offline','Offline');
+  }
+}
+
+/* ---------- Save helpers ---------- */
+function markDirty(){
+  refreshAll();
+  saveToLocal(false);
+  scheduleOnlineSave();
+}
+
+function saveToLocal(showAlert=true){
+  localStorage.setItem(LOCAL_KEY,JSON.stringify(getState()));
+  if(showAlert) alert('Saved locally.');
+}
+
+function loadFromLocal(){
+  const raw = localStorage.getItem(LOCAL_KEY);
+  if(!raw){
+    alert('No local data found.');
+    return;
+  }
+
+  applyState(JSON.parse(raw));
+}
+
+/* ---------- Pattern Manager ---------- */
+function addPattern(){
+  const id = newPatternId();
+
+  patterns.push({
+    id,
+    name:'Custom Pattern',
+    restDays:[0,6],
+    color:PATTERN_COLORS[patterns.length % PATTERN_COLORS.length]
+  });
+
+  markDirty();
+}
+
+function removePattern(id){
+  if(patterns.length <= 1){
+    alert('At least one pattern is required.');
+    return;
+  }
+
+  if(!confirm('Delete this shift pattern?')) return;
+
+  patterns = patterns.filter(p=>p.id!==id);
+
+  employees.forEach(e=>{
+    if(e.patternId === id){
+      e.patternId = patterns[0].id;
+    }
+  });
+
+  markDirty();
+}
+
+function updatePattern(id,key,value){
+  const p = findPattern(id);
+  if(!p) return;
+
+  if(key === 'name') p.name = value.trim() || p.name;
+  if(key === 'color') p.color = value;
+
+  markDirty();
+}
+
+function togglePatternRestDay(id,d){
+  const p = findPattern(id);
+  if(!p) return;
+
+  if(p.restDays.includes(d)){
+    p.restDays = p.restDays.filter(x=>x!==d);
+  }else{
+    p.restDays.push(d);
+  }
+
+  p.restDays.sort((a,b)=>a-b);
+  markDirty();
+}
+
 function renderPatternEditor(){
-  patternEditor.innerHTML=patterns.map(p=>{
-    const rest=p.restDays.length?p.restDays.map(d=>DAY_NAMES[d]).join(', '):'None';
-    let daysHtml='';for(let d=0;d<7;d++){const r=p.restDays.includes(d);daysHtml+=`<div class="day-check ${r?'rest':'work'}" onclick="togglePatternRestDay('${p.id}',${d})"><div class="dbox">${DAY_NAMES[d].slice(0,2)}</div></div>`}
-    return `<div class="pattern-row"><div class="pcolor" style="background:${p.color}"></div><input value="${esc(p.name)}" onchange="updatePattern('${p.id}','name',this.value)" style="width:150px;font-weight:700;"><input type="color" value="${p.color}" onchange="updatePattern('${p.id}','color',this.value)"><div class="day-checks">${daysHtml}</div><span style="font-size:11px;color:var(--red);font-weight:800;">Rest: ${rest}</span><span class="del" onclick="removePattern('${p.id}')">&times;</span></div>`;
-  }).join('');
+  const box = document.getElementById('patternEditor');
+  let html = '';
+
+  patterns.forEach(p=>{
+    const rest = p.restDays.length ? p.restDays.map(d=>DAY_NAMES[d]).join(', ') : 'None';
+
+    html += `<div class="pattern-row">
+      <div class="pcolor" style="background:${p.color}"></div>
+      <input value="${esc(p.name)}" onchange="updatePattern('${p.id}','name',this.value)" style="width:150px;font-weight:700;">
+      <input type="color" value="${p.color}" onchange="updatePattern('${p.id}','color',this.value)">
+      <div class="day-checks">`;
+
+    for(let d=0; d<7; d++){
+      const restDay = p.restDays.includes(d);
+
+      html += `<div class="day-check ${restDay?'rest':'work'}" onclick="togglePatternRestDay('${p.id}',${d})">
+        <div class="dbox">${DAY_NAMES[d].slice(0,2)}</div>
+      </div>`;
+    }
+
+    html += `</div>
+      <span style="font-size:11px;color:var(--red);font-weight:800;">Rest: ${rest}</span>
+      <span class="del" onclick="removePattern('${p.id}')">&times;</span>
+    </div>`;
+  });
+
+  box.innerHTML = html;
 }
 
-function addShift(){const p=parseTimeRange('09:00-18:00');shifts.push({id:newShiftId(),name:'New Shift',time:p.time,startMin:p.startMin,endMin:p.endMin,overnight:p.overnight,color:PATTERN_COLORS[shifts.length%PATTERN_COLORS.length]});markDirty()}
-function updateShift(id,key,value){const s=findShift(id);if(!s)return;if(key==='name')s.name=value.trim()||s.name;if(key==='color')s.color=value;if(key==='time'){const p=parseTimeRange(value);if(!p){alert('Invalid time range. Please use HH:MM-HH:MM.');renderShiftEditor();return}Object.assign(s,p)}markDirty()}
-function removeShift(id){if(!confirm('Delete this shift? Existing assignments using this shift will be removed.'))return;shifts=shifts.filter(s=>s.id!==id);Object.keys(scheduleData).forEach(empId=>Object.keys(scheduleData[empId]||{}).forEach(ds=>{const e=getEntry(empId,ds);e.shifts=e.shifts.filter(x=>x!==id);setEntry(empId,ds,e)}));markDirty()}
+/* ---------- Shift Manager ---------- */
+function addShift(){
+  const id = newShiftId();
+
+  shifts.push({
+    id,
+    name:'New Shift',
+    time:'09:00-18:00',
+    startMin:540,
+    endMin:1080,
+    overnight:false,
+    color:PATTERN_COLORS[shifts.length % PATTERN_COLORS.length]
+  });
+
+  markDirty();
+}
+
+function updateShift(id,key,value){
+  const s = findShift(id);
+  if(!s) return;
+
+  if(key === 'name') s.name = value.trim() || s.name;
+  if(key === 'color') s.color = value;
+
+  if(key === 'time'){
+    const parsed = parseTimeRange(value);
+
+    if(!parsed){
+      alert('Invalid time range. Please use HH:MM-HH:MM.');
+      renderShiftEditor();
+      return;
+    }
+
+    s.time = parsed.time;
+    s.startMin = parsed.startMin;
+    s.endMin = parsed.endMin;
+    s.overnight = parsed.overnight;
+  }
+
+  markDirty();
+}
+
+function removeShift(id){
+  if(!confirm('Delete this shift? Existing assignments using this shift will be removed.')) return;
+
+  shifts = shifts.filter(s=>s.id!==id);
+
+  Object.keys(scheduleData).forEach(empId=>{
+    Object.keys(scheduleData[empId] || {}).forEach(ds=>{
+      const e = getEntry(empId,ds);
+      e.shifts = e.shifts.filter(x=>x!==id);
+      setEntry(empId,ds,e);
+    });
+  });
+
+  markDirty();
+}
+
 function renderShiftEditor(){
-  shiftEditor.innerHTML=shifts.map(s=>`<div class="shift-row"><div class="shift-color-dot" style="background:${s.color}"></div><input value="${esc(s.name)}" onchange="updateShift('${s.id}','name',this.value)" style="width:130px;font-weight:700;"><input value="${esc(s.time)}" onchange="updateShift('${s.id}','time',this.value)" style="width:110px;"><input type="color" value="${s.color}" onchange="updateShift('${s.id}','color',this.value)"><span style="font-size:11px;color:var(--muted);">${s.overnight?'Overnight shift':'Day shift'}</span><span class="del" onclick="removeShift('${s.id}')">&times;</span></div>`).join('');
+  const box = document.getElementById('shiftEditor');
+  let html = '';
+
+  shifts.forEach(s=>{
+    html += `<div class="shift-row">
+      <div class="shift-color-dot" style="background:${s.color}"></div>
+      <input value="${esc(s.name)}" onchange="updateShift('${s.id}','name',this.value)" style="width:130px;font-weight:700;">
+      <input value="${esc(s.time)}" onchange="updateShift('${s.id}','time',this.value)" style="width:110px;">
+      <input type="color" value="${s.color}" onchange="updateShift('${s.id}','color',this.value)">
+      <span style="font-size:11px;color:var(--muted);">${s.overnight?'Overnight shift':'Day shift'}</span>
+      <span class="del" onclick="removeShift('${s.id}')">&times;</span>
+    </div>`;
+  });
+
+  box.innerHTML = html;
 }
 
+/* ---------- Employees ---------- */
 function addEmployee(name){
-  const n=(name||newEmpName.value).trim();if(!n)return;if(employees.some(e=>e.name===n))return alert('Employee name already exists.');
-  const id=newEmployeeId();employees.push({id,name:n,region:'HK',patternId:patterns[0]?.id||''});scheduleData[id]={};newEmpName.value='';markDirty();
-}
-function addBatchEmployees(){const n=parseInt(prompt('How many employees would you like to add?','14'));if(!n||n<=0)return;for(let i=0;i<n;i++){const id=newEmployeeId();employees.push({id,name:'Staff '+(employees.length+1),region:'HK',patternId:patterns[employees.length%patterns.length]?.id||''});scheduleData[id]={}}markDirty()}
-function updateEmployee(id,key,value){const e=findEmployee(id);if(!e)return;if(key==='name'){const v=value.trim();if(!v)return;if(employees.some(x=>x.id!==id&&x.name===v)){alert('Employee name already exists.');renderEmployees();return}e.name=v}if(key==='region')e.region=value;if(key==='patternId')e.patternId=value;markDirty()}
-function removeEmployee(id){const e=findEmployee(id);if(!e)return;if(!confirm('Delete '+e.name+'?'))return;employees=employees.filter(x=>x.id!==id);delete scheduleData[id];selectedCells=new Set([...selectedCells].filter(k=>!k.startsWith(id+'|')));markDirty()}
-function renderEmployees(){
-  employeeGrid.innerHTML=employees.map((e,i)=>{
-    const pc=getPatternColor(e.patternId);
-    const opts=patterns.map(p=>`<option value="${p.id}" ${e.patternId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
-    return `<div class="employee-card"><div class="idx">${i+1}</div><input class="emp-name" value="${esc(e.name)}" onchange="updateEmployee('${e.id}','name',this.value)" onfocus="this.select()"><select onchange="updateEmployee('${e.id}','region',this.value)"><option value="HK" ${e.region==='HK'?'selected':''}>Hong Kong</option><option value="CN" ${e.region==='CN'?'selected':''}>Mainland China</option></select><select onchange="updateEmployee('${e.id}','patternId',this.value)">${opts}</select><span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(e.patternId))}</span><span class="del" onclick="removeEmployee('${e.id}')">&times;</span></div>`;
-  }).join('');
-  empCount.textContent=employees.length;
+  const input = document.getElementById('newEmpName');
+  const n = (name || input.value).trim();
+
+  if(!n) return;
+
+  if(employees.some(e=>e.name===n)){
+    alert('Employee name already exists.');
+    return;
+  }
+
+  const id = newEmployeeId();
+
+  employees.push({
+    id,
+    name:n,
+    region:'HK',
+    patternId:patterns[0]?.id || ''
+  });
+
+  scheduleData[id] = {};
+  input.value = '';
+
+  markDirty();
 }
 
-function rebuildDaysOnly(){const s=cfgStart.value,e=cfgEnd.value;days=[];if(!s||!e)return;for(let d=parseDate(s);d<=parseDate(e);d.setDate(d.getDate()+1))days.push(fmtDate(d));dayCount.textContent=days.length;if(!detailDate.value&&days.length)detailDate.value=days[0]}
-function rebuildDaysAndSave(){rebuildDaysOnly();markDirty()}
-function cellKey(empId,ds){return empId+'|'+ds}
+function addBatchEmployees(){
+  const n = parseInt(prompt('How many employees would you like to add?','14'),10);
+  if(!n || n <= 0) return;
+
+  for(let i=0; i<n; i++){
+    const id = newEmployeeId();
+
+    employees.push({
+      id,
+      name:'Staff ' + (employees.length + 1),
+      region:'HK',
+      patternId:patterns[employees.length % patterns.length]?.id || ''
+    });
+
+    scheduleData[id] = {};
+  }
+
+  markDirty();
+}
+
+function updateEmployee(id,key,value){
+  const e = findEmployee(id);
+  if(!e) return;
+
+  if(key === 'name'){
+    const v = value.trim();
+
+    if(!v) return;
+
+    if(employees.some(x=>x.id!==id && x.name===v)){
+      alert('Employee name already exists.');
+      renderEmployees();
+      return;
+    }
+
+    e.name = v;
+  }
+
+  if(key === 'region') e.region = value;
+  if(key === 'patternId') e.patternId = value;
+
+  markDirty();
+}
+
+function removeEmployee(id){
+  const e = findEmployee(id);
+  if(!e) return;
+
+  if(!confirm('Delete ' + e.name + '?')) return;
+
+  employees = employees.filter(x=>x.id!==id);
+  delete scheduleData[id];
+
+  selectedCells = new Set([...selectedCells].filter(k=>!k.startsWith(id+'|')));
+
+  markDirty();
+}
+
+function renderEmployees(){
+  const box = document.getElementById('employeeGrid');
+  let html = '';
+
+  employees.forEach((e,i)=>{
+    const pc = getPatternColor(e.patternId);
+
+    const patternOptions = patterns.map(p =>
+      `<option value="${p.id}" ${e.patternId===p.id?'selected':''}>${esc(p.name)}</option>`
+    ).join('');
+
+    html += `<div class="employee-card">
+      <div class="idx">${i+1}</div>
+      <input class="emp-name" value="${esc(e.name)}" onchange="updateEmployee('${e.id}','name',this.value)" onfocus="this.select()">
+      <select onchange="updateEmployee('${e.id}','region',this.value)">
+        <option value="HK" ${e.region==='HK'?'selected':''}>Hong Kong</option>
+        <option value="CN" ${e.region==='CN'?'selected':''}>Mainland China</option>
+      </select>
+      <select onchange="updateEmployee('${e.id}','patternId',this.value)">
+        ${patternOptions}
+      </select>
+      <span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(e.patternId))}</span>
+      <span class="del" onclick="removeEmployee('${e.id}')">&times;</span>
+    </div>`;
+  });
+
+  box.innerHTML = html;
+  document.getElementById('empCount').textContent = employees.length;
+}
+
+/* ---------- Date range ---------- */
+function rebuildDaysOnly(){
+  const s = document.getElementById('cfgStart').value;
+  const e = document.getElementById('cfgEnd').value;
+
+  days = [];
+
+  if(!s || !e) return;
+
+  for(let d=parseDate(s); d<=parseDate(e); d.setDate(d.getDate()+1)){
+    days.push(fmtDate(d));
+  }
+
+  document.getElementById('dayCount').textContent = days.length;
+
+  if(!document.getElementById('detailDate').value && days.length){
+    document.getElementById('detailDate').value = days[0];
+  }
+}
+
+function rebuildDaysAndSave(){
+  rebuildDaysOnly();
+  markDirty();
+}
+
+/* ---------- Schedule ---------- */
+function cellKey(empId,ds){
+  return empId + '|' + ds;
+}
+
 function handleCellClick(e,empId,ds){
-  const key=cellKey(empId,ds);
-  if(e.shiftKey&&lastSelectedCell){selectCellRange(lastSelectedCell.empId,lastSelectedCell.dateStr,empId,ds)}
-  else{if(!e.ctrlKey&&!e.metaKey)selectedCells.clear();selectedCells.has(key)?selectedCells.delete(key):selectedCells.add(key);lastSelectedCell={empId,dateStr:ds}}
+  const key = cellKey(empId,ds);
+
+  if(e.shiftKey && lastSelectedCell){
+    selectCellRange(lastSelectedCell.empId,lastSelectedCell.dateStr,empId,ds);
+  }else{
+    if(!e.ctrlKey && !e.metaKey) selectedCells.clear();
+
+    if(selectedCells.has(key)){
+      selectedCells.delete(key);
+    }else{
+      selectedCells.add(key);
+    }
+
+    lastSelectedCell = {
+      empId,
+      dateStr:ds
+    };
+  }
+
   renderSelection();
 }
-function selectCellRange(fromEmpId,fromDate,toEmpId,toDate){
-  const a=employees.findIndex(e=>e.id===fromEmpId),b=employees.findIndex(e=>e.id===toEmpId),c=days.indexOf(fromDate),d=days.indexOf(toDate);
-  if(a<0||b<0||c<0||d<0)return;selectedCells.clear();
-  for(let ei=Math.min(a,b);ei<=Math.max(a,b);ei++)for(let di=Math.min(c,d);di<=Math.max(c,d);di++)selectedCells.add(cellKey(employees[ei].id,days[di]));
-}
-function clearSelectedCells(){selectedCells.clear();lastSelectedCell=null;renderSelection()}
-function renderSelection(){document.querySelectorAll('.schedule-cell').forEach(td=>td.classList.toggle('selected',selectedCells.has(td.dataset.key)))}
 
-function deleteSelectedCellsWithConfirm(){
-  if(!selectedCells.size)return alert('Please select one or more cells first.');
-  if(!confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`))return;
-  deleteSelectedCells(false);
+function selectCellRange(fromEmpId,fromDate,toEmpId,toDate){
+  const fromEmpIndex = employees.findIndex(e=>e.id===fromEmpId);
+  const toEmpIndex = employees.findIndex(e=>e.id===toEmpId);
+  const fromDateIndex = days.indexOf(fromDate);
+  const toDateIndex = days.indexOf(toDate);
+
+  if(fromEmpIndex === -1 || toEmpIndex === -1 || fromDateIndex === -1 || toDateIndex === -1){
+    return;
+  }
+
+  const empStart = Math.min(fromEmpIndex,toEmpIndex);
+  const empEnd = Math.max(fromEmpIndex,toEmpIndex);
+  const dateStart = Math.min(fromDateIndex,toDateIndex);
+  const dateEnd = Math.max(fromDateIndex,toDateIndex);
+
+  selectedCells.clear();
+
+  for(let ei=empStart; ei<=empEnd; ei++){
+    const emp = employees[ei];
+
+    for(let di=dateStart; di<=dateEnd; di++){
+      selectedCells.add(cellKey(emp.id,days[di]));
+    }
+  }
 }
-function deleteSelectedCells(ask=true){
-  if(!selectedCells.size)return false;
-  if(ask&&!confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`))return false;
-  selectedCells.forEach(k=>{const [empId,ds]=k.split('|');clearEntry(empId,ds)});
+
+function clearSelectedCells(){
+  selectedCells.clear();
+  lastSelectedCell = null;
+  renderSelection();
+}
+
+function renderSelection(){
+  document.querySelectorAll('.schedule-cell').forEach(td=>{
+    td.classList.toggle('selected',selectedCells.has(td.dataset.key));
+  });
+}
+
+function deleteSelectedArrangements(){
+  if(!selectedCells.size) return false;
+
+  selectedCells.forEach(k=>{
+    const [empId,ds] = k.split('|');
+    clearEntry(empId,ds);
+  });
+
   markDirty();
   return true;
 }
 
+function deleteSelectedArrangementsWithConfirm(){
+  if(!selectedCells.size){
+    alert('Please select one or more cells first.');
+    return;
+  }
+
+  if(!confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)){
+    return;
+  }
+
+  deleteSelectedArrangements();
+}
+
 function openShiftPopup(empId,ds){
-  const emp=findEmployee(empId);if(!emp)return;currentEditEmpId=empId;currentEditDate=ds;
-  const entry=getEntry(empId,ds),rest=isPatternRestDay(emp,ds),holiday=getHolidayInfo(ds,emp.region);
-  popupTitle.textContent=`${emp.name} · ${ds} ${DAY_NAMES[dow(ds)]}`;
-  let sub=`Pattern: <b style="color:${getPatternColor(emp.patternId)}">${esc(getPatternName(emp.patternId))}</b> · Region: <b>${emp.region==='HK'?'Hong Kong':'Mainland China'}</b>`;
-  if(rest)sub+=`<br><span style="color:#b91c1c;font-weight:800;">This is a pattern rest day.</span>`;
-  if(holiday)sub+=`<br><span style="color:#d97706;font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}</span>`;
-  popupSub.innerHTML=sub;leaveType.value=entry.leave?.type||'';leaveDays.value=String(entry.leave?.days||'1');
-  shiftCheckList.innerHTML=shifts.map(s=>{const checked=entry.shifts.includes(s.id);return`<div class="shift-option ${checked?'checked':''}" onclick="toggleShiftOption(this)"><input type="checkbox" value="${s.id}" ${checked?'checked':''}><span class="dot" style="background:${s.color}"></span><span style="font-weight:800;color:${s.color};">${esc(s.name)}</span><span class="time">${esc(s.time)}${s.overnight?' next day':''}</span></div>`}).join('');
-  restDayOtBox.innerHTML=rest?`<label style="display:flex;align-items:center;gap:6px;color:#b91c1c;font-weight:800;"><input type="checkbox" id="popupOvertime" ${entry.overtime?'checked':''}> Rest Day OT</label>`:`<input type="checkbox" id="popupOvertime" style="display:none;">`;
-  popupClearBtn.onclick=()=>{document.querySelectorAll('#shiftCheckList .shift-option').forEach(el=>{el.classList.remove('checked');el.querySelector('input').checked=false});leaveType.value='';leaveDays.value='1';const ot=document.getElementById('popupOvertime');if(ot)ot.checked=false};
-  shiftPopup.style.display='flex';
-}
-function toggleShiftOption(el){const cb=el.querySelector('input');cb.checked=!cb.checked;el.classList.toggle('checked',cb.checked)}
-function saveShiftAssignment(){
-  const emp=findEmployee(currentEditEmpId);if(!emp)return;
-  const shiftIds=[...document.querySelectorAll('#shiftCheckList input:checked')].map(cb=>cb.value);
-  const lt=leaveType.value,ld=parseFloat(leaveDays.value);
-  const leave=lt?{type:lt,days:ld,hours:ld===0.5?4:9}:null;
-  const rest=isPatternRestDay(emp,currentEditDate),overtime=document.getElementById('popupOvertime')?.checked||false;
-  if(leave&&shiftIds.length&&!confirm('This cell has both leave and shift assignments. Continue?'))return;
-  if(rest&&shiftIds.length&&!overtime&&!confirm('This is a rest day. Shifts will not count as coverage unless Rest Day OT is selected. Continue?'))return;
-  const newEntry={shifts:shiftIds,overtime,manual:true,leave};setEntry(currentEditEmpId,currentEditDate,newEntry);
-  autoFillForwardWorkBlock(currentEditEmpId,currentEditDate,newEntry);
-  closeShiftPopup();markDirty();
-}
-function closeShiftPopup(e){if(e&&e.target!==shiftPopup)return;shiftPopup.style.display='none'}
-function autoFillForwardWorkBlock(empId,sourceDate,sourceEntry){
-  const emp=findEmployee(empId);if(!emp)return;const idx=days.indexOf(sourceDate);if(idx<0||isPatternRestDay(emp,sourceDate)||sourceEntry.leave||!sourceEntry.shifts?.length)return;
-  for(let i=idx+1;i<days.length;i++){const ds=days[i];if(isPatternRestDay(emp,ds))break;const ex=getEntry(empId,ds);if(ex.manual)continue;setEntry(empId,ds,{shifts:[...sourceEntry.shifts],overtime:false,manual:false,leave:null})}
-}
-function clearAllSchedule(){if(!confirm('Clear all arrangements?'))return;scheduleData={};employees.forEach(e=>scheduleData[e.id]={});selectedCells.clear();lastSelectedCell=null;markDirty()}
-function renderScheduleTable(){
-  if(!employees.length){scheduleWrap.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted)">Please add employees first.</div>';return}
-  if(!days.length){scheduleWrap.innerHTML='<div style="padding:30px;text-align:center;color:var(--muted)">Please set the date range first.</div>';return}
-  let html=`<div class="copy-tip">Click to select. Ctrl/⌘ + C / V supported. Press Delete / Backspace to delete selected arrangement data.</div><table class="schedule-table"><thead><tr><th class="emp-col">Employee</th><th class="region-col">Region</th><th class="pattern-col">Pattern</th>`;
-  days.forEach(ds=>{const d=parseDate(ds),h=getAnyHolidayInfo(ds);html+=`<th class="day-col">${d.getMonth()+1}/${d.getDate()}${h?' *':''}<br><span style="color:var(--muted);">${DAY_NAMES[d.getDay()]}</span></th>`});
-  html+='</tr></thead><tbody>';
-  employees.forEach(emp=>{
-    const pc=getPatternColor(emp.patternId);
-    html+=`<tr><td class="emp-col">${esc(emp.name)}</td><td class="region-col">${emp.region==='HK'?'HK':'CN'}</td><td class="pattern-col"><span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(emp.patternId))}</span></td>`;
-    days.forEach(ds=>{
-      const entry=getEntry(emp.id,ds),rest=isPatternRestDay(emp,ds),holiday=getHolidayInfo(ds,emp.region),selected=selectedCells.has(cellKey(emp.id,ds));
-      let content='';if(rest)content+=`<div class="off-label">OFF</div>`;if(holiday)content+=`<div class="holiday-label">${holiday.flag} PH</div>`;if(entry.leave)content+=`<div class="leave-label">${entry.leave.type} ${entry.leave.days}D</div>`;
-      if(entry.shifts.length){content+='<div>';entry.shifts.forEach(id=>{const s=findShift(id);if(s)content+=`<span class="shift-dot" style="background:${s.color}" title="${esc(s.name)} ${esc(s.time)}"></span>`});if(entry.overtime)content+=`<span class="ot-label">OT</span>`;content+='</div>'}
-      if(!entry.shifts.length&&!entry.leave)content+=`<div class="cell-hint">${rest?'Double-click for OT':'Double-click'}</div>`;
-      const cls=['schedule-cell',rest?'rest-cell':'work-cell',selected?'selected':'',entry.manual?'manual-cell':'',(!entry.manual&&entry.shifts.length)?'auto-cell':''].join(' ');
-      html+=`<td class="${cls}" data-key="${cellKey(emp.id,ds)}" onclick="handleCellClick(event,'${emp.id}','${ds}')" ondblclick="openShiftPopup('${emp.id}','${ds}')">${content}</td>`;
-    });
-    html+='</tr>';
+  const emp = findEmployee(empId);
+  if(!emp) return;
+
+  currentEditEmpId = empId;
+  currentEditDate = ds;
+
+  const entry = getEntry(empId,ds);
+  const rest = isPatternRestDay(emp,ds);
+  const holiday = getHolidayInfo(ds,emp.region);
+
+  document.getElementById('popupTitle').textContent = `${emp.name} · ${ds} ${DAY_NAMES[dow(ds)]}`;
+
+  let sub = `Pattern: <b style="color:${getPatternColor(emp.patternId)}">${esc(getPatternName(emp.patternId))}</b> `;
+  sub += `· Region: <b>${emp.region==='HK'?'Hong Kong':'Mainland China'}</b>`;
+
+  if(rest){
+    sub += `<br><span style="color:#b91c1c;font-weight:800;">This is a pattern rest day.</span>`;
+  }
+
+  if(holiday){
+    sub += `<br><span style="color:#d97706;font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}</span>`;
+  }
+
+  document.getElementById('popupSub').innerHTML = sub;
+
+  document.getElementById('leaveType').value = entry.leave?.type || '';
+  document.getElementById('leaveDays').value = String(entry.leave?.days || '1');
+
+  let html = '';
+
+  shifts.forEach(s=>{
+    const checked = entry.shifts.includes(s.id);
+
+    html += `<div class="shift-option ${checked?'checked':''}" onclick="toggleShiftOption(this)">
+      <input type="checkbox" value="${s.id}" ${checked?'checked':''}>
+      <span class="dot" style="background:${s.color}"></span>
+      <span style="font-weight:800;color:${s.color};">${esc(s.name)}</span>
+      <span class="time">${esc(s.time)}${s.overnight?' next day':''}</span>
+    </div>`;
   });
-  scheduleWrap.innerHTML=html+'</tbody></table>';
+
+  document.getElementById('shiftCheckList').innerHTML = html;
+
+  document.getElementById('restDayOtBox').innerHTML = rest
+    ? `<label style="display:flex;align-items:center;gap:6px;color:#b91c1c;font-weight:800;">
+        <input type="checkbox" id="popupOvertime" ${entry.overtime?'checked':''}>
+        Rest Day OT
+      </label>`
+    : `<input type="checkbox" id="popupOvertime" style="display:none;">`;
+
+  document.getElementById('popupClearBtn').onclick = function(){
+    document.querySelectorAll('#shiftCheckList .shift-option').forEach(el=>{
+      el.classList.remove('checked');
+      el.querySelector('input').checked = false;
+    });
+
+    document.getElementById('leaveType').value = '';
+    document.getElementById('leaveDays').value = '1';
+
+    const ot = document.getElementById('popupOvertime');
+    if(ot) ot.checked = false;
+  };
+
+  document.getElementById('shiftPopup').style.display = 'flex';
 }
 
-function getFirstSelected(){const arr=[...selectedCells];if(!arr.length)return null;const [empId,ds]=arr[0].split('|');return{empId,dateStr:ds}}
-function copySelectedCell(){const first=getFirstSelected();if(!first)return false;copiedCellData=JSON.parse(JSON.stringify(getEntry(first.empId,first.dateStr)));return true}
-function copySelectedCellWithFeedback(){if(!selectedCells.size)return alert('Please select one cell to copy first.');if(copySelectedCell())alert('Selected cell copied.')}
-function pasteToSelectedCells(){if(!copiedCellData||!selectedCells.size)return false;selectedCells.forEach(k=>{const[empId,ds]=k.split('|');setEntry(empId,ds,{...JSON.parse(JSON.stringify(copiedCellData)),manual:true})});markDirty();return true}
-function pasteToSelectedCellsWithFeedback(){if(!copiedCellData)return alert('No copied cell found.');if(!selectedCells.size)return alert('Please select at least one target cell.');if(!confirm(`Paste the copied arrangement to ${selectedCells.size} selected cell(s)?`))return;pasteToSelectedCells()}
+function toggleShiftOption(el){
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.classList.toggle('checked',cb.checked);
+}
 
-function getShiftBlocks(shift){const blocks=new Set();if(shift.overnight){for(let m=shift.startMin;m<1440;m+=30)blocks.add(Math.floor(m/30));for(let m=0;m<shift.endMin;m+=30)blocks.add(Math.floor(m/30))}else for(let m=shift.startMin;m<shift.endMin;m+=30)blocks.add(Math.floor(m/30));return[...blocks].sort((a,b)=>a-b)}
+function autoFillForwardWorkBlock(empId,sourceDate,sourceEntry){
+  const emp = findEmployee(empId);
+  if(!emp) return;
+
+  const sourceIndex = days.indexOf(sourceDate);
+  if(sourceIndex === -1) return;
+
+  if(isPatternRestDay(emp,sourceDate)) return;
+  if(sourceEntry.leave) return;
+  if(!sourceEntry.shifts || !sourceEntry.shifts.length) return;
+
+  for(let i=sourceIndex+1; i<days.length; i++){
+    const ds = days[i];
+
+    if(isPatternRestDay(emp,ds)) break;
+
+    const existing = getEntry(empId,ds);
+
+    if(existing.manual) continue;
+
+    setEntry(empId,ds,{
+      shifts:[...sourceEntry.shifts],
+      overtime:false,
+      manual:false,
+      leave:null
+    });
+  }
+}
+
+function saveShiftAssignment(){
+  const emp = findEmployee(currentEditEmpId);
+  if(!emp) return;
+
+  const shiftIds = [...document.querySelectorAll('#shiftCheckList input:checked')].map(cb=>cb.value);
+
+  const leaveType = document.getElementById('leaveType').value;
+  const leaveDays = parseFloat(document.getElementById('leaveDays').value);
+
+  const leave = leaveType ? {
+    type:leaveType,
+    days:leaveDays,
+    hours:leaveDays === 0.5 ? 4 : 9
+  } : null;
+
+  const rest = isPatternRestDay(emp,currentEditDate);
+  const overtime = document.getElementById('popupOvertime')?.checked || false;
+
+  if(leave && shiftIds.length){
+    if(!confirm('This cell has both leave and shift assignments. Continue?')) return;
+  }
+
+  if(rest && shiftIds.length && !overtime){
+    if(!confirm('This is a rest day. Shifts will not count as coverage unless Rest Day OT is selected. Continue?')) return;
+  }
+
+  const newEntry = {
+    shifts:shiftIds,
+    overtime,
+    manual:true,
+    leave
+  };
+
+  setEntry(currentEditEmpId,currentEditDate,newEntry);
+  autoFillForwardWorkBlock(currentEditEmpId,currentEditDate,newEntry);
+
+  closeShiftPopup();
+  markDirty();
+}
+
+function closeShiftPopup(e){
+  if(e && e.target !== document.getElementById('shiftPopup')) return;
+  document.getElementById('shiftPopup').style.display = 'none';
+}
+
+function clearAllSchedule(){
+  if(!confirm('Clear all arrangements?')) return;
+
+  scheduleData = {};
+  employees.forEach(e=>scheduleData[e.id]={});
+
+  selectedCells.clear();
+  lastSelectedCell = null;
+
+  markDirty();
+}
+
+function renderScheduleTable(){
+  const wrap = document.getElementById('scheduleWrap');
+
+  if(!employees.length){
+    wrap.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Please add employees first.</div>';
+    return;
+  }
+
+  if(!days.length){
+    wrap.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Please set the date range first.</div>';
+    return;
+  }
+
+  let html = `<div class="copy-tip">
+    Click to select a cell. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit.
+    Ctrl/⌘ + C / V is supported. Press Delete / Backspace to delete selected arrangement data.
+  </div>`;
+
+  html += `<table class="schedule-table"><thead><tr>
+    <th class="emp-col">Employee</th>
+    <th class="region-col">Region</th>
+    <th class="pattern-col">Pattern</th>`;
+
+  days.forEach(ds=>{
+    const d = parseDate(ds);
+    const anyHoliday = getAnyHolidayInfo(ds);
+
+    html += `<th class="day-col">
+      ${d.getMonth()+1}/${d.getDate()}${anyHoliday?' *':''}<br>
+      <span style="color:var(--muted);">${DAY_NAMES[d.getDay()]}</span>
+    </th>`;
+  });
+
+  html += '</tr></thead><tbody>';
+
+  employees.forEach(emp=>{
+    const pc = getPatternColor(emp.patternId);
+
+    html += `<tr>
+      <td class="emp-col">${esc(emp.name)}</td>
+      <td class="region-col">${emp.region==='HK'?'HK':'CN'}</td>
+      <td class="pattern-col">
+        <span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(emp.patternId))}</span>
+      </td>`;
+
+    days.forEach(ds=>{
+      const entry = getEntry(emp.id,ds);
+      const rest = isPatternRestDay(emp,ds);
+      const holiday = getHolidayInfo(ds,emp.region);
+      const selected = selectedCells.has(cellKey(emp.id,ds));
+
+      let content = '';
+
+      if(rest) content += `<div class="off-label">OFF</div>`;
+      if(holiday) content += `<div class="holiday-label">${holiday.flag} PH</div>`;
+      if(entry.leave) content += `<div class="leave-label">${entry.leave.type} ${entry.leave.days}D</div>`;
+
+      if(entry.shifts.length){
+        content += `<div>`;
+
+        entry.shifts.forEach(id=>{
+          const s = findShift(id);
+          if(s){
+            content += `<span class="shift-dot" style="background:${s.color}" title="${esc(s.name)} ${esc(s.time)}"></span>`;
+          }
+        });
+
+        if(entry.overtime) content += `<span class="ot-label">OT</span>`;
+
+        content += `</div>`;
+      }
+
+      if(!entry.shifts.length && !entry.leave){
+        content += `<div class="cell-hint">${rest?'Double-click for OT':'Double-click'}</div>`;
+      }
+
+      const cls = [
+        'schedule-cell',
+        rest ? 'rest-cell' : 'work-cell',
+        selected ? 'selected' : '',
+        entry.manual ? 'manual-cell' : '',
+        (!entry.manual && entry.shifts.length) ? 'auto-cell' : ''
+      ].join(' ');
+
+      html += `<td class="${cls}" data-key="${cellKey(emp.id,ds)}"
+        onclick="handleCellClick(event,'${emp.id}','${ds}')"
+        ondblclick="openShiftPopup('${emp.id}','${ds}')">${content}</td>`;
+    });
+
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+/* ---------- Copy / paste ---------- */
+function getFirstSelected(){
+  const arr = [...selectedCells];
+  if(!arr.length) return null;
+
+  const [empId,ds] = arr[0].split('|');
+
+  return {
+    empId,
+    dateStr:ds
+  };
+}
+
+function copySelectedCell(){
+  const first = getFirstSelected();
+  if(!first) return false;
+
+  const e = getEntry(first.empId,first.dateStr);
+  copiedCellData = JSON.parse(JSON.stringify(e));
+
+  return true;
+}
+
+function copySelectedCellWithFeedback(){
+  if(!selectedCells.size){
+    alert('Please select one cell to copy first.');
+    return;
+  }
+
+  if(copySelectedCell()){
+    alert('Selected cell copied. You can now select one or more target cells and paste.');
+  }
+}
+
+function pasteToSelectedCells(){
+  if(!copiedCellData || !selectedCells.size) return false;
+
+  selectedCells.forEach(k=>{
+    const [empId,ds] = k.split('|');
+
+    setEntry(empId,ds,{
+      ...JSON.parse(JSON.stringify(copiedCellData)),
+      manual:true
+    });
+  });
+
+  markDirty();
+
+  return true;
+}
+
+function pasteToSelectedCellsWithFeedback(){
+  if(!copiedCellData){
+    alert('No copied cell found. Please copy one cell first.');
+    return;
+  }
+
+  if(!selectedCells.size){
+    alert('Please select at least one target cell.');
+    return;
+  }
+
+  const count = selectedCells.size;
+
+  if(!confirm(`Paste the copied arrangement to ${count} selected cell(s)?`)){
+    return;
+  }
+
+  pasteToSelectedCells();
+}
+
+/* ---------- Coverage ---------- */
+function getShiftBlocks(shift){
+  const blocks = new Set();
+
+  if(shift.overnight){
+    for(let m=shift.startMin; m<1440; m+=30){
+      blocks.add(Math.floor(m/30));
+    }
+
+    for(let m=0; m<shift.endMin; m+=30){
+      blocks.add(Math.floor(m/30));
+    }
+  }else{
+    for(let m=shift.startMin; m<shift.endMin; m+=30){
+      blocks.add(Math.floor(m/30));
+    }
+  }
+
+  return [...blocks].sort((a,b)=>a-b);
+}
+
 function computeDailyCoverage(ds){
-  const coverage=new Array(48).fill(0),shiftAssignments=new Map();
-  employees.forEach(emp=>{const entry=getEntry(emp.id,ds);if(entry.leave&&entry.leave.days>=1)return;if(isPatternRestDay(emp,ds)&&!entry.overtime)return;entry.shifts.forEach(id=>{const s=findShift(id);if(!s)return;if(!shiftAssignments.has(id))shiftAssignments.set(id,[]);shiftAssignments.get(id).push(emp.name);getShiftBlocks(s).forEach(b=>coverage[b]++)})});
-  return{coverage,shiftAssignments};
+  const coverage = new Array(48).fill(0);
+  const coveredBy = new Array(48).fill(null).map(()=>[]);
+  const shiftAssignments = new Map();
+
+  employees.forEach(emp=>{
+    const entry = getEntry(emp.id,ds);
+
+    if(entry.leave && entry.leave.days >= 1) return;
+    if(isPatternRestDay(emp,ds) && !entry.overtime) return;
+
+    entry.shifts.forEach(shiftId=>{
+      const s = findShift(shiftId);
+      if(!s) return;
+
+      if(!shiftAssignments.has(shiftId)){
+        shiftAssignments.set(shiftId,[]);
+      }
+
+      shiftAssignments.get(shiftId).push(emp.name);
+
+      getShiftBlocks(s).forEach(b=>{
+        coverage[b]++;
+        coveredBy[b].push(emp.name);
+      });
+    });
+  });
+
+  for(let i=0;i<48;i++){
+    coveredBy[i] = [...new Set(coveredBy[i])];
+  }
+
+  return {
+    coverage,
+    coveredBy,
+    shiftAssignments
+  };
 }
-function findGaps(cov){const gaps=[];let start=-1;for(let i=0;i<48;i++){if(cov[i]===0){if(start===-1)start=i}else if(start!==-1){gaps.push({start,end:i-1});start=-1}}if(start!==-1)gaps.push({start,end:47});return gaps}
-function fmtBlockTime(i){const h=Math.floor(i/2),m=(i%2)*30;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+
+function findGaps(cov){
+  const gaps = [];
+  let start = -1;
+
+  for(let i=0;i<48;i++){
+    if(cov[i] === 0){
+      if(start === -1) start = i;
+    }else if(start !== -1){
+      gaps.push({
+        start,
+        end:i-1
+      });
+
+      start = -1;
+    }
+  }
+
+  if(start !== -1){
+    gaps.push({
+      start,
+      end:47
+    });
+  }
+
+  return gaps;
+}
+
+function fmtBlockTime(i){
+  const h = Math.floor(i/2);
+  const m = (i%2)*30;
+
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
 function renderDailyView(){
-  let ds=detailDate.value;if(!ds&&days.length){ds=days[0];detailDate.value=ds}if(!ds)return;
-  const {coverage,shiftAssignments}=computeDailyCoverage(ds),gaps=findGaps(coverage),anyHoliday=getAnyHolidayInfo(ds);
-  dayTags.innerHTML=`<span class="day-tag" style="background:#e5e7eb;color:#374151;">${DAY_NAMES[dow(ds)]}</span>`+(anyHoliday?`<span class="day-tag" style="background:#fffbeb;color:#d97706;">${esc(anyHoliday.label)} · ${esc(anyHoliday.name)}</span>`:'');
-  let html=`<div class="coverage-timeline"><h3>📶 24-Hour Coverage Heatmap</h3><div class="coverage-bar-wrap">`;
-  gaps.forEach(g=>{const left=g.start/48*100,width=(g.end-g.start+1)/48*100,mid=left+width/2;html+=`<div class="gap-marker" style="left:${left}%;width:${width}%"></div><div class="gap-label" style="left:${mid}%">⚠ ${fmtBlockTime(g.start)}-${fmtBlockTime(g.end+1)}</div>`});
-  html+='<div class="coverage-bar">';
-  let prev=coverage[0],seg=0;for(let i=1;i<=48;i++){if(i===48||coverage[i]!==prev){const width=(i-seg)/48*100,cls=prev===0?'cover-0':prev===1?'cover-1':prev===2?'cover-2':prev===3?'cover-3':'cover-4p';html+=`<div class="coverage-seg ${cls}" style="width:${width}%" title="${prev} staff ${fmtBlockTime(seg)}-${fmtBlockTime(i)}"></div>`;seg=i;prev=i<48?coverage[i]:0}}
-  html+='</div></div><div class="coverage-labels">';for(let h=0;h<=24;h+=2)html+=`<span>${String(h).padStart(2,'0')}:00</span>`;html+='</div></div>';
-  html+='<h3>🎨 Shift Color Legend</h3><div class="legend">'+shifts.map(s=>`<div class="legend-item"><span class="legend-dot" style="background:${s.color}"></span><b>${esc(s.name)}</b> ${esc(s.time)}</div>`).join('')+'</div>';
-  html+='<h3>🕐 Slot Assignment Detail</h3><table class="slot-table"><thead><tr><th>Shift</th><th>Time</th><th>Staff on Duty</th><th>Headcount</th></tr></thead><tbody>';
-  shifts.forEach(s=>{const staff=shiftAssignments.get(s.id)||[];html+=`<tr><td style="font-weight:900;color:${s.color};"><span class="shift-dot" style="background:${s.color};width:10px;height:10px;"></span>${esc(s.name)}</td><td>${esc(s.time)}${s.overnight?' next day':''}</td><td>${staff.length?esc(staff.join(', ')):'<span class="empty-cell">No coverage</span>'}</td><td class="${staff.length?'emp-cell':'empty-cell'}">${staff.length}</td></tr>`});
-  dailyContent.innerHTML=html+'</tbody></table>';
-  if(gaps.length){gapWarning.className='gap-warning err';gapWarning.textContent='⚠ Coverage gap: '+gaps.map(g=>fmtBlockTime(g.start)+'-'+fmtBlockTime(g.end+1)).join(', ')}
-  else{gapWarning.className='gap-warning ok';gapWarning.textContent='✅ Full 24-hour coverage, zero gaps.'}
-}
-function shiftDay(delta){const base=detailDate.value||days[0]||fmtDate(new Date()),d=parseDate(base);d.setDate(d.getDate()+delta);detailDate.value=fmtDate(d);renderDailyView()}
-function goToToday(){detailDate.value=fmtDate(new Date());renderDailyView()}
+  let ds = document.getElementById('detailDate').value;
 
+  if(!ds && days.length){
+    ds = days[0];
+    document.getElementById('detailDate').value = ds;
+  }
+
+  if(!ds) return;
+
+  const {
+    coverage,
+    shiftAssignments
+  } = computeDailyCoverage(ds);
+
+  const gaps = findGaps(coverage);
+  const anyHoliday = getAnyHolidayInfo(ds);
+
+  let tagHtml = `<span class="day-tag" style="background:#e5e7eb;color:#374151;">${DAY_NAMES[dow(ds)]}</span>`;
+
+  if(anyHoliday){
+    tagHtml += `<span class="day-tag" style="background:#fffbeb;color:#d97706;">${esc(anyHoliday.label)} · ${esc(anyHoliday.name)}</span>`;
+  }
+
+  document.getElementById('dayTags').innerHTML = tagHtml;
+
+  let html = `<div class="coverage-timeline">
+    <h3>📶 24-Hour Coverage Heatmap</h3>
+    <div class="coverage-bar-wrap">`;
+
+  gaps.forEach(g=>{
+    const left = g.start / 48 * 100;
+    const width = (g.end - g.start + 1) / 48 * 100;
+    const mid = left + width / 2;
+
+    html += `<div class="gap-marker" style="left:${left}%;width:${width}%"></div>
+      <div class="gap-label" style="left:${mid}%">⚠ ${fmtBlockTime(g.start)}-${fmtBlockTime(g.end+1)}</div>`;
+  });
+
+  html += `<div class="coverage-bar">`;
+
+  let prev = coverage[0];
+  let seg = 0;
+
+  for(let i=1;i<=48;i++){
+    if(i === 48 || coverage[i] !== prev){
+      const width = (i - seg) / 48 * 100;
+      const cls = prev === 0 ? 'cover-0' : prev === 1 ? 'cover-1' : prev === 2 ? 'cover-2' : prev === 3 ? 'cover-3' : 'cover-4p';
+
+      html += `<div class="coverage-seg ${cls}" style="width:${width}%"
+        title="${prev} staff ${fmtBlockTime(seg)}-${fmtBlockTime(i)}"></div>`;
+
+      seg = i;
+      prev = i < 48 ? coverage[i] : 0;
+    }
+  }
+
+  html += `</div></div><div class="coverage-labels">`;
+
+  for(let h=0; h<=24; h+=2){
+    html += `<span>${String(h).padStart(2,'0')}:00</span>`;
+  }
+
+  html += `</div></div>`;
+
+  html += `<h3>🎨 Shift Color Legend</h3><div class="legend">`;
+
+  shifts.forEach(s=>{
+    html += `<div class="legend-item">
+      <span class="legend-dot" style="background:${s.color}"></span>
+      <b>${esc(s.name)}</b> ${esc(s.time)}
+    </div>`;
+  });
+
+  html += `</div>`;
+
+  html += `<h3>🕐 Slot Assignment Detail</h3>
+    <table class="slot-table">
+      <thead>
+        <tr>
+          <th>Shift</th>
+          <th>Time</th>
+          <th>Staff on Duty</th>
+          <th>Headcount</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  shifts.forEach(s=>{
+    const staff = shiftAssignments.get(s.id) || [];
+
+    html += `<tr>
+      <td style="font-weight:900;color:${s.color};">
+        <span class="shift-dot" style="background:${s.color};width:10px;height:10px;"></span>
+        ${esc(s.name)}
+      </td>
+      <td>${esc(s.time)}${s.overnight?' next day':''}</td>
+      <td>${staff.length ? esc(staff.join(', ')) : '<span class="empty-cell">No coverage</span>'}</td>
+      <td class="${staff.length?'emp-cell':'empty-cell'}">${staff.length}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+
+  document.getElementById('dailyContent').innerHTML = html;
+
+  const warn = document.getElementById('gapWarning');
+
+  if(gaps.length){
+    warn.className = 'gap-warning err';
+    warn.textContent = '⚠ Coverage gap: ' + gaps.map(g=>fmtBlockTime(g.start)+'-'+fmtBlockTime(g.end+1)).join(', ');
+  }else{
+    warn.className = 'gap-warning ok';
+    warn.textContent = '✅ Full 24-hour coverage, zero gaps.';
+  }
+}
+
+function shiftDay(delta){
+  const el = document.getElementById('detailDate');
+  const base = el.value || days[0] || fmtDate(new Date());
+  const d = parseDate(base);
+
+  d.setDate(d.getDate()+delta);
+
+  el.value = fmtDate(d);
+
+  renderDailyView();
+}
+
+function goToToday(){
+  document.getElementById('detailDate').value = fmtDate(new Date());
+  renderDailyView();
+}
+
+/* ---------- CSV ---------- */
 function exportCSV(){
-  let csv='\uFEFFDate';shifts.forEach(s=>csv+=`,"${s.name} (${s.time})"`);csv+=',"Status"\n';
-  days.forEach(ds=>{const{coverage,shiftAssignments}=computeDailyCoverage(ds),row=[ds];shifts.forEach(s=>row.push((shiftAssignments.get(s.id)||[]).join('/')||'No coverage'));row.push(findGaps(coverage).length?'Coverage Gap':'Full Coverage');csv+=row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')+'\n'});
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='coordinator_roster_2026.csv';a.click();URL.revokeObjectURL(a.href);
+  let csv = '\uFEFFDate';
+
+  shifts.forEach(s=>{
+    csv += `,"${String(s.name).replace(/"/g,'""')} (${String(s.time).replace(/"/g,'""')})"`;
+  });
+
+  csv += ',"Status"\n';
+
+  days.forEach(ds=>{
+    const {
+      coverage,
+      shiftAssignments
+    } = computeDailyCoverage(ds);
+
+    const row = [ds];
+
+    shifts.forEach(s=>{
+      row.push((shiftAssignments.get(s.id) || []).join('/') || 'No coverage');
+    });
+
+    const gaps = findGaps(coverage);
+    row.push(gaps.length ? 'Coverage Gap' : 'Full Coverage');
+
+    csv += row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',') + '\n';
+  });
+
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+
+  a.href = URL.createObjectURL(blob);
+  a.download = 'coordinator_roster_2026.csv';
+  a.click();
+
+  URL.revokeObjectURL(a.href);
 }
 
-function refreshAll(){renderPatternEditor();renderShiftEditor();renderEmployees();renderScheduleTable();renderDailyView()}
+/* ---------- Render ---------- */
+function refreshAll(){
+  renderPatternEditor();
+  renderShiftEditor();
+  renderEmployees();
+  renderScheduleTable();
+  renderDailyView();
+}
+
+/* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown',e=>{
-  const tag=document.activeElement?.tagName;
-  const editing=['INPUT','SELECT','TEXTAREA'].includes(tag)||document.activeElement?.isContentEditable;
-  if(e.key==='Escape')closeShiftPopup();
-  if(e.key==='Enter'&&document.activeElement===newEmpName)addEmployee();
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'&&selectedCells.size){copySelectedCell()}
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'&&selectedCells.size){e.preventDefault();pasteToSelectedCells()}
-  if(!editing&&shiftPopup.style.display==='none'&&(e.key==='Delete'||e.key==='Backspace')&&selectedCells.size){
+  const tag = document.activeElement?.tagName?.toLowerCase();
+  const isTyping = ['input','select','textarea'].includes(tag);
+
+  if(e.key === 'Escape'){
+    closeShiftPopup();
+  }
+
+  if(e.key === 'Enter' && document.activeElement === document.getElementById('newEmpName')){
+    addEmployee();
+  }
+
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && selectedCells.size && !isTyping){
+    copySelectedCell();
+  }
+
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v' && selectedCells.size && !isTyping){
     e.preventDefault();
-    deleteSelectedCells(true);
+    pasteToSelectedCells();
+  }
+
+  if((e.key === 'Delete' || e.key === 'Backspace') && selectedCells.size && !isTyping){
+    e.preventDefault();
+
+    if(confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)){
+      deleteSelectedArrangements();
+    }
   }
 });
 
+/* ---------- Init ---------- */
 function initDefaults(){
-  patterns=[{id:'p1',name:'Mon-Fri',restDays:[0,6],color:'#1677ff'},{id:'p2',name:'Tue-Sat',restDays:[0,1],color:'#52c41a'},{id:'p3',name:'Sun-Thu',restDays:[5,6],color:'#fa8c16'}];patternIdCounter=3;
-  shifts=[
+  patterns = [
+    {
+      id:'p1',
+      name:'Mon-Fri',
+      restDays:[0,6],
+      color:'#1677ff'
+    },
+    {
+      id:'p2',
+      name:'Tue-Sat',
+      restDays:[0,1],
+      color:'#52c41a'
+    },
+    {
+      id:'p3',
+      name:'Sun-Thu',
+      restDays:[5,6],
+      color:'#fa8c16'
+    }
+  ];
+
+  patternIdCounter = 3;
+
+  shifts = [
     {id:'s1',name:'Shift 1',time:'08:00-17:00',startMin:480,endMin:1020,overnight:false,color:'#0891b2'},
     {id:'s2',name:'Shift 2',time:'08:30-17:30',startMin:510,endMin:1050,overnight:false,color:'#1677ff'},
     {id:'s3',name:'Shift 3',time:'09:00-18:00',startMin:540,endMin:1080,overnight:false,color:'#52c41a'},
@@ -497,20 +2176,59 @@ function initDefaults(){
     {id:'s9',name:'Night 1',time:'21:00-06:00',startMin:1260,endMin:360,overnight:true,color:'#595959'},
     {id:'s10',name:'Night 2',time:'22:00-07:00',startMin:1320,endMin:420,overnight:true,color:'#262626'},
     {id:'s11',name:'Night 3',time:'23:00-08:00',startMin:1380,endMin:480,overnight:true,color:'#8c8c8c'}
-  ];shiftIdCounter=11;
-  employees=[];scheduleData={};employeeIdCounter=0;
-  for(let i=0;i<14;i++){const id=newEmployeeId();employees.push({id,name:'Staff '+(i+1),region:i%2===0?'HK':'CN',patternId:patterns[i%patterns.length].id});scheduleData[id]={}}
-  detailDate.value=cfgStart.value;
+  ];
+
+  shiftIdCounter = 11;
+
+  employees = [];
+  scheduleData = {};
+
+  employeeIdCounter = 0;
+
+  for(let i=0;i<14;i++){
+    const id = newEmployeeId();
+
+    employees.push({
+      id,
+      name:'Staff ' + (i+1),
+      region:i%2===0 ? 'HK' : 'CN',
+      patternId:patterns[i%patterns.length].id
+    });
+
+    scheduleData[id] = {};
+  }
+
+  document.getElementById('detailDate').value = document.getElementById('cfgStart').value;
 }
+
 async function init(){
-  const raw=localStorage.getItem('coordinator_roster_2026_shared_v2');
-  if(raw){try{applyState(JSON.parse(raw))}catch(e){console.warn(e);initDefaults();rebuildDaysOnly();refreshAll()}}
-  else{initDefaults();rebuildDaysOnly();refreshAll()}
+  const raw = localStorage.getItem(LOCAL_KEY);
+
+  if(raw){
+    try{
+      applyState(JSON.parse(raw));
+    }catch(err){
+      console.warn(err);
+      initDefaults();
+      rebuildDaysOnly();
+      refreshAll();
+    }
+  }else{
+    initDefaults();
+    rebuildDaysOnly();
+    refreshAll();
+  }
+
   await loadOnline();
   connectRealtime();
-  if(!detailDate.value&&days.length)detailDate.value=days[0];
+
+  if(!document.getElementById('detailDate').value && days.length){
+    document.getElementById('detailDate').value = days[0];
+  }
+
   refreshAll();
 }
+
 init();
 </script>
 </body>
