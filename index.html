@@ -1314,7 +1314,7 @@ function renderShiftLegendInline(){
   shifts.forEach(s=>{
     html += `<div class="legend-item">
       <span class="legend-dot" style="background:${s.color}"></span>
-      <b>${esc(s.name)}</b>
+      <b>${esc(s.time)}${s.overnight ? '+1' : ''}</b>
     </div>`;
   });
   box.innerHTML = html;
@@ -1524,7 +1524,7 @@ function openShiftPopup(empId,ds){
       <input type="checkbox" value="${s.id}" ${checked?'checked':''}>
       <span class="dot" style="background:${s.color}"></span>
       <span style="font-weight:800;color:${s.color};">${esc(s.name)}</span>
-      <span class="time">${esc(s.time)}${s.overnight?' next day':''}</span>
+      <span class="time">${esc(s.time)}${s.overnight?' +1':''}</span>
     </div>`;
   });
   document.getElementById('shiftCheckList').innerHTML = html;
@@ -1935,7 +1935,7 @@ function renderDailyView(){
         <span class="shift-dot" style="background:${s.color};width:10px;height:10px;"></span>
         ${esc(s.name)}
       </td>
-      <td>${esc(s.time)}${s.overnight?' next day':''}</td>
+      <td>${esc(s.time)}${s.overnight?' +1':''}</td>
       <td>${staff.length ? esc(staff.join(', ')) : '<span class="empty-cell">No coverage</span>'}</td>
       <td class="${staff.length?'emp-cell':'empty-cell'}">${staff.length}</td>
     </tr>`;
