@@ -197,6 +197,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   max-height:690px;
   border:1px solid var(--border);
   border-radius:8px;
+  position:relative;
 }
 .copy-tip{
   font-size:11px;
@@ -209,6 +210,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   border-collapse:collapse;
   font-size:11px;
   min-width:100%;
+  table-layout:fixed;
 }
 .schedule-table th,.schedule-table td{
   border:1px solid var(--border);
@@ -220,14 +222,15 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   background:#f8fafc;
   position:sticky;
   top:0;
-  z-index:6;
+  z-index:20;
 }
 .emp-col{
   position:sticky;
   left:0;
   background:#f8fafc!important;
-  z-index:7;
+  z-index:21;
   min-width:150px;
+  width:150px;
   text-align:left!important;
   font-weight:800;
 }
@@ -235,15 +238,17 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   position:sticky;
   left:150px;
   background:#f8fafc!important;
-  z-index:7;
+  z-index:21;
   min-width:82px;
+  width:82px;
 }
 .pattern-col{
   position:sticky;
   left:232px;
   background:#f8fafc!important;
-  z-index:7;
+  z-index:21;
   min-width:96px;
+  width:96px;
 }
 .day-col{min-width:88px;font-size:10px}
 .schedule-cell{
@@ -260,24 +265,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   outline:2px solid var(--primary);
   outline-offset:-2px;
   box-shadow:inset 0 0 0 2px rgba(22,119,255,.22);
-}
-.schedule-cell.manual-cell::after{
-  content:"MAN";
-  position:absolute;
-  right:3px;
-  bottom:1px;
-  font-size:8px;
-  color:#1677ff;
-  font-weight:900;
-}
-.schedule-cell.auto-cell::after{
-  content:"AUTO";
-  position:absolute;
-  right:3px;
-  bottom:1px;
-  font-size:8px;
-  color:#9ca3af;
-  font-weight:800;
 }
 .off-label,.leave-label,.holiday-label,.ot-label{
   display:inline-block;
@@ -451,7 +438,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   display:flex;
   gap:8px;
   flex-wrap:wrap;
-  margin:4px 0 12px;
+  margin:0;
 }
 .legend-item{
   display:flex;
@@ -482,9 +469,58 @@ input[type="color"]{padding:1px;width:34px;height:28px}
 .slot-table th{background:#f8fafc}
 .empty-cell{color:#9ca3af;font-style:italic}
 .emp-cell{font-weight:800;color:var(--primary)}
+
+.col-resize-th{
+  position:relative;
+}
+.col-resizer{
+  position:absolute;
+  top:0;
+  right:-3px;
+  width:8px;
+  height:100%;
+  cursor:col-resize;
+  z-index:50;
+  background:transparent;
+}
+.col-resizer:hover{
+  background:rgba(22,119,255,.18);
+}
+.manpower-tools{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.manpower-header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  flex-wrap:wrap;
+}
+.manpower-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.manpower-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.manpower-tip{
+  font-size:11px;
+  color:var(--muted);
+  margin-left:4px;
+}
+
 @media print{
   body{background:#fff;padding:0}
-  .app-header,.btn,.note,.add-line,.day-picker,.popup-overlay{display:none!important}
+  .app-header,.btn,.note,.add-line,.day-picker,.popup-overlay,.col-resizer{display:none!important}
   .card{box-shadow:none;border:1px solid #ddd}
   @page{size:A3 landscape;margin:8mm}
 }
@@ -499,7 +535,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
         Shared Manpower Arrangement · Shift Pattern Manager · Leave Tracking · 24-Hour Coverage
       </div>
     </div>
-
     <div class="header-actions">
       <span id="syncStatus" class="status syncing">Connecting</span>
       <button class="btn btn-outline" onclick="saveOnlineNow()">☁ Save Online</button>
@@ -509,7 +544,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <button class="btn btn-outline" onclick="exportBackupJSON()">⬇ Export Backup JSON</button>
       <button class="btn btn-outline" onclick="document.getElementById('backupFileInput').click()">⬆ Import Backup JSON</button>
       <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none" onchange="importBackupJSON(event)">
-      <button class="btn btn-outline" onclick="exportCSV()">📥 Export CSV</button>
       <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
     </div>
   </div>
@@ -581,16 +615,21 @@ input[type="color"]{padding:1px;width:34px;height:28px}
 
   <div class="card">
     <div class="card-header">
-      <h2>📋 Manpower Arrangement</h2>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:11px;color:var(--muted);">
-          Click to select. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit. Press Delete to remove selected data.
-        </span>
-        <button class="btn btn-sm btn-ghost" onclick="copySelectedCellWithFeedback()">Copy Selected Cell</button>
-        <button class="btn btn-sm btn-primary" onclick="pasteToSelectedCellsWithFeedback()">Paste to Selected Cells</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteSelectedArrangementsWithConfirm()">Delete Selected</button>
-        <button class="btn btn-sm btn-ghost" onclick="clearSelectedCells()">Clear Selection</button>
-        <button class="btn btn-sm btn-ghost" onclick="clearAllSchedule()">Clear All</button>
+      <div class="manpower-header-row">
+        <div class="manpower-left">
+          <h2>📋 Manpower Arrangement</h2>
+          <div id="shiftLegendInline" class="legend"></div>
+        </div>
+        <div class="manpower-right">
+          <span class="manpower-tip">
+            Click to select. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit. Press Delete to remove selected data.
+          </span>
+          <button class="btn btn-sm btn-ghost" onclick="copySelectedCellWithFeedback()">Copy Selected Cell</button>
+          <button class="btn btn-sm btn-primary" onclick="pasteToSelectedCellsWithFeedback()">Paste to Selected Cells</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSelectedArrangementsWithConfirm()">Delete Selected</button>
+          <button class="btn btn-sm btn-ghost" onclick="clearSelectedCells()">Clear Selection</button>
+          <button class="btn btn-sm btn-ghost" onclick="clearAllSchedule()">Clear All</button>
+        </div>
       </div>
     </div>
     <div class="card-body" style="padding:8px;">
@@ -620,7 +659,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   <div class="popup-box" onclick="event.stopPropagation()">
     <h3 id="popupTitle">Edit Arrangement</h3>
     <div class="popup-sub" id="popupSub"></div>
-
     <div class="leave-box">
       <div class="leave-box-title">Leave</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -636,10 +674,8 @@ input[type="color"]{padding:1px;width:34px;height:28px}
         </select>
       </div>
     </div>
-
     <div class="shift-check-list" id="shiftCheckList"></div>
     <div id="restDayOtBox" style="margin-bottom:12px;"></div>
-
     <div class="popup-actions">
       <button class="btn btn-sm btn-ghost" id="popupClearBtn">Clear</button>
       <button class="btn btn-sm btn-ghost" onclick="closeShiftPopup()">Cancel</button>
@@ -648,22 +684,22 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   </div>
 </div>
 
+<input type="file" id="localLoadInput" accept=".json,application/json" style="display:none" onchange="handleLocalFileLoad(event)">
+
 <script>
 const FIREBASE_DB_URL = 'https://coordinator-roster-2026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FIREBASE_PATH = 'sharedRoster2026';
 const LOCAL_KEY = 'coordinator_roster_2026_shared_v3';
-
+const LOCAL_DIR_HANDLE_KEY = 'coordinator_roster_2026_dir_handle_supported';
 const CLIENT_ID = 'client_' + Math.random().toString(36).slice(2) + Date.now();
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const PATTERN_COLORS = ['#1677ff','#52c41a','#fa8c16','#722ed1','#13c2c2','#eb2f96','#2f54eb','#d46b08','#389e0d','#c41d7f'];
-
 const HK_HOLIDAYS_2026 = new Set([
   '2026-01-01','2026-02-17','2026-02-18','2026-02-19',
   '2026-04-03','2026-04-04','2026-04-05','2026-04-06',
   '2026-05-01','2026-05-24','2026-06-19','2026-07-01',
   '2026-09-27','2026-10-01','2026-10-18','2026-12-25','2026-12-26'
 ]);
-
 const CN_HOLIDAYS_2026 = new Set([
   '2026-01-01','2026-01-02','2026-01-03',
   '2026-02-17','2026-02-18','2026-02-19','2026-02-20','2026-02-21','2026-02-22','2026-02-23',
@@ -673,7 +709,6 @@ const CN_HOLIDAYS_2026 = new Set([
   '2026-09-25','2026-09-26','2026-09-27',
   '2026-10-01','2026-10-02','2026-10-03','2026-10-04','2026-10-05','2026-10-06','2026-10-07'
 ]);
-
 const HOLIDAY_NAMES = {
   '2026-01-01':"New Year's Day",
   '2026-01-02':'New Year Holiday',
@@ -720,21 +755,24 @@ let shifts = [];
 let employees = [];
 let days = [];
 let scheduleData = {};
-
 let selectedCells = new Set();
 let lastSelectedCell = null;
 let copiedCellData = null;
-
 let currentEditEmpId = null;
 let currentEditDate = null;
-
 let patternIdCounter = 0;
 let shiftIdCounter = 0;
 let employeeIdCounter = 0;
-
 let saveTimer = null;
 let realtimeSource = null;
 let applyingRemote = false;
+let localDirectoryHandle = null;
+
+let pinnedWidths = {
+  employee:150,
+  region:82,
+  pattern:96
+};
 
 function esc(s){
   return String(s ?? '').replace(/[&<>"']/g,m=>({
@@ -745,32 +783,31 @@ function esc(s){
     "'":'&#39;'
   }[m]));
 }
-
 function fmtDate(d){
   const x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
   return x.toISOString().slice(0,10);
 }
-
 function parseDate(s){
   return new Date(s + 'T00:00:00');
 }
-
 function dow(ds){
   return parseDate(ds).getDay();
 }
-
+function compactDateStr(ds){
+  return String(ds || '').replaceAll('-','');
+}
+function todayCompact(){
+  return compactDateStr(fmtDate(new Date()));
+}
 function newPatternId(){
   return 'p' + (++patternIdCounter);
 }
-
 function newShiftId(){
   return 's' + (++shiftIdCounter);
 }
-
 function newEmployeeId(){
   return 'e' + (++employeeIdCounter);
 }
-
 function hexToRgba(hex,a){
   if(!hex || !hex.startsWith('#')) return `rgba(0,0,0,${a})`;
   const r = parseInt(hex.slice(1,3),16);
@@ -778,13 +815,11 @@ function hexToRgba(hex,a){
   const b = parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${a})`;
 }
-
 function setSyncStatus(type,text){
   const el = document.getElementById('syncStatus');
   el.className = 'status ' + type;
   el.textContent = text;
 }
-
 function getHolidayInfo(ds,region){
   const isHK = region === 'HK' && HK_HOLIDAYS_2026.has(ds);
   const isCN = region === 'CN' && CN_HOLIDAYS_2026.has(ds);
@@ -795,7 +830,6 @@ function getHolidayInfo(ds,region){
     name: HOLIDAY_NAMES[ds] || 'Public Holiday'
   };
 }
-
 function getAnyHolidayInfo(ds){
   const hk = HK_HOLIDAYS_2026.has(ds);
   const cn = CN_HOLIDAYS_2026.has(ds);
@@ -805,49 +839,38 @@ function getAnyHolidayInfo(ds){
     name: HOLIDAY_NAMES[ds] || 'Public Holiday'
   };
 }
-
 function findPattern(id){
   return patterns.find(p=>p.id===id);
 }
-
 function findShift(id){
   return shifts.find(s=>s.id===id);
 }
-
 function findEmployee(id){
   return employees.find(e=>e.id===id);
 }
-
 function getPatternName(id){
   const p = findPattern(id);
   return p ? p.name : 'Unknown';
 }
-
 function getPatternColor(id){
   const p = findPattern(id);
   return p ? p.color : '#999';
 }
-
 function isPatternRestDay(emp,ds){
   const p = findPattern(emp.patternId);
   return p ? p.restDays.includes(dow(ds)) : false;
 }
-
 function parseTimeRange(range){
   const clean = String(range || '').replace(/[–—]/g,'-').trim();
   const m = clean.match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
   if(!m) return null;
-
   const sh = parseInt(m[1],10);
   const sm = parseInt(m[2],10);
   const eh = parseInt(m[3],10);
   const em = parseInt(m[4],10);
-
   if(sh > 23 || eh > 23 || sm > 59 || em > 59) return null;
-
   const startMin = sh * 60 + sm;
   const endMin = eh * 60 + em;
-
   return {
     time:`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}-${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`,
     startMin,
@@ -855,11 +878,9 @@ function parseTimeRange(range){
     overnight:endMin <= startMin
   };
 }
-
 function getEntry(empId,ds){
   if(!scheduleData[empId]) scheduleData[empId] = {};
   const e = scheduleData[empId][ds];
-
   if(!e){
     return {
       shifts:[],
@@ -868,7 +889,6 @@ function getEntry(empId,ds){
       leave:null
     };
   }
-
   return {
     shifts:Array.isArray(e.shifts) ? e.shifts : [],
     overtime:!!e.overtime,
@@ -876,24 +896,20 @@ function getEntry(empId,ds){
     leave:e.leave || null
   };
 }
-
 function setEntry(empId,ds,entry){
   if(!scheduleData[empId]) scheduleData[empId] = {};
-
   const normalized = {
     shifts:Array.isArray(entry.shifts) ? [...entry.shifts] : [],
     overtime:!!entry.overtime,
     manual:!!entry.manual,
     leave:entry.leave || null
   };
-
   if(!normalized.shifts.length && !normalized.overtime && !normalized.manual && !normalized.leave){
     delete scheduleData[empId][ds];
   }else{
     scheduleData[empId][ds] = normalized;
   }
 }
-
 function clearEntry(empId,ds){
   if(scheduleData[empId]){
     delete scheduleData[empId][ds];
@@ -909,6 +925,7 @@ function getState(){
     scheduleData,
     cfgStart:document.getElementById('cfgStart').value,
     cfgEnd:document.getElementById('cfgEnd').value,
+    pinnedWidths,
     counters:{
       patternIdCounter,
       shiftIdCounter,
@@ -916,36 +933,34 @@ function getState(){
     }
   };
 }
-
 function applyState(state){
   if(!state) return;
-
   applyingRemote = true;
-
   patterns = Array.isArray(state.patterns) ? state.patterns : patterns;
   shifts = Array.isArray(state.shifts) ? state.shifts : shifts;
   employees = Array.isArray(state.employees) ? state.employees : employees;
   scheduleData = state.scheduleData || {};
-
   if(state.cfgStart) document.getElementById('cfgStart').value = state.cfgStart;
   if(state.cfgEnd) document.getElementById('cfgEnd').value = state.cfgEnd;
-
+  if(state.pinnedWidths){
+    pinnedWidths = {
+      employee:Math.max(100, parseInt(state.pinnedWidths.employee || 150,10)),
+      region:Math.max(70, parseInt(state.pinnedWidths.region || 82,10)),
+      pattern:Math.max(80, parseInt(state.pinnedWidths.pattern || 96,10))
+    };
+  }
   patternIdCounter = state.counters?.patternIdCounter ?? Math.max(0,...patterns.map(p=>parseInt(String(p.id).slice(1),10)||0));
   shiftIdCounter = state.counters?.shiftIdCounter ?? Math.max(0,...shifts.map(s=>parseInt(String(s.id).slice(1),10)||0));
   employeeIdCounter = state.counters?.employeeIdCounter ?? Math.max(0,...employees.map(e=>parseInt(String(e.id).slice(1),10)||0));
-
   employees.forEach(e=>{
     if(!scheduleData[e.id]) scheduleData[e.id] = {};
     if(!e.region) e.region = 'HK';
   });
-
   rebuildDaysOnly();
   refreshAll();
-  saveToLocal(false);
-
+  saveToLocalCacheOnly();
   applyingRemote = false;
 }
-
 function exportBackupJSON(){
   const backup = {
     exportedAt:new Date().toISOString(),
@@ -953,45 +968,34 @@ function exportBackupJSON(){
     version:'backup_v1',
     state:getState()
   };
-
   const blob = new Blob(
     [JSON.stringify(backup,null,2)],
     {type:'application/json;charset=utf-8;'}
   );
-
   const a = document.createElement('a');
   const date = fmtDate(new Date());
-
   a.href = URL.createObjectURL(blob);
   a.download = `coordinator_roster_backup_${date}.json`;
   a.click();
-
   URL.revokeObjectURL(a.href);
 }
-
 function importBackupJSON(event){
   const file = event.target.files && event.target.files[0];
   if(!file) return;
-
   const reader = new FileReader();
-
   reader.onload = function(){
     try{
       const data = JSON.parse(reader.result);
       const state = data.state || data;
-
       if(!state.patterns || !state.shifts || !state.employees || !state.scheduleData){
         alert('Invalid backup file. Please select a valid Coordinator Roster backup JSON file.');
         return;
       }
-
       if(!confirm('Import this backup and replace the current roster data?')){
         return;
       }
-
       applyState(state);
       markDirty();
-
       alert('Backup imported successfully.');
     }catch(err){
       console.error(err);
@@ -1000,89 +1004,69 @@ function importBackupJSON(event){
       event.target.value = '';
     }
   };
-
   reader.readAsText(file);
 }
 
 /* ---------- Firebase sharing ---------- */
 async function saveOnlineNow(){
   if(applyingRemote) return;
-
   try{
     setSyncStatus('syncing','Saving');
-
     const payload = {
       clientId:CLIENT_ID,
       updatedAt:new Date().toISOString(),
       state:getState()
     };
-
     const res = await fetch(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`,{
       method:'PUT',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload)
     });
-
     if(!res.ok) throw new Error('Firebase write failed');
-
     setSyncStatus('online','Online');
   }catch(err){
     console.error(err);
     setSyncStatus('offline','Offline');
   }
 }
-
 function scheduleOnlineSave(){
   if(applyingRemote) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveOnlineNow,600);
 }
-
 async function loadOnline(){
   try{
     setSyncStatus('syncing','Loading');
-
     const res = await fetch(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
     if(!res.ok) throw new Error('Firebase read failed');
-
     const data = await res.json();
-
     if(data && data.state){
       applyState(data.state);
     }
-
     setSyncStatus('online','Online');
   }catch(err){
     console.error(err);
     setSyncStatus('offline','Offline');
   }
 }
-
 function connectRealtime(){
   try{
     if(realtimeSource) realtimeSource.close();
-
     realtimeSource = new EventSource(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
-
     realtimeSource.onopen = () => setSyncStatus('online','Online');
-
     realtimeSource.onerror = () => setSyncStatus('offline','Offline');
-
     const handle = e => {
       try{
         const msg = JSON.parse(e.data);
         const payload = msg.data;
-
         if(!payload || !payload.state) return;
         if(payload.clientId === CLIENT_ID) return;
-
         applyState(payload.state);
         setSyncStatus('online','Online');
       }catch(err){
         console.warn(err);
       }
     };
-
     realtimeSource.addEventListener('put',handle);
     realtimeSource.addEventListener('patch',handle);
   }catch(err){
@@ -1091,119 +1075,181 @@ function connectRealtime(){
   }
 }
 
-/* ---------- Save helpers ---------- */
-function markDirty(){
-  refreshAll();
-  saveToLocal(false);
-  scheduleOnlineSave();
-}
-
-function saveToLocal(showAlert=true){
+/* ---------- Local save/load ---------- */
+function saveToLocalCacheOnly(){
   localStorage.setItem(LOCAL_KEY,JSON.stringify(getState()));
-  if(showAlert) alert('Saved locally.');
 }
+function suggestLocalFileName(){
+  return `${todayCompact()}.json`;
+}
+async function saveToLocal(showAlert=true){
+  saveToLocalCacheOnly();
 
-function loadFromLocal(){
-  const raw = localStorage.getItem(LOCAL_KEY);
-  if(!raw){
-    alert('No local data found.');
-    return;
+  const payload = {
+    savedAt:new Date().toISOString(),
+    app:'Coordinator Roster 2026',
+    version:'local_save_v1',
+    state:getState()
+  };
+
+  if('showDirectoryPicker' in window){
+    try{
+      const dirHandle = await window.showDirectoryPicker({
+        mode:'readwrite',
+        startIn:'documents'
+      });
+      localDirectoryHandle = dirHandle;
+      localStorage.setItem(LOCAL_DIR_HANDLE_KEY,'1');
+
+      const fileHandle = await dirHandle.getFileHandle(suggestLocalFileName(), { create:true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(JSON.stringify(payload,null,2));
+      await writable.close();
+
+      if(showAlert){
+        alert('Saved locally successfully.\nFile name: ' + suggestLocalFileName() + '\nPlease ensure you selected folder:\nC:\\Users\\kaitlynhuang\\Desktop\\Job Folder\\Coordinator Roster 2026');
+      }
+      return;
+    }catch(err){
+      console.warn('Directory save cancelled or failed, fallback to download.', err);
+    }
   }
 
-  applyState(JSON.parse(raw));
+  try{
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = suggestLocalFileName();
+    a.click();
+    URL.revokeObjectURL(a.href);
+
+    if(showAlert){
+      alert('Your browser does not support direct folder writing or permission was cancelled.\nThe file has been downloaded as ' + suggestLocalFileName() + '. Please move it to:\nC:\\Users\\kaitlynhuang\\Desktop\\Job Folder\\Coordinator Roster 2026');
+    }
+  }catch(err){
+    console.error(err);
+    alert('Failed to save local file.');
+  }
+}
+async function loadFromLocal(){
+  if('showOpenFilePicker' in window){
+    try{
+      const handles = await window.showOpenFilePicker({
+        multiple:false,
+        types:[{
+          description:'JSON Files',
+          accept:{'application/json':['.json']}
+        }]
+      });
+      if(!handles || !handles.length) return;
+      const file = await handles[0].getFile();
+      const text = await file.text();
+      loadStateFromLocalText(text);
+      return;
+    }catch(err){
+      console.warn('Open local file cancelled or failed, fallback to input.', err);
+    }
+  }
+  document.getElementById('localLoadInput').click();
+}
+function handleLocalFileLoad(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      loadStateFromLocalText(reader.result);
+    }catch(err){
+      console.error(err);
+      alert('Failed to load local file.');
+    }finally{
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+function loadStateFromLocalText(text){
+  const data = JSON.parse(text);
+  const state = data.state || data;
+  if(!state.patterns || !state.shifts || !state.employees || !state.scheduleData){
+    alert('Invalid local save file.');
+    return;
+  }
+  applyState(state);
+  markDirty();
+  alert('Local file loaded successfully.');
 }
 
 /* ---------- Pattern Manager ---------- */
 function addPattern(){
   const id = newPatternId();
-
   patterns.push({
     id,
     name:'Custom Pattern',
     restDays:[0,6],
     color:PATTERN_COLORS[patterns.length % PATTERN_COLORS.length]
   });
-
   markDirty();
 }
-
 function removePattern(id){
   if(patterns.length <= 1){
     alert('At least one pattern is required.');
     return;
   }
-
   if(!confirm('Delete this shift pattern?')) return;
-
   patterns = patterns.filter(p=>p.id!==id);
-
   employees.forEach(e=>{
     if(e.patternId === id){
       e.patternId = patterns[0].id;
     }
   });
-
   markDirty();
 }
-
 function updatePattern(id,key,value){
   const p = findPattern(id);
   if(!p) return;
-
   if(key === 'name') p.name = value.trim() || p.name;
   if(key === 'color') p.color = value;
-
   markDirty();
 }
-
 function togglePatternRestDay(id,d){
   const p = findPattern(id);
   if(!p) return;
-
   if(p.restDays.includes(d)){
     p.restDays = p.restDays.filter(x=>x!==d);
   }else{
     p.restDays.push(d);
   }
-
   p.restDays.sort((a,b)=>a-b);
   markDirty();
 }
-
 function renderPatternEditor(){
   const box = document.getElementById('patternEditor');
   let html = '';
-
   patterns.forEach(p=>{
     const rest = p.restDays.length ? p.restDays.map(d=>DAY_NAMES[d]).join(', ') : 'None';
-
     html += `<div class="pattern-row">
       <div class="pcolor" style="background:${p.color}"></div>
       <input value="${esc(p.name)}" onchange="updatePattern('${p.id}','name',this.value)" style="width:150px;font-weight:700;">
       <input type="color" value="${p.color}" onchange="updatePattern('${p.id}','color',this.value)">
       <div class="day-checks">`;
-
     for(let d=0; d<7; d++){
       const restDay = p.restDays.includes(d);
-
       html += `<div class="day-check ${restDay?'rest':'work'}" onclick="togglePatternRestDay('${p.id}',${d})">
         <div class="dbox">${DAY_NAMES[d].slice(0,2)}</div>
       </div>`;
     }
-
     html += `</div>
       <span style="font-size:11px;color:var(--red);font-weight:800;">Rest: ${rest}</span>
       <span class="del" onclick="removePattern('${p.id}')">&times;</span>
     </div>`;
   });
-
   box.innerHTML = html;
 }
 
 /* ---------- Shift Manager ---------- */
 function addShift(){
   const id = newShiftId();
-
   shifts.push({
     id,
     name:'New Shift',
@@ -1213,40 +1259,30 @@ function addShift(){
     overnight:false,
     color:PATTERN_COLORS[shifts.length % PATTERN_COLORS.length]
   });
-
   markDirty();
 }
-
 function updateShift(id,key,value){
   const s = findShift(id);
   if(!s) return;
-
   if(key === 'name') s.name = value.trim() || s.name;
   if(key === 'color') s.color = value;
-
   if(key === 'time'){
     const parsed = parseTimeRange(value);
-
     if(!parsed){
       alert('Invalid time range. Please use HH:MM-HH:MM.');
       renderShiftEditor();
       return;
     }
-
     s.time = parsed.time;
     s.startMin = parsed.startMin;
     s.endMin = parsed.endMin;
     s.overnight = parsed.overnight;
   }
-
   markDirty();
 }
-
 function removeShift(id){
   if(!confirm('Delete this shift? Existing assignments using this shift will be removed.')) return;
-
   shifts = shifts.filter(s=>s.id!==id);
-
   Object.keys(scheduleData).forEach(empId=>{
     Object.keys(scheduleData[empId] || {}).forEach(ds=>{
       const e = getEntry(empId,ds);
@@ -1254,14 +1290,11 @@ function removeShift(id){
       setEntry(empId,ds,e);
     });
   });
-
   markDirty();
 }
-
 function renderShiftEditor(){
   const box = document.getElementById('shiftEditor');
   let html = '';
-
   shifts.forEach(s=>{
     html += `<div class="shift-row">
       <div class="shift-color-dot" style="background:${s.color}"></div>
@@ -1272,7 +1305,18 @@ function renderShiftEditor(){
       <span class="del" onclick="removeShift('${s.id}')">&times;</span>
     </div>`;
   });
-
+  box.innerHTML = html;
+}
+function renderShiftLegendInline(){
+  const box = document.getElementById('shiftLegendInline');
+  if(!box) return;
+  let html = '';
+  shifts.forEach(s=>{
+    html += `<div class="legend-item">
+      <span class="legend-dot" style="background:${s.color}"></span>
+      <b>${esc(s.name)}</b>
+    </div>`;
+  });
   box.innerHTML = html;
 }
 
@@ -1280,98 +1324,71 @@ function renderShiftEditor(){
 function addEmployee(name){
   const input = document.getElementById('newEmpName');
   const n = (name || input.value).trim();
-
   if(!n) return;
-
   if(employees.some(e=>e.name===n)){
     alert('Employee name already exists.');
     return;
   }
-
   const id = newEmployeeId();
-
   employees.push({
     id,
     name:n,
     region:'HK',
     patternId:patterns[0]?.id || ''
   });
-
   scheduleData[id] = {};
   input.value = '';
-
   markDirty();
 }
-
 function addBatchEmployees(){
   const n = parseInt(prompt('How many employees would you like to add?','14'),10);
   if(!n || n <= 0) return;
-
   for(let i=0; i<n; i++){
     const id = newEmployeeId();
-
     employees.push({
       id,
       name:'Staff ' + (employees.length + 1),
       region:'HK',
       patternId:patterns[employees.length % patterns.length]?.id || ''
     });
-
     scheduleData[id] = {};
   }
-
   markDirty();
 }
-
 function updateEmployee(id,key,value){
   const e = findEmployee(id);
   if(!e) return;
-
   if(key === 'name'){
     const v = value.trim();
-
     if(!v) return;
-
     if(employees.some(x=>x.id!==id && x.name===v)){
       alert('Employee name already exists.');
       renderEmployees();
       return;
     }
-
     e.name = v;
   }
-
   if(key === 'region') e.region = value;
   if(key === 'patternId') e.patternId = value;
-
   markDirty();
 }
-
 function removeEmployee(id){
   const e = findEmployee(id);
   if(!e) return;
-
   if(!confirm('Delete ' + e.name + '?')) return;
-
   employees = employees.filter(x=>x.id!==id);
   delete scheduleData[id];
-
   selectedCells = new Set([...selectedCells].filter(k=>!k.startsWith(id+'|')));
-
   markDirty();
 }
-
 function renderEmployees(){
   const box = document.getElementById('employeeGrid');
   let html = '';
-
   employees.forEach((e,i)=>{
     const pc = getPatternColor(e.patternId);
-
     const patternOptions = patterns.map(p =>
       `<option value="${p.id}" ${e.patternId===p.id?'selected':''}>${esc(p.name)}</option>`
     ).join('');
-
     html += `<div class="employee-card">
       <div class="idx">${i+1}</div>
       <input class="emp-name" value="${esc(e.name)}" onchange="updateEmployee('${e.id}','name',this.value)" onfocus="this.select()">
@@ -1386,7 +1403,6 @@ function renderEmployees(){
       <span class="del" onclick="removeEmployee('${e.id}')">&times;</span>
     </div>`;
   });
-
   box.innerHTML = html;
   document.getElementById('empCount').textContent = employees.length;
 }
@@ -1395,22 +1411,16 @@ function renderEmployees(){
 function rebuildDaysOnly(){
   const s = document.getElementById('cfgStart').value;
   const e = document.getElementById('cfgEnd').value;
-
   days = [];
-
   if(!s || !e) return;
-
   for(let d=parseDate(s); d<=parseDate(e); d.setDate(d.getDate()+1)){
     days.push(fmtDate(d));
   }
-
   document.getElementById('dayCount').textContent = days.length;
-
   if(!document.getElementById('detailDate').value && days.length){
     document.getElementById('detailDate').value = days[0];
   }
 }
-
 function rebuildDaysAndSave(){
   rebuildDaysOnly();
   markDirty();
@@ -1420,127 +1430,96 @@ function rebuildDaysAndSave(){
 function cellKey(empId,ds){
   return empId + '|' + ds;
 }
-
 function handleCellClick(e,empId,ds){
   const key = cellKey(empId,ds);
-
   if(e.shiftKey && lastSelectedCell){
     selectCellRange(lastSelectedCell.empId,lastSelectedCell.dateStr,empId,ds);
   }else{
     if(!e.ctrlKey && !e.metaKey) selectedCells.clear();
-
     if(selectedCells.has(key)){
       selectedCells.delete(key);
     }else{
       selectedCells.add(key);
     }
-
     lastSelectedCell = {
       empId,
       dateStr:ds
     };
   }
-
   renderSelection();
 }
-
 function selectCellRange(fromEmpId,fromDate,toEmpId,toDate){
   const fromEmpIndex = employees.findIndex(e=>e.id===fromEmpId);
   const toEmpIndex = employees.findIndex(e=>e.id===toEmpId);
   const fromDateIndex = days.indexOf(fromDate);
   const toDateIndex = days.indexOf(toDate);
-
   if(fromEmpIndex === -1 || toEmpIndex === -1 || fromDateIndex === -1 || toDateIndex === -1){
     return;
   }
-
   const empStart = Math.min(fromEmpIndex,toEmpIndex);
   const empEnd = Math.max(fromEmpIndex,toEmpIndex);
   const dateStart = Math.min(fromDateIndex,toDateIndex);
   const dateEnd = Math.max(fromDateIndex,toDateIndex);
-
   selectedCells.clear();
-
   for(let ei=empStart; ei<=empEnd; ei++){
     const emp = employees[ei];
-
     for(let di=dateStart; di<=dateEnd; di++){
       selectedCells.add(cellKey(emp.id,days[di]));
     }
   }
 }
-
 function clearSelectedCells(){
   selectedCells.clear();
   lastSelectedCell = null;
   renderSelection();
 }
-
 function renderSelection(){
   document.querySelectorAll('.schedule-cell').forEach(td=>{
     td.classList.toggle('selected',selectedCells.has(td.dataset.key));
   });
 }
-
 function deleteSelectedArrangements(){
   if(!selectedCells.size) return false;
-
   selectedCells.forEach(k=>{
     const [empId,ds] = k.split('|');
     clearEntry(empId,ds);
   });
-
   markDirty();
   return true;
 }
-
 function deleteSelectedArrangementsWithConfirm(){
   if(!selectedCells.size){
     alert('Please select one or more cells first.');
     return;
   }
-
   if(!confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)){
     return;
   }
-
   deleteSelectedArrangements();
 }
-
 function openShiftPopup(empId,ds){
   const emp = findEmployee(empId);
   if(!emp) return;
-
   currentEditEmpId = empId;
   currentEditDate = ds;
-
   const entry = getEntry(empId,ds);
   const rest = isPatternRestDay(emp,ds);
   const holiday = getHolidayInfo(ds,emp.region);
-
   document.getElementById('popupTitle').textContent = `${emp.name} · ${ds} ${DAY_NAMES[dow(ds)]}`;
-
-  let sub = `Pattern: <b style="color:${getPatternColor(emp.patternId)}">${esc(getPatternName(emp.patternId))}</b> `;
-  sub += `· Region: <b>${emp.region==='HK'?'Hong Kong':'Mainland China'}</b>`;
-
+  let sub = `Pattern: <b style="color:${getPatternColor(emp.patternId)}">${esc(getPatternName(emp.patternId))}</b>`;
+  sub += ` · Region: <b>${emp.region==='HK'?'Hong Kong':'Mainland China'}</b>`;
   if(rest){
     sub += `<br><span style="color:#b91c1c;font-weight:800;">This is a pattern rest day.</span>`;
   }
-
   if(holiday){
     sub += `<br><span style="color:#d97706;font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}</span>`;
   }
-
   document.getElementById('popupSub').innerHTML = sub;
-
   document.getElementById('leaveType').value = entry.leave?.type || '';
   document.getElementById('leaveDays').value = String(entry.leave?.days || '1');
-
   let html = '';
-
   shifts.forEach(s=>{
     const checked = entry.shifts.includes(s.id);
-
     html += `<div class="shift-option ${checked?'checked':''}" onclick="toggleShiftOption(this)">
       <input type="checkbox" value="${s.id}" ${checked?'checked':''}>
       <span class="dot" style="background:${s.color}"></span>
@@ -1548,58 +1527,43 @@ function openShiftPopup(empId,ds){
       <span class="time">${esc(s.time)}${s.overnight?' next day':''}</span>
     </div>`;
   });
-
   document.getElementById('shiftCheckList').innerHTML = html;
-
   document.getElementById('restDayOtBox').innerHTML = rest
     ? `<label style="display:flex;align-items:center;gap:6px;color:#b91c1c;font-weight:800;">
         <input type="checkbox" id="popupOvertime" ${entry.overtime?'checked':''}>
         Rest Day OT
       </label>`
     : `<input type="checkbox" id="popupOvertime" style="display:none;">`;
-
   document.getElementById('popupClearBtn').onclick = function(){
     document.querySelectorAll('#shiftCheckList .shift-option').forEach(el=>{
       el.classList.remove('checked');
       el.querySelector('input').checked = false;
     });
-
     document.getElementById('leaveType').value = '';
     document.getElementById('leaveDays').value = '1';
-
     const ot = document.getElementById('popupOvertime');
     if(ot) ot.checked = false;
   };
-
   document.getElementById('shiftPopup').style.display = 'flex';
 }
-
 function toggleShiftOption(el){
   const cb = el.querySelector('input');
   cb.checked = !cb.checked;
   el.classList.toggle('checked',cb.checked);
 }
-
 function autoFillForwardWorkBlock(empId,sourceDate,sourceEntry){
   const emp = findEmployee(empId);
   if(!emp) return;
-
   const sourceIndex = days.indexOf(sourceDate);
   if(sourceIndex === -1) return;
-
   if(isPatternRestDay(emp,sourceDate)) return;
   if(sourceEntry.leave) return;
   if(!sourceEntry.shifts || !sourceEntry.shifts.length) return;
-
   for(let i=sourceIndex+1; i<days.length; i++){
     const ds = days[i];
-
     if(isPatternRestDay(emp,ds)) break;
-
     const existing = getEntry(empId,ds);
-
     if(existing.manual) continue;
-
     setEntry(empId,ds,{
       shifts:[...sourceEntry.shifts],
       overtime:false,
@@ -1608,240 +1572,237 @@ function autoFillForwardWorkBlock(empId,sourceDate,sourceEntry){
     });
   }
 }
-
 function saveShiftAssignment(){
   const emp = findEmployee(currentEditEmpId);
   if(!emp) return;
-
   const shiftIds = [...document.querySelectorAll('#shiftCheckList input:checked')].map(cb=>cb.value);
-
   const leaveType = document.getElementById('leaveType').value;
   const leaveDays = parseFloat(document.getElementById('leaveDays').value);
-
   const leave = leaveType ? {
     type:leaveType,
     days:leaveDays,
     hours:leaveDays === 0.5 ? 4 : 9
   } : null;
-
   const rest = isPatternRestDay(emp,currentEditDate);
   const overtime = document.getElementById('popupOvertime')?.checked || false;
-
   if(leave && shiftIds.length){
     if(!confirm('This cell has both leave and shift assignments. Continue?')) return;
   }
-
   if(rest && shiftIds.length && !overtime){
     if(!confirm('This is a rest day. Shifts will not count as coverage unless Rest Day OT is selected. Continue?')) return;
   }
-
   const newEntry = {
     shifts:shiftIds,
     overtime,
     manual:true,
     leave
   };
-
   setEntry(currentEditEmpId,currentEditDate,newEntry);
   autoFillForwardWorkBlock(currentEditEmpId,currentEditDate,newEntry);
-
   closeShiftPopup();
   markDirty();
 }
-
 function closeShiftPopup(e){
   if(e && e.target !== document.getElementById('shiftPopup')) return;
   document.getElementById('shiftPopup').style.display = 'none';
 }
-
 function clearAllSchedule(){
   if(!confirm('Clear all arrangements?')) return;
-
   scheduleData = {};
   employees.forEach(e=>scheduleData[e.id]={});
-
   selectedCells.clear();
   lastSelectedCell = null;
-
   markDirty();
 }
-
+function getPinnedOffsets(){
+  return {
+    empLeft:0,
+    regionLeft:pinnedWidths.employee,
+    patternLeft:pinnedWidths.employee + pinnedWidths.region
+  };
+}
 function renderScheduleTable(){
   const wrap = document.getElementById('scheduleWrap');
-
   if(!employees.length){
     wrap.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Please add employees first.</div>';
     return;
   }
-
   if(!days.length){
     wrap.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Please set the date range first.</div>';
     return;
   }
+
+  const offsets = getPinnedOffsets();
 
   let html = `<div class="copy-tip">
     Click to select a cell. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit.
     Ctrl/⌘ + C / V is supported. Press Delete / Backspace to delete selected arrangement data.
   </div>`;
 
-  html += `<table class="schedule-table"><thead><tr>
-    <th class="emp-col">Employee</th>
-    <th class="region-col">Region</th>
-    <th class="pattern-col">Pattern</th>`;
-
+  html += `<table class="schedule-table">
+    <colgroup>
+      <col style="width:${pinnedWidths.employee}px;">
+      <col style="width:${pinnedWidths.region}px;">
+      <col style="width:${pinnedWidths.pattern}px;">
+    </colgroup>
+    <thead><tr>
+    <th class="emp-col col-resize-th" style="left:${offsets.empLeft}px;width:${pinnedWidths.employee}px;min-width:${pinnedWidths.employee}px;">
+      Employee
+      <span class="col-resizer" onmousedown="startResize(event,'employee')"></span>
+    </th>
+    <th class="region-col col-resize-th" style="left:${offsets.regionLeft}px;width:${pinnedWidths.region}px;min-width:${pinnedWidths.region}px;">
+      Region
+      <span class="col-resizer" onmousedown="startResize(event,'region')"></span>
+    </th>
+    <th class="pattern-col col-resize-th" style="left:${offsets.patternLeft}px;width:${pinnedWidths.pattern}px;min-width:${pinnedWidths.pattern}px;">
+      Pattern
+      <span class="col-resizer" onmousedown="startResize(event,'pattern')"></span>
+    </th>`;
   days.forEach(ds=>{
     const d = parseDate(ds);
     const anyHoliday = getAnyHolidayInfo(ds);
-
     html += `<th class="day-col">
       ${d.getMonth()+1}/${d.getDate()}${anyHoliday?' *':''}<br>
       <span style="color:var(--muted);">${DAY_NAMES[d.getDay()]}</span>
     </th>`;
   });
-
   html += '</tr></thead><tbody>';
 
   employees.forEach(emp=>{
     const pc = getPatternColor(emp.patternId);
-
     html += `<tr>
-      <td class="emp-col">${esc(emp.name)}</td>
-      <td class="region-col">${emp.region==='HK'?'HK':'CN'}</td>
-      <td class="pattern-col">
+      <td class="emp-col" style="left:${offsets.empLeft}px;width:${pinnedWidths.employee}px;min-width:${pinnedWidths.employee}px;">${esc(emp.name)}</td>
+      <td class="region-col" style="left:${offsets.regionLeft}px;width:${pinnedWidths.region}px;min-width:${pinnedWidths.region}px;">${emp.region==='HK'?'HK':'CN'}</td>
+      <td class="pattern-col" style="left:${offsets.patternLeft}px;width:${pinnedWidths.pattern}px;min-width:${pinnedWidths.pattern}px;">
         <span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(emp.patternId))}</span>
       </td>`;
-
     days.forEach(ds=>{
       const entry = getEntry(emp.id,ds);
       const rest = isPatternRestDay(emp,ds);
       const holiday = getHolidayInfo(ds,emp.region);
       const selected = selectedCells.has(cellKey(emp.id,ds));
-
       let content = '';
-
       if(rest) content += `<div class="off-label">OFF</div>`;
       if(holiday) content += `<div class="holiday-label">${holiday.flag} PH</div>`;
       if(entry.leave) content += `<div class="leave-label">${entry.leave.type} ${entry.leave.days}D</div>`;
-
       if(entry.shifts.length){
         content += `<div>`;
-
         entry.shifts.forEach(id=>{
           const s = findShift(id);
           if(s){
             content += `<span class="shift-dot" style="background:${s.color}" title="${esc(s.name)} ${esc(s.time)}"></span>`;
           }
         });
-
         if(entry.overtime) content += `<span class="ot-label">OT</span>`;
-
         content += `</div>`;
       }
-
       if(!entry.shifts.length && !entry.leave){
         content += `<div class="cell-hint">${rest?'Double-click for OT':'Double-click'}</div>`;
       }
-
       const cls = [
         'schedule-cell',
         rest ? 'rest-cell' : 'work-cell',
-        selected ? 'selected' : '',
-        entry.manual ? 'manual-cell' : '',
-        (!entry.manual && entry.shifts.length) ? 'auto-cell' : ''
+        selected ? 'selected' : ''
       ].join(' ');
-
       html += `<td class="${cls}" data-key="${cellKey(emp.id,ds)}"
         onclick="handleCellClick(event,'${emp.id}','${ds}')"
         ondblclick="openShiftPopup('${emp.id}','${ds}')">${content}</td>`;
     });
-
     html += '</tr>';
   });
-
   html += '</tbody></table>';
   wrap.innerHTML = html;
+}
+
+/* ---------- Column resize ---------- */
+function startResize(event,colKey){
+  event.preventDefault();
+  event.stopPropagation();
+  const startX = event.clientX;
+  const startWidth = pinnedWidths[colKey];
+  const minMap = {
+    employee:100,
+    region:70,
+    pattern:80
+  };
+
+  function onMove(e){
+    const delta = e.clientX - startX;
+    pinnedWidths[colKey] = Math.max(minMap[colKey], startWidth + delta);
+    renderScheduleTable();
+  }
+  function onUp(){
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('mouseup',onUp);
+    saveToLocalCacheOnly();
+    scheduleOnlineSave();
+  }
+
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
 }
 
 /* ---------- Copy / paste ---------- */
 function getFirstSelected(){
   const arr = [...selectedCells];
   if(!arr.length) return null;
-
   const [empId,ds] = arr[0].split('|');
-
   return {
     empId,
     dateStr:ds
   };
 }
-
 function copySelectedCell(){
   const first = getFirstSelected();
   if(!first) return false;
-
   const e = getEntry(first.empId,first.dateStr);
   copiedCellData = JSON.parse(JSON.stringify(e));
-
   return true;
 }
-
 function copySelectedCellWithFeedback(){
   if(!selectedCells.size){
     alert('Please select one cell to copy first.');
     return;
   }
-
   if(copySelectedCell()){
     alert('Selected cell copied. You can now select one or more target cells and paste.');
   }
 }
-
 function pasteToSelectedCells(){
   if(!copiedCellData || !selectedCells.size) return false;
-
   selectedCells.forEach(k=>{
     const [empId,ds] = k.split('|');
-
     setEntry(empId,ds,{
       ...JSON.parse(JSON.stringify(copiedCellData)),
       manual:true
     });
   });
-
   markDirty();
-
   return true;
 }
-
 function pasteToSelectedCellsWithFeedback(){
   if(!copiedCellData){
     alert('No copied cell found. Please copy one cell first.');
     return;
   }
-
   if(!selectedCells.size){
     alert('Please select at least one target cell.');
     return;
   }
-
   const count = selectedCells.size;
-
   if(!confirm(`Paste the copied arrangement to ${count} selected cell(s)?`)){
     return;
   }
-
   pasteToSelectedCells();
 }
 
 /* ---------- Coverage ---------- */
 function getShiftBlocks(shift){
   const blocks = new Set();
-
   if(shift.overnight){
     for(let m=shift.startMin; m<1440; m+=30){
       blocks.add(Math.floor(m/30));
     }
-
     for(let m=0; m<shift.endMin; m+=30){
       blocks.add(Math.floor(m/30));
     }
@@ -1850,53 +1811,41 @@ function getShiftBlocks(shift){
       blocks.add(Math.floor(m/30));
     }
   }
-
   return [...blocks].sort((a,b)=>a-b);
 }
-
 function computeDailyCoverage(ds){
   const coverage = new Array(48).fill(0);
   const coveredBy = new Array(48).fill(null).map(()=>[]);
   const shiftAssignments = new Map();
-
   employees.forEach(emp=>{
     const entry = getEntry(emp.id,ds);
-
     if(entry.leave && entry.leave.days >= 1) return;
     if(isPatternRestDay(emp,ds) && !entry.overtime) return;
-
     entry.shifts.forEach(shiftId=>{
       const s = findShift(shiftId);
       if(!s) return;
-
       if(!shiftAssignments.has(shiftId)){
         shiftAssignments.set(shiftId,[]);
       }
-
       shiftAssignments.get(shiftId).push(emp.name);
-
       getShiftBlocks(s).forEach(b=>{
         coverage[b]++;
         coveredBy[b].push(emp.name);
       });
     });
   });
-
   for(let i=0;i<48;i++){
     coveredBy[i] = [...new Set(coveredBy[i])];
   }
-
   return {
     coverage,
     coveredBy,
     shiftAssignments
   };
 }
-
 function findGaps(cov){
   const gaps = [];
   let start = -1;
-
   for(let i=0;i<48;i++){
     if(cov[i] === 0){
       if(start === -1) start = i;
@@ -1905,103 +1854,68 @@ function findGaps(cov){
         start,
         end:i-1
       });
-
       start = -1;
     }
   }
-
   if(start !== -1){
     gaps.push({
       start,
       end:47
     });
   }
-
   return gaps;
 }
-
 function fmtBlockTime(i){
   const h = Math.floor(i/2);
   const m = (i%2)*30;
-
   return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
 }
-
 function renderDailyView(){
   let ds = document.getElementById('detailDate').value;
-
   if(!ds && days.length){
     ds = days[0];
     document.getElementById('detailDate').value = ds;
   }
-
   if(!ds) return;
-
   const {
     coverage,
     shiftAssignments
   } = computeDailyCoverage(ds);
-
   const gaps = findGaps(coverage);
   const anyHoliday = getAnyHolidayInfo(ds);
-
   let tagHtml = `<span class="day-tag" style="background:#e5e7eb;color:#374151;">${DAY_NAMES[dow(ds)]}</span>`;
-
   if(anyHoliday){
     tagHtml += `<span class="day-tag" style="background:#fffbeb;color:#d97706;">${esc(anyHoliday.label)} · ${esc(anyHoliday.name)}</span>`;
   }
-
   document.getElementById('dayTags').innerHTML = tagHtml;
-
   let html = `<div class="coverage-timeline">
     <h3>📶 24-Hour Coverage Heatmap</h3>
     <div class="coverage-bar-wrap">`;
-
   gaps.forEach(g=>{
     const left = g.start / 48 * 100;
     const width = (g.end - g.start + 1) / 48 * 100;
     const mid = left + width / 2;
-
     html += `<div class="gap-marker" style="left:${left}%;width:${width}%"></div>
       <div class="gap-label" style="left:${mid}%">⚠ ${fmtBlockTime(g.start)}-${fmtBlockTime(g.end+1)}</div>`;
   });
-
   html += `<div class="coverage-bar">`;
-
   let prev = coverage[0];
   let seg = 0;
-
   for(let i=1;i<=48;i++){
     if(i === 48 || coverage[i] !== prev){
       const width = (i - seg) / 48 * 100;
       const cls = prev === 0 ? 'cover-0' : prev === 1 ? 'cover-1' : prev === 2 ? 'cover-2' : prev === 3 ? 'cover-3' : 'cover-4p';
-
       html += `<div class="coverage-seg ${cls}" style="width:${width}%"
         title="${prev} staff ${fmtBlockTime(seg)}-${fmtBlockTime(i)}"></div>`;
-
       seg = i;
       prev = i < 48 ? coverage[i] : 0;
     }
   }
-
   html += `</div></div><div class="coverage-labels">`;
-
   for(let h=0; h<=24; h+=2){
     html += `<span>${String(h).padStart(2,'0')}:00</span>`;
   }
-
   html += `</div></div>`;
-
-  html += `<h3>🎨 Shift Color Legend</h3><div class="legend">`;
-
-  shifts.forEach(s=>{
-    html += `<div class="legend-item">
-      <span class="legend-dot" style="background:${s.color}"></span>
-      <b>${esc(s.name)}</b> ${esc(s.time)}
-    </div>`;
-  });
-
-  html += `</div>`;
 
   html += `<h3>🕐 Slot Assignment Detail</h3>
     <table class="slot-table">
@@ -2014,10 +1928,8 @@ function renderDailyView(){
         </tr>
       </thead>
       <tbody>`;
-
   shifts.forEach(s=>{
     const staff = shiftAssignments.get(s.id) || [];
-
     html += `<tr>
       <td style="font-weight:900;color:${s.color};">
         <span class="shift-dot" style="background:${s.color};width:10px;height:10px;"></span>
@@ -2028,13 +1940,9 @@ function renderDailyView(){
       <td class="${staff.length?'emp-cell':'empty-cell'}">${staff.length}</td>
     </tr>`;
   });
-
   html += `</tbody></table>`;
-
   document.getElementById('dailyContent').innerHTML = html;
-
   const warn = document.getElementById('gapWarning');
-
   if(gaps.length){
     warn.className = 'gap-warning err';
     warn.textContent = '⚠ Coverage gap: ' + gaps.map(g=>fmtBlockTime(g.start)+'-'+fmtBlockTime(g.end+1)).join(', ');
@@ -2043,96 +1951,55 @@ function renderDailyView(){
     warn.textContent = '✅ Full 24-hour coverage, zero gaps.';
   }
 }
-
 function shiftDay(delta){
   const el = document.getElementById('detailDate');
   const base = el.value || days[0] || fmtDate(new Date());
   const d = parseDate(base);
-
   d.setDate(d.getDate()+delta);
-
   el.value = fmtDate(d);
-
   renderDailyView();
 }
-
 function goToToday(){
   document.getElementById('detailDate').value = fmtDate(new Date());
   renderDailyView();
-}
-
-/* ---------- CSV ---------- */
-function exportCSV(){
-  let csv = '\uFEFFDate';
-
-  shifts.forEach(s=>{
-    csv += `,"${String(s.name).replace(/"/g,'""')} (${String(s.time).replace(/"/g,'""')})"`;
-  });
-
-  csv += ',"Status"\n';
-
-  days.forEach(ds=>{
-    const {
-      coverage,
-      shiftAssignments
-    } = computeDailyCoverage(ds);
-
-    const row = [ds];
-
-    shifts.forEach(s=>{
-      row.push((shiftAssignments.get(s.id) || []).join('/') || 'No coverage');
-    });
-
-    const gaps = findGaps(coverage);
-    row.push(gaps.length ? 'Coverage Gap' : 'Full Coverage');
-
-    csv += row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',') + '\n';
-  });
-
-  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-
-  a.href = URL.createObjectURL(blob);
-  a.download = 'coordinator_roster_2026.csv';
-  a.click();
-
-  URL.revokeObjectURL(a.href);
 }
 
 /* ---------- Render ---------- */
 function refreshAll(){
   renderPatternEditor();
   renderShiftEditor();
+  renderShiftLegendInline();
   renderEmployees();
   renderScheduleTable();
   renderDailyView();
+}
+
+/* ---------- Save helpers ---------- */
+function markDirty(){
+  refreshAll();
+  saveToLocalCacheOnly();
+  scheduleOnlineSave();
 }
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown',e=>{
   const tag = document.activeElement?.tagName?.toLowerCase();
   const isTyping = ['input','select','textarea'].includes(tag);
-
   if(e.key === 'Escape'){
     closeShiftPopup();
   }
-
   if(e.key === 'Enter' && document.activeElement === document.getElementById('newEmpName')){
     addEmployee();
   }
-
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && selectedCells.size && !isTyping){
     copySelectedCell();
   }
-
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v' && selectedCells.size && !isTyping){
     e.preventDefault();
     pasteToSelectedCells();
   }
-
   if((e.key === 'Delete' || e.key === 'Backspace') && selectedCells.size && !isTyping){
     e.preventDefault();
-
     if(confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)){
       deleteSelectedArrangements();
     }
@@ -2161,9 +2028,7 @@ function initDefaults(){
       color:'#fa8c16'
     }
   ];
-
   patternIdCounter = 3;
-
   shifts = [
     {id:'s1',name:'Shift 1',time:'08:00-17:00',startMin:480,endMin:1020,overnight:false,color:'#0891b2'},
     {id:'s2',name:'Shift 2',time:'08:30-17:30',startMin:510,endMin:1050,overnight:false,color:'#1677ff'},
@@ -2177,33 +2042,29 @@ function initDefaults(){
     {id:'s10',name:'Night 2',time:'22:00-07:00',startMin:1320,endMin:420,overnight:true,color:'#262626'},
     {id:'s11',name:'Night 3',time:'23:00-08:00',startMin:1380,endMin:480,overnight:true,color:'#8c8c8c'}
   ];
-
   shiftIdCounter = 11;
-
   employees = [];
   scheduleData = {};
-
   employeeIdCounter = 0;
-
+  pinnedWidths = {
+    employee:150,
+    region:82,
+    pattern:96
+  };
   for(let i=0;i<14;i++){
     const id = newEmployeeId();
-
     employees.push({
       id,
       name:'Staff ' + (i+1),
       region:i%2===0 ? 'HK' : 'CN',
       patternId:patterns[i%patterns.length].id
     });
-
     scheduleData[id] = {};
   }
-
   document.getElementById('detailDate').value = document.getElementById('cfgStart').value;
 }
-
 async function init(){
   const raw = localStorage.getItem(LOCAL_KEY);
-
   if(raw){
     try{
       applyState(JSON.parse(raw));
@@ -2218,17 +2079,13 @@ async function init(){
     rebuildDaysOnly();
     refreshAll();
   }
-
   await loadOnline();
   connectRealtime();
-
   if(!document.getElementById('detailDate').value && days.length){
     document.getElementById('detailDate').value = days[0];
   }
-
   refreshAll();
 }
-
 init();
 </script>
 </body>
