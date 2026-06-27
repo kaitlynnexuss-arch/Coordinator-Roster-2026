@@ -15,6 +15,7 @@
   --red:#ef4444;
   --green:#22c55e;
   --orange:#f59e0b;
+  --purple:#7c3aed;
   --radius:12px;
   --shadow:0 1px 3px rgba(0,0,0,.08);
 }
@@ -93,13 +94,14 @@ body{
 .status.online{background:#dcfce7;color:#15803d}
 .status.offline{background:#fee2e2;color:#b91c1c}
 .status.syncing{background:#e0f2fe;color:#0369a1}
-input,select{
+input,select,textarea{
   border:1px solid var(--border);
   border-radius:6px;
   padding:5px 8px;
   font-size:12px;
   background:#fff;
 }
+textarea{resize:vertical}
 input[type="color"]{padding:1px;width:34px;height:28px}
 .pattern-row,.shift-row,.employee-card{
   display:flex;
@@ -224,14 +226,10 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   top:0;
   z-index:20;
 }
-
-.emp-col,
-.region-col,
-.pattern-col{
+.emp-col,.region-col,.pattern-col{
   position:sticky;
   background:#f8fafc!important;
 }
-
 .emp-col{
   left:0;
   z-index:21;
@@ -240,21 +238,18 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   text-align:left!important;
   font-weight:800;
 }
-
 .region-col{
   left:150px;
   z-index:21;
   min-width:82px;
   width:82px;
 }
-
 .pattern-col{
   left:232px;
   z-index:21;
   min-width:96px;
   width:96px;
 }
-
 .schedule-table thead .emp-col,
 .schedule-table thead .region-col,
 .schedule-table thead .pattern-col{
@@ -312,7 +307,8 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   box-shadow:0 8px 40px rgba(0,0,0,.25);
   padding:20px;
   min-width:430px;
-  max-width:640px;
+  max-width:680px;
+  width:min(92vw,680px);
 }
 .popup-box h3{font-size:16px;margin-bottom:5px}
 .popup-sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}
@@ -480,10 +476,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
 .slot-table th{background:#f8fafc}
 .empty-cell{color:#9ca3af;font-style:italic}
 .emp-cell{font-weight:800;color:var(--primary)}
-
-.col-resize-th{
-  position:relative;
-}
+.col-resize-th{position:relative}
 .col-resizer{
   position:absolute;
   top:0;
@@ -494,9 +487,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   z-index:50;
   background:transparent;
 }
-.col-resizer:hover{
-  background:rgba(22,119,255,.18);
-}
+.col-resizer:hover{background:rgba(22,119,255,.18)}
 .manpower-tools{
   display:flex;
   gap:8px;
@@ -528,7 +519,52 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   color:var(--muted);
   margin-left:4px;
 }
-
+.weekly-chip{
+  font-size:10px;
+  padding:2px 7px;
+  border-radius:999px;
+  font-weight:800;
+  background:#eff6ff;
+  color:#1d4ed8;
+  border:1px solid #bfdbfe;
+}
+.weekly-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+  max-height:220px;
+  overflow:auto;
+}
+.weekly-item{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 10px;
+  background:#fafafa;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.weekly-left{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.weekly-empty{
+  color:var(--muted);
+  font-size:12px;
+  padding:10px 0;
+}
+.modal-grid{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:10px;
+  align-items:center;
+}
+.modal-row{margin-bottom:10px}
 @media print{
   body{background:#fff;padding:0}
   .app-header,.btn,.note,.add-line,.day-picker,.popup-overlay,.col-resizer{display:none!important}
@@ -548,14 +584,14 @@ input[type="color"]{padding:1px;width:34px;height:28px}
     </div>
     <div class="header-actions">
       <span id="syncStatus" class="status syncing">Connecting</span>
-      <button class="btn btn-outline" onclick="saveOnlineNow()">☁ Save Online</button>
-      <button class="btn btn-outline" onclick="loadOnline()">↻ Load Online</button>
-      <button class="btn btn-outline" onclick="saveToLocal()">💾 Save Local</button>
-      <button class="btn btn-outline" onclick="loadFromLocal()">📂 Load Local</button>
-      <button class="btn btn-outline" onclick="exportBackupJSON()">⬇ Export Backup JSON</button>
-      <button class="btn btn-outline" onclick="document.getElementById('backupFileInput').click()">⬆ Import Backup JSON</button>
-      <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none" onchange="importBackupJSON(event)">
-      <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+      <button class="btn btn-outline" id="btnSaveOnline">☁ Save Online</button>
+      <button class="btn btn-outline" id="btnLoadOnline">↻ Load Online</button>
+      <button class="btn btn-outline" id="btnSaveLocal">💾 Save Local</button>
+      <button class="btn btn-outline" id="btnLoadLocal">📂 Load Local</button>
+      <button class="btn btn-outline" id="btnExportBackup">⬇ Export Backup JSON</button>
+      <button class="btn btn-outline" id="btnImportBackup">⬆ Import Backup JSON</button>
+      <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none">
+      <button class="btn btn-outline" id="btnPrint">🖨 Print</button>
     </div>
   </div>
 
@@ -577,14 +613,14 @@ input[type="color"]{padding:1px;width:34px;height:28px}
         Green = working day. Red = rest day. Click weekdays to change rest days.
       </div>
       <div id="patternEditor"></div>
-      <div class="add-line" onclick="addPattern()">+ Add New Shift Pattern</div>
+      <div class="add-line" id="btnAddPattern">+ Add New Shift Pattern</div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-header">
       <h2>🕐 Shift Manager</h2>
-      <button class="btn btn-sm btn-primary" onclick="addShift()">+ Add Shift</button>
+      <button class="btn btn-sm btn-primary" id="btnAddShift">+ Add Shift</button>
     </div>
     <div class="card-body">
       <div class="help-text">
@@ -599,8 +635,8 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <h2>👥 Employee Roster</h2>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         <input type="text" id="newEmpName" placeholder="New employee name" style="width:160px;">
-        <button class="btn btn-sm btn-primary" onclick="addEmployee()">+ Add</button>
-        <button class="btn btn-sm btn-ghost" onclick="addBatchEmployees()">Batch Add</button>
+        <button class="btn btn-sm btn-primary" id="btnAddEmployee">+ Add</button>
+        <button class="btn btn-sm btn-ghost" id="btnAddBatchEmployees">Batch Add</button>
       </div>
     </div>
     <div class="card-body">
@@ -615,11 +651,11 @@ input[type="color"]{padding:1px;width:34px;height:28px}
     <div class="card-body">
       <div class="period-info">
         <label>Start Date</label>
-        <input type="date" id="cfgStart" value="2026-07-01" onchange="rebuildDaysAndSave()">
+        <input type="date" id="cfgStart" value="2026-07-01">
         <label>End Date</label>
-        <input type="date" id="cfgEnd" value="2026-12-31" onchange="rebuildDaysAndSave()">
+        <input type="date" id="cfgEnd" value="2026-12-31">
         <span style="font-size:11px;color:var(--muted);margin-left:10px;">Days: <b id="dayCount">0</b></span>
-        <button class="btn btn-sm btn-ghost" onclick="rebuildDaysAndSave()">Rebuild Days</button>
+        <button class="btn btn-sm btn-ghost" id="btnRebuildDays">Rebuild Days</button>
       </div>
     </div>
   </div>
@@ -635,11 +671,11 @@ input[type="color"]{padding:1px;width:34px;height:28px}
           <span class="manpower-tip">
             Click to select. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit. Press Delete to remove selected data.
           </span>
-          <button class="btn btn-sm btn-ghost" onclick="copySelectedCellWithFeedback()">Copy Selected Cell</button>
-          <button class="btn btn-sm btn-primary" onclick="pasteToSelectedCellsWithFeedback()">Paste to Selected Cells</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteSelectedArrangementsWithConfirm()">Delete Selected</button>
-          <button class="btn btn-sm btn-ghost" onclick="clearSelectedCells()">Clear Selection</button>
-          <button class="btn btn-sm btn-ghost" onclick="clearAllSchedule()">Clear All</button>
+          <button class="btn btn-sm btn-ghost" id="btnCopySelected">Copy Selected Cell</button>
+          <button class="btn btn-sm btn-primary" id="btnPasteSelected">Paste to Selected Cells</button>
+          <button class="btn btn-sm btn-danger" id="btnDeleteSelected">Delete Selected</button>
+          <button class="btn btn-sm btn-ghost" id="btnClearSelection">Clear Selection</button>
+          <button class="btn btn-sm btn-ghost" id="btnClearAllSchedule">Clear All</button>
         </div>
       </div>
     </div>
@@ -653,12 +689,12 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <h2>🔍 Daily Coverage Detail</h2>
     </div>
     <div class="day-picker">
-      <button class="btn btn-sm btn-ghost" onclick="shiftDay(-1)">◀ Prev Day</button>
-      <button class="btn btn-sm btn-ghost" onclick="shiftDay(-7)">◀ Prev Week</button>
-      <input type="date" id="detailDate" onchange="renderDailyView()">
-      <button class="btn btn-sm btn-ghost" onclick="shiftDay(7)">Next Week ▶</button>
-      <button class="btn btn-sm btn-ghost" onclick="shiftDay(1)">Next Day ▶</button>
-      <button class="btn btn-sm btn-ghost" onclick="goToToday()">Today</button>
+      <button class="btn btn-sm btn-ghost" id="btnPrevDay">◀ Prev Day</button>
+      <button class="btn btn-sm btn-ghost" id="btnPrevWeek">◀ Prev Week</button>
+      <input type="date" id="detailDate">
+      <button class="btn btn-sm btn-ghost" id="btnNextWeek">Next Week ▶</button>
+      <button class="btn btn-sm btn-ghost" id="btnNextDay">Next Day ▶</button>
+      <button class="btn btn-sm btn-ghost" id="btnToday">Today</button>
       <div class="day-tags" id="dayTags"></div>
     </div>
     <div class="gap-warning" id="gapWarning"></div>
@@ -666,8 +702,8 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   </div>
 </div>
 
-<div class="popup-overlay" id="shiftPopup" style="display:none;" onclick="closeShiftPopup(event)">
-  <div class="popup-box" onclick="event.stopPropagation()">
+<div class="popup-overlay" id="shiftPopup" style="display:none;">
+  <div class="popup-box" role="dialog" aria-modal="true">
     <h3 id="popupTitle">Edit Arrangement</h3>
     <div class="popup-sub" id="popupSub"></div>
     <div class="leave-box">
@@ -689,28 +725,66 @@ input[type="color"]{padding:1px;width:34px;height:28px}
     <div id="restDayOtBox" style="margin-bottom:12px;"></div>
     <div class="popup-actions">
       <button class="btn btn-sm btn-ghost" id="popupClearBtn">Clear</button>
-      <button class="btn btn-sm btn-ghost" onclick="closeShiftPopup()">Cancel</button>
-      <button class="btn btn-sm btn-primary" onclick="saveShiftAssignment()">Confirm</button>
+      <button class="btn btn-sm btn-ghost" id="popupCancelBtn">Cancel</button>
+      <button class="btn btn-sm btn-primary" id="popupConfirmBtn">Confirm</button>
     </div>
   </div>
 </div>
 
-<input type="file" id="localLoadInput" accept=".json,application/json" style="display:none" onchange="handleLocalFileLoad(event)">
+<div class="popup-overlay" id="weeklyPatternModal" style="display:none;">
+  <div class="popup-box" role="dialog" aria-modal="true">
+    <h3 id="weeklyModalTitle">Weekly Pattern Override</h3>
+    <div class="popup-sub">Set or remove a weekly pattern override for the selected employee.</div>
+
+    <div class="modal-row">
+      <div class="modal-grid">
+        <label for="weeklyTargetDate">Target Date</label>
+        <input type="date" id="weeklyTargetDate">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="modal-grid">
+        <label for="weeklyPatternSelect">Pattern</label>
+        <select id="weeklyPatternSelect"></select>
+      </div>
+    </div>
+
+    <div class="modal-row" style="font-size:12px;color:var(--muted);">
+      Week Start: <b id="weeklyWeekStartLabel">-</b>
+    </div>
+
+    <div class="leave-box" style="margin-top:8px;">
+      <div class="leave-box-title">Existing Weekly Overrides</div>
+      <div id="weeklyPatternList" class="weekly-list"></div>
+    </div>
+
+    <div class="popup-actions">
+      <button class="btn btn-sm btn-ghost" id="weeklyPatternCloseBtn">Close</button>
+      <button class="btn btn-sm btn-danger" id="weeklyPatternRemoveBtn">Remove Selected Week Override</button>
+      <button class="btn btn-sm btn-primary" id="weeklyPatternSaveBtn">Save Override</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="localLoadInput" accept=".json,application/json" style="display:none">
 
 <script>
 const FIREBASE_DB_URL = 'https://coordinator-roster-2026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FIREBASE_PATH = 'sharedRoster2026';
 const LOCAL_KEY = 'coordinator_roster_2026_shared_v3';
-const LOCAL_DIR_HANDLE_KEY = 'coordinator_roster_2026_dir_handle_supported';
 const CLIENT_ID = 'client_' + Math.random().toString(36).slice(2) + Date.now();
+
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const PATTERN_COLORS = ['#1677ff','#52c41a','#fa8c16','#722ed1','#13c2c2','#eb2f96','#2f54eb','#d46b08','#389e0d','#c41d7f'];
+
 const HK_HOLIDAYS_2026 = new Set([
   '2026-01-01','2026-02-17','2026-02-18','2026-02-19',
   '2026-04-03','2026-04-04','2026-04-05','2026-04-06',
   '2026-05-01','2026-05-24','2026-06-19','2026-07-01',
   '2026-09-27','2026-10-01','2026-10-18','2026-12-25','2026-12-26'
 ]);
+
 const CN_HOLIDAYS_2026 = new Set([
   '2026-01-01','2026-01-02','2026-01-03',
   '2026-02-17','2026-02-18','2026-02-19','2026-02-20','2026-02-21','2026-02-22','2026-02-23',
@@ -720,6 +794,7 @@ const CN_HOLIDAYS_2026 = new Set([
   '2026-09-25','2026-09-26','2026-09-27',
   '2026-10-01','2026-10-02','2026-10-03','2026-10-04','2026-10-05','2026-10-06','2026-10-07'
 ]);
+
 const HOLIDAY_NAMES = {
   '2026-01-01':"New Year's Day",
   '2026-01-02':'New Year Holiday',
@@ -766,24 +841,37 @@ let shifts = [];
 let employees = [];
 let days = [];
 let scheduleData = {};
+
 let selectedCells = new Set();
 let lastSelectedCell = null;
 let copiedCellData = null;
 let currentEditEmpId = null;
 let currentEditDate = null;
+let currentWeeklyEmpId = null;
+
 let patternIdCounter = 0;
 let shiftIdCounter = 0;
 let employeeIdCounter = 0;
+
 let saveTimer = null;
 let realtimeSource = null;
 let applyingRemote = false;
-let localDirectoryHandle = null;
 
 let pinnedWidths = {
   employee:150,
   region:82,
   pattern:96
 };
+
+const dirtyFlags = {
+  patterns:true,
+  shifts:true,
+  employees:true,
+  schedule:true,
+  daily:true
+};
+
+function $(id){ return document.getElementById(id); }
 
 function esc(s){
   return String(s ?? '').replace(/[&<>"']/g,m=>({
@@ -794,31 +882,32 @@ function esc(s){
     "'":'&#39;'
   }[m]));
 }
+
 function fmtDate(d){
   const x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
   return x.toISOString().slice(0,10);
 }
+
 function parseDate(s){
   return new Date(s + 'T00:00:00');
 }
+
 function dow(ds){
   return parseDate(ds).getDay();
 }
+
 function compactDateStr(ds){
   return String(ds || '').replaceAll('-','');
 }
+
 function todayCompact(){
   return compactDateStr(fmtDate(new Date()));
 }
-function newPatternId(){
-  return 'p' + (++patternIdCounter);
-}
-function newShiftId(){
-  return 's' + (++shiftIdCounter);
-}
-function newEmployeeId(){
-  return 'e' + (++employeeIdCounter);
-}
+
+function newPatternId(){ return 'p' + (++patternIdCounter); }
+function newShiftId(){ return 's' + (++shiftIdCounter); }
+function newEmployeeId(){ return 'e' + (++employeeIdCounter); }
+
 function hexToRgba(hex,a){
   if(!hex || !hex.startsWith('#')) return `rgba(0,0,0,${a})`;
   const r = parseInt(hex.slice(1,3),16);
@@ -826,11 +915,13 @@ function hexToRgba(hex,a){
   const b = parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${a})`;
 }
+
 function setSyncStatus(type,text){
-  const el = document.getElementById('syncStatus');
+  const el = $('syncStatus');
   el.className = 'status ' + type;
   el.textContent = text;
 }
+
 function getHolidayInfo(ds,region){
   const isHK = region === 'HK' && HK_HOLIDAYS_2026.has(ds);
   const isCN = region === 'CN' && CN_HOLIDAYS_2026.has(ds);
@@ -841,6 +932,7 @@ function getHolidayInfo(ds,region){
     name: HOLIDAY_NAMES[ds] || 'Public Holiday'
   };
 }
+
 function getAnyHolidayInfo(ds){
   const hk = HK_HOLIDAYS_2026.has(ds);
   const cn = CN_HOLIDAYS_2026.has(ds);
@@ -850,46 +942,27 @@ function getAnyHolidayInfo(ds){
     name: HOLIDAY_NAMES[ds] || 'Public Holiday'
   };
 }
-function findPattern(id){
-  return patterns.find(p=>p.id===id);
-}
-function findShift(id){
-  return shifts.find(s=>s.id===id);
-}
-function findEmployee(id){
-  return employees.find(e=>e.id===id);
-}
+
+function findPattern(id){ return patterns.find(p=>p.id===id); }
+function findShift(id){ return shifts.find(s=>s.id===id); }
+function findEmployee(id){ return employees.find(e=>e.id===id); }
+
 function getPatternName(id){
   const p = findPattern(id);
   return p ? p.name : 'Unknown';
 }
+
 function getPatternColor(id){
   const p = findPattern(id);
   return p ? p.color : '#999';
 }
+
 function getWeekStart(ds){
   const d = parseDate(ds);
   const day = d.getDay();
   d.setDate(d.getDate() - day);
   return fmtDate(d);
 }
-function getEffectivePatternId(emp,ds){
-  if(!emp) return '';
-  const weekStart = getWeekStart(ds);
-  if(emp.weeklyPatterns && emp.weeklyPatterns[weekStart]){
-    return emp.weeklyPatterns[weekStart];
-  }
-  return emp.patternId;
-}
-function getEffectivePattern(emp,ds){
-  return findPattern(getEffectivePatternId(emp,ds));
-}
-  function getWeekStart(ds){
-  const d = parseDate(ds);
-  const day = d.getDay(); // Sun = 0
-  d.setDate(d.getDate() - day);
-  return fmtDate(d);
-}
 
 function getEffectivePatternId(emp,ds){
   if(!emp) return '';
@@ -903,29 +976,35 @@ function getEffectivePatternId(emp,ds){
 function getEffectivePattern(emp,ds){
   return findPattern(getEffectivePatternId(emp,ds));
 }
+
 function isPatternRestDay(emp,ds){
   const p = getEffectivePattern(emp,ds);
   return p ? p.restDays.includes(dow(ds)) : false;
 }
-}
+
 function parseTimeRange(range){
   const clean = String(range || '').replace(/[–—]/g,'-').trim();
   const m = clean.match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
   if(!m) return null;
+
   const sh = parseInt(m[1],10);
   const sm = parseInt(m[2],10);
   const eh = parseInt(m[3],10);
   const em = parseInt(m[4],10);
+
   if(sh > 23 || eh > 23 || sm > 59 || em > 59) return null;
+
   const startMin = sh * 60 + sm;
   const endMin = eh * 60 + em;
+
   return {
-    time:`${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}-${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`,
+    time: `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}-${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`,
     startMin,
     endMin,
     overnight:endMin <= startMin
   };
 }
+
 function getEntry(empId,ds){
   if(!scheduleData[empId]) scheduleData[empId] = {};
   const e = scheduleData[empId][ds];
@@ -944,6 +1023,7 @@ function getEntry(empId,ds){
     leave:e.leave || null
   };
 }
+
 function setEntry(empId,ds,entry){
   if(!scheduleData[empId]) scheduleData[empId] = {};
   const normalized = {
@@ -958,10 +1038,42 @@ function setEntry(empId,ds,entry){
     scheduleData[empId][ds] = normalized;
   }
 }
+
 function clearEntry(empId,ds){
   if(scheduleData[empId]){
     delete scheduleData[empId][ds];
   }
+}
+
+function cellKey(empId,ds){
+  return empId + '|' + ds;
+}
+
+function markDirtySections(...sections){
+  sections.forEach(s=> dirtyFlags[s] = true);
+  refreshDirty();
+  saveToLocalCacheOnly();
+  scheduleOnlineSave();
+}
+
+function refreshDirty(){
+  if(dirtyFlags.patterns) renderPatternEditor();
+  if(dirtyFlags.shifts){
+    renderShiftEditor();
+    renderShiftLegendInline();
+  }
+  if(dirtyFlags.employees) renderEmployees();
+  if(dirtyFlags.schedule) renderScheduleTable();
+  if(dirtyFlags.daily) renderDailyView();
+
+  Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = false);
+}
+
+function markDirtyFull(){
+  Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
+  refreshDirty();
+  saveToLocalCacheOnly();
+  scheduleOnlineSave();
 }
 
 /* ---------- State / Backup ---------- */
@@ -971,8 +1083,8 @@ function getState(){
     shifts,
     employees,
     scheduleData,
-    cfgStart:document.getElementById('cfgStart').value,
-    cfgEnd:document.getElementById('cfgEnd').value,
+    cfgStart:$('cfgStart').value,
+    cfgEnd:$('cfgEnd').value,
     pinnedWidths,
     counters:{
       patternIdCounter,
@@ -981,15 +1093,16 @@ function getState(){
     }
   };
 }
-function applyState(state){
-  if(!state) return;
-  applyingRemote = true;
-  patterns = Array.isArray(state.patterns) ? state.patterns : patterns;
-  shifts = Array.isArray(state.shifts) ? state.shifts : shifts;
-  employees = Array.isArray(state.employees) ? state.employees : employees;
+
+function normalizeState(state){
+  patterns = Array.isArray(state.patterns) ? state.patterns : [];
+  shifts = Array.isArray(state.shifts) ? state.shifts : [];
+  employees = Array.isArray(state.employees) ? state.employees : [];
   scheduleData = state.scheduleData || {};
-  if(state.cfgStart) document.getElementById('cfgStart').value = state.cfgStart;
-  if(state.cfgEnd) document.getElementById('cfgEnd').value = state.cfgEnd;
+
+  if(state.cfgStart) $('cfgStart').value = state.cfgStart;
+  if(state.cfgEnd) $('cfgEnd').value = state.cfgEnd;
+
   if(state.pinnedWidths){
     pinnedWidths = {
       employee:Math.max(100, parseInt(state.pinnedWidths.employee || 150,10)),
@@ -997,19 +1110,29 @@ function applyState(state){
       pattern:Math.max(80, parseInt(state.pinnedWidths.pattern || 96,10))
     };
   }
+
   patternIdCounter = state.counters?.patternIdCounter ?? Math.max(0,...patterns.map(p=>parseInt(String(p.id).slice(1),10)||0));
   shiftIdCounter = state.counters?.shiftIdCounter ?? Math.max(0,...shifts.map(s=>parseInt(String(s.id).slice(1),10)||0));
   employeeIdCounter = state.counters?.employeeIdCounter ?? Math.max(0,...employees.map(e=>parseInt(String(e.id).slice(1),10)||0));
+
   employees.forEach(e=>{
-  if(!scheduleData[e.id]) scheduleData[e.id] = {};
-  if(!e.region) e.region = 'HK';
-  if(!e.weeklyPatterns) e.weeklyPatterns = {};
-});
+    if(!scheduleData[e.id]) scheduleData[e.id] = {};
+    if(!e.region) e.region = 'HK';
+    if(!e.weeklyPatterns) e.weeklyPatterns = {};
+  });
+}
+
+function applyState(state){
+  if(!state) return;
+  applyingRemote = true;
+  normalizeState(state);
   rebuildDaysOnly();
-  refreshAll();
+  Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
+  refreshDirty();
   saveToLocalCacheOnly();
   applyingRemote = false;
 }
+
 function exportBackupJSON(){
   const backup = {
     exportedAt:new Date().toISOString(),
@@ -1017,17 +1140,14 @@ function exportBackupJSON(){
     version:'backup_v1',
     state:getState()
   };
-  const blob = new Blob(
-    [JSON.stringify(backup,null,2)],
-    {type:'application/json;charset=utf-8;'}
-  );
+  const blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json;charset=utf-8;'});
   const a = document.createElement('a');
-  const date = fmtDate(new Date());
   a.href = URL.createObjectURL(blob);
-  a.download = `coordinator_roster_backup_${date}.json`;
+  a.download = `coordinator_roster_backup_${fmtDate(new Date())}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
+
 function importBackupJSON(event){
   const file = event.target.files && event.target.files[0];
   if(!file) return;
@@ -1040,11 +1160,9 @@ function importBackupJSON(event){
         alert('Invalid backup file. Please select a valid Coordinator Roster backup JSON file.');
         return;
       }
-      if(!confirm('Import this backup and replace the current roster data?')){
-        return;
-      }
+      if(!confirm('Import this backup and replace the current roster data?')) return;
       applyState(state);
-      markDirty();
+      markDirtyFull();
       alert('Backup imported successfully.');
     }catch(err){
       console.error(err);
@@ -1078,11 +1196,13 @@ async function saveOnlineNow(){
     setSyncStatus('offline','Offline');
   }
 }
+
 function scheduleOnlineSave(){
   if(applyingRemote) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveOnlineNow,600);
 }
+
 async function loadOnline(){
   try{
     setSyncStatus('syncing','Loading');
@@ -1098,12 +1218,14 @@ async function loadOnline(){
     setSyncStatus('offline','Offline');
   }
 }
+
 function connectRealtime(){
   try{
     if(realtimeSource) realtimeSource.close();
     realtimeSource = new EventSource(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
     realtimeSource.onopen = () => setSyncStatus('online','Online');
     realtimeSource.onerror = () => setSyncStatus('offline','Offline');
+
     const handle = e => {
       try{
         const msg = JSON.parse(e.data);
@@ -1128,41 +1250,19 @@ function connectRealtime(){
 function saveToLocalCacheOnly(){
   localStorage.setItem(LOCAL_KEY,JSON.stringify(getState()));
 }
+
 function suggestLocalFileName(){
   return `${todayCompact()}.json`;
 }
+
 async function saveToLocal(showAlert=true){
   saveToLocalCacheOnly();
-
   const payload = {
     savedAt:new Date().toISOString(),
     app:'Coordinator Roster 2026',
     version:'local_save_v1',
     state:getState()
   };
-
-  if('showDirectoryPicker' in window){
-    try{
-      const dirHandle = await window.showDirectoryPicker({
-        mode:'readwrite',
-        startIn:'documents'
-      });
-      localDirectoryHandle = dirHandle;
-      localStorage.setItem(LOCAL_DIR_HANDLE_KEY,'1');
-
-      const fileHandle = await dirHandle.getFileHandle(suggestLocalFileName(), { create:true });
-      const writable = await fileHandle.createWritable();
-      await writable.write(JSON.stringify(payload,null,2));
-      await writable.close();
-
-      if(showAlert){
-        alert('Saved locally successfully.\nFile name: ' + suggestLocalFileName() + '\nPlease ensure you selected folder:\nC:\\Users\\kaitlynhuang\\Desktop\\Job Folder\\Coordinator Roster 2026');
-      }
-      return;
-    }catch(err){
-      console.warn('Directory save cancelled or failed, fallback to download.', err);
-    }
-  }
 
   try{
     const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json;charset=utf-8;'});
@@ -1171,36 +1271,19 @@ async function saveToLocal(showAlert=true){
     a.download = suggestLocalFileName();
     a.click();
     URL.revokeObjectURL(a.href);
-
     if(showAlert){
-      alert('Your browser does not support direct folder writing or permission was cancelled.\nThe file has been downloaded as ' + suggestLocalFileName() + '. Please move it to:\nC:\\Users\\kaitlynhuang\\Desktop\\Job Folder\\Coordinator Roster 2026');
+      alert('Local file saved successfully.');
     }
   }catch(err){
     console.error(err);
     alert('Failed to save local file.');
   }
 }
+
 async function loadFromLocal(){
-  if('showOpenFilePicker' in window){
-    try{
-      const handles = await window.showOpenFilePicker({
-        multiple:false,
-        types:[{
-          description:'JSON Files',
-          accept:{'application/json':['.json']}
-        }]
-      });
-      if(!handles || !handles.length) return;
-      const file = await handles[0].getFile();
-      const text = await file.text();
-      loadStateFromLocalText(text);
-      return;
-    }catch(err){
-      console.warn('Open local file cancelled or failed, fallback to input.', err);
-    }
-  }
-  document.getElementById('localLoadInput').click();
+  $('localLoadInput').click();
 }
+
 function handleLocalFileLoad(event){
   const file = event.target.files && event.target.files[0];
   if(!file) return;
@@ -1217,6 +1300,7 @@ function handleLocalFileLoad(event){
   };
   reader.readAsText(file);
 }
+
 function loadStateFromLocalText(text){
   const data = JSON.parse(text);
   const state = data.state || data;
@@ -1225,7 +1309,7 @@ function loadStateFromLocalText(text){
     return;
   }
   applyState(state);
-  markDirty();
+  markDirtyFull();
   alert('Local file loaded successfully.');
 }
 
@@ -1238,8 +1322,9 @@ function addPattern(){
     restDays:[0,6],
     color:PATTERN_COLORS[patterns.length % PATTERN_COLORS.length]
   });
-  markDirty();
+  markDirtySections('patterns','employees','schedule','daily');
 }
+
 function removePattern(id){
   if(patterns.length <= 1){
     alert('At least one pattern is required.');
@@ -1251,16 +1336,25 @@ function removePattern(id){
     if(e.patternId === id){
       e.patternId = patterns[0].id;
     }
+    if(e.weeklyPatterns){
+      Object.keys(e.weeklyPatterns).forEach(week=>{
+        if(e.weeklyPatterns[week] === id){
+          delete e.weeklyPatterns[week];
+        }
+      });
+    }
   });
-  markDirty();
+  markDirtySections('patterns','employees','schedule','daily');
 }
+
 function updatePattern(id,key,value){
   const p = findPattern(id);
   if(!p) return;
   if(key === 'name') p.name = value.trim() || p.name;
   if(key === 'color') p.color = value;
-  markDirty();
+  markDirtySections('patterns','employees','schedule','daily');
 }
+
 function togglePatternRestDay(id,d){
   const p = findPattern(id);
   if(!p) return;
@@ -1270,30 +1364,65 @@ function togglePatternRestDay(id,d){
     p.restDays.push(d);
   }
   p.restDays.sort((a,b)=>a-b);
-  markDirty();
+  markDirtySections('patterns','schedule','daily');
 }
+
 function renderPatternEditor(){
-  const box = document.getElementById('patternEditor');
-  let html = '';
+  const box = $('patternEditor');
+  box.innerHTML = '';
+  const frag = document.createDocumentFragment();
+
   patterns.forEach(p=>{
-    const rest = p.restDays.length ? p.restDays.map(d=>DAY_NAMES[d]).join(', ') : 'None';
-    html += `<div class="pattern-row">
-      <div class="pcolor" style="background:${p.color}"></div>
-      <input value="${esc(p.name)}" onchange="updatePattern('${p.id}','name',this.value)" style="width:150px;font-weight:700;">
-      <input type="color" value="${p.color}" onchange="updatePattern('${p.id}','color',this.value)">
-      <div class="day-checks">`;
+    const row = document.createElement('div');
+    row.className = 'pattern-row';
+
+    const color = document.createElement('div');
+    color.className = 'pcolor';
+    color.style.background = p.color;
+
+    const nameInput = document.createElement('input');
+    nameInput.value = p.name;
+    nameInput.style.width = '150px';
+    nameInput.style.fontWeight = '700';
+    nameInput.addEventListener('change',e=>updatePattern(p.id,'name',e.target.value));
+
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = p.color;
+    colorInput.addEventListener('change',e=>updatePattern(p.id,'color',e.target.value));
+
+    const checks = document.createElement('div');
+    checks.className = 'day-checks';
+
     for(let d=0; d<7; d++){
-      const restDay = p.restDays.includes(d);
-      html += `<div class="day-check ${restDay?'rest':'work'}" onclick="togglePatternRestDay('${p.id}',${d})">
-        <div class="dbox">${DAY_NAMES[d].slice(0,2)}</div>
-      </div>`;
+      const wrap = document.createElement('div');
+      wrap.className = 'day-check ' + (p.restDays.includes(d) ? 'rest' : 'work');
+      wrap.addEventListener('click',()=>togglePatternRestDay(p.id,d));
+
+      const boxDay = document.createElement('div');
+      boxDay.className = 'dbox';
+      boxDay.textContent = DAY_NAMES[d].slice(0,2);
+
+      wrap.appendChild(boxDay);
+      checks.appendChild(wrap);
     }
-    html += `</div>
-      <span style="font-size:11px;color:var(--red);font-weight:800;">Rest: ${rest}</span>
-      <span class="del" onclick="removePattern('${p.id}')">&times;</span>
-    </div>`;
+
+    const restText = document.createElement('span');
+    restText.style.fontSize = '11px';
+    restText.style.color = 'var(--red)';
+    restText.style.fontWeight = '800';
+    restText.textContent = 'Rest: ' + (p.restDays.length ? p.restDays.map(d=>DAY_NAMES[d]).join(', ') : 'None');
+
+    const del = document.createElement('span');
+    del.className = 'del';
+    del.innerHTML = '&times;';
+    del.addEventListener('click',()=>removePattern(p.id));
+
+    row.append(color,nameInput,colorInput,checks,restText,del);
+    frag.appendChild(row);
   });
-  box.innerHTML = html;
+
+  box.appendChild(frag);
 }
 
 /* ---------- Shift Manager ---------- */
@@ -1308,18 +1437,21 @@ function addShift(){
     overnight:false,
     color:PATTERN_COLORS[shifts.length % PATTERN_COLORS.length]
   });
-  markDirty();
+  markDirtySections('shifts','schedule','daily');
 }
+
 function updateShift(id,key,value){
   const s = findShift(id);
   if(!s) return;
+
   if(key === 'name') s.name = value.trim() || s.name;
   if(key === 'color') s.color = value;
   if(key === 'time'){
     const parsed = parseTimeRange(value);
     if(!parsed){
       alert('Invalid time range. Please use HH:MM-HH:MM.');
-      renderShiftEditor();
+      dirtyFlags.shifts = true;
+      refreshDirty();
       return;
     }
     s.time = parsed.time;
@@ -1327,8 +1459,10 @@ function updateShift(id,key,value){
     s.endMin = parsed.endMin;
     s.overnight = parsed.overnight;
   }
-  markDirty();
+
+  markDirtySections('shifts','schedule','daily');
 }
+
 function removeShift(id){
   if(!confirm('Delete this shift? Existing assignments using this shift will be removed.')) return;
   shifts = shifts.filter(s=>s.id!==id);
@@ -1339,39 +1473,81 @@ function removeShift(id){
       setEntry(empId,ds,e);
     });
   });
-  markDirty();
+  markDirtySections('shifts','schedule','daily');
 }
+
 function renderShiftEditor(){
-  const box = document.getElementById('shiftEditor');
-  let html = '';
+  const box = $('shiftEditor');
+  box.innerHTML = '';
+  const frag = document.createDocumentFragment();
+
   shifts.forEach(s=>{
-    html += `<div class="shift-row">
-      <div class="shift-color-dot" style="background:${s.color}"></div>
-      <input value="${esc(s.name)}" onchange="updateShift('${s.id}','name',this.value)" style="width:130px;font-weight:700;">
-      <input value="${esc(s.time)}" onchange="updateShift('${s.id}','time',this.value)" style="width:110px;">
-      <input type="color" value="${s.color}" onchange="updateShift('${s.id}','color',this.value)">
-      <span style="font-size:11px;color:var(--muted);">${s.overnight?'Overnight shift':'Day shift'}</span>
-      <span class="del" onclick="removeShift('${s.id}')">&times;</span>
-    </div>`;
+    const row = document.createElement('div');
+    row.className = 'shift-row';
+
+    const dot = document.createElement('div');
+    dot.className = 'shift-color-dot';
+    dot.style.background = s.color;
+
+    const nameInput = document.createElement('input');
+    nameInput.value = s.name;
+    nameInput.style.width = '130px';
+    nameInput.style.fontWeight = '700';
+    nameInput.addEventListener('change',e=>updateShift(s.id,'name',e.target.value));
+
+    const timeInput = document.createElement('input');
+    timeInput.value = s.time;
+    timeInput.style.width = '110px';
+    timeInput.addEventListener('change',e=>updateShift(s.id,'time',e.target.value));
+
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = s.color;
+    colorInput.addEventListener('change',e=>updateShift(s.id,'color',e.target.value));
+
+    const typeText = document.createElement('span');
+    typeText.style.fontSize = '11px';
+    typeText.style.color = 'var(--muted)';
+    typeText.textContent = s.overnight ? 'Overnight shift' : 'Day shift';
+
+    const del = document.createElement('span');
+    del.className = 'del';
+    del.innerHTML = '&times;';
+    del.addEventListener('click',()=>removeShift(s.id));
+
+    row.append(dot,nameInput,timeInput,colorInput,typeText,del);
+    frag.appendChild(row);
   });
-  box.innerHTML = html;
+
+  box.appendChild(frag);
 }
+
 function renderShiftLegendInline(){
-  const box = document.getElementById('shiftLegendInline');
-  if(!box) return;
-  let html = '';
+  const box = $('shiftLegendInline');
+  box.innerHTML = '';
+  const frag = document.createDocumentFragment();
+
   shifts.forEach(s=>{
-    html += `<div class="legend-item">
-      <span class="legend-dot" style="background:${s.color}"></span>
-      <b>${esc(s.time)}${s.overnight ? '+1' : ''}</b>
-    </div>`;
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const dot = document.createElement('span');
+    dot.className = 'legend-dot';
+    dot.style.background = s.color;
+
+    const bold = document.createElement('b');
+    bold.textContent = `${s.time}${s.overnight ? '+1' : ''}`;
+
+    item.append(dot,bold);
+    frag.appendChild(item);
   });
-  box.innerHTML = html;
+
+  box.appendChild(frag);
 }
 
 /* ---------- Employees ---------- */
 function addEmployee(name){
-  const input = document.getElementById('newEmpName');
+  const input = $('newEmpName');
   const n = (name || input.value).trim();
   if(!n) return;
   if(employees.some(e=>e.name===n)){
@@ -1388,7 +1564,7 @@ function addEmployee(name){
   });
   scheduleData[id] = {};
   input.value = '';
-  markDirty();
+  markDirtySections('employees','schedule','daily');
 }
 
 function addBatchEmployees(){
@@ -1405,46 +1581,7 @@ function addBatchEmployees(){
     });
     scheduleData[id] = {};
   }
-  markDirty();
-}
-
-function setEmployeeWeeklyPattern(empId){
-  const emp = findEmployee(empId);
-  if(!emp) return;
-
-  const defaultDate = days[0] || fmtDate(new Date());
-  const inputDate = prompt('Enter any date in the target week (YYYY-MM-DD):', defaultDate);
-  if(!inputDate) return;
-
-  const weekStart = getWeekStart(inputDate);
-
-  let msg = `Select pattern for week starting ${weekStart}:\n`;
-  patterns.forEach((p,i)=>{
-    msg += `${i+1}. ${p.name}\n`;
-  });
-  msg += `\nEnter number.\nEnter 0 to clear weekly override.`;
-
-  const picked = prompt(msg, '1');
-  if(picked === null) return;
-
-  const num = parseInt(picked,10);
-
-  if(num === 0){
-    if(!emp.weeklyPatterns) emp.weeklyPatterns = {};
-    delete emp.weeklyPatterns[weekStart];
-    markDirty();
-    return;
-  }
-
-  const targetPattern = patterns[num - 1];
-  if(!targetPattern){
-    alert('Invalid selection.');
-    return;
-  }
-
-  if(!emp.weeklyPatterns) emp.weeklyPatterns = {};
-  emp.weeklyPatterns[weekStart] = targetPattern.id;
-  markDirty();
+  markDirtySections('employees','schedule','daily');
 }
 
 function updateEmployee(id,key,value){
@@ -1455,14 +1592,15 @@ function updateEmployee(id,key,value){
     if(!v) return;
     if(employees.some(x=>x.id!==id && x.name===v)){
       alert('Employee name already exists.');
-      renderEmployees();
+      dirtyFlags.employees = true;
+      refreshDirty();
       return;
     }
     e.name = v;
   }
   if(key === 'region') e.region = value;
   if(key === 'patternId') e.patternId = value;
-  markDirty();
+  markDirtySections('employees','schedule','daily');
 }
 
 function removeEmployee(id){
@@ -1472,60 +1610,252 @@ function removeEmployee(id){
   employees = employees.filter(x=>x.id!==id);
   delete scheduleData[id];
   selectedCells = new Set([...selectedCells].filter(k=>!k.startsWith(id+'|')));
-  markDirty();
+  markDirtySections('employees','schedule','daily');
+}
+
+function openWeeklyPatternModal(empId){
+  const emp = findEmployee(empId);
+  if(!emp) return;
+  currentWeeklyEmpId = empId;
+  $('weeklyModalTitle').textContent = `Weekly Pattern Override · ${emp.name}`;
+
+  const defaultDate = days[0] || fmtDate(new Date());
+  $('weeklyTargetDate').value = defaultDate;
+
+  const select = $('weeklyPatternSelect');
+  select.innerHTML = '';
+  patterns.forEach(p=>{
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    select.appendChild(opt);
+  });
+
+  updateWeeklyModalWeekLabel();
+  renderWeeklyPatternList();
+  $('weeklyPatternModal').style.display = 'flex';
+}
+
+function closeWeeklyPatternModal(){
+  $('weeklyPatternModal').style.display = 'none';
+  currentWeeklyEmpId = null;
+}
+
+function updateWeeklyModalWeekLabel(){
+  const ds = $('weeklyTargetDate').value || (days[0] || fmtDate(new Date()));
+  $('weeklyWeekStartLabel').textContent = getWeekStart(ds);
+  const emp = findEmployee(currentWeeklyEmpId);
+  if(!emp) return;
+
+  const weekStart = getWeekStart(ds);
+  const patternId = emp.weeklyPatterns?.[weekStart] || emp.patternId;
+  $('weeklyPatternSelect').value = patternId;
+}
+
+function renderWeeklyPatternList(){
+  const box = $('weeklyPatternList');
+  box.innerHTML = '';
+
+  const emp = findEmployee(currentWeeklyEmpId);
+  if(!emp) return;
+
+  const overrides = Object.entries(emp.weeklyPatterns || {}).sort((a,b)=>a[0].localeCompare(b[0]));
+  if(!overrides.length){
+    const empty = document.createElement('div');
+    empty.className = 'weekly-empty';
+    empty.textContent = 'No weekly overrides yet.';
+    box.appendChild(empty);
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  overrides.forEach(([weekStart,patternId])=>{
+    const item = document.createElement('div');
+    item.className = 'weekly-item';
+
+    const left = document.createElement('div');
+    left.className = 'weekly-left';
+
+    const tag = document.createElement('span');
+    tag.className = 'weekly-chip';
+    tag.textContent = weekStart;
+
+    const badge = document.createElement('span');
+    badge.className = 'pattern-badge';
+    badge.style.background = hexToRgba(getPatternColor(patternId),.12);
+    badge.style.color = getPatternColor(patternId);
+    badge.textContent = getPatternName(patternId);
+
+    left.append(tag,badge);
+
+    const right = document.createElement('div');
+    right.style.display = 'flex';
+    right.style.gap = '6px';
+
+    const useBtn = document.createElement('button');
+    useBtn.className = 'btn btn-sm btn-ghost';
+    useBtn.textContent = 'Load';
+    useBtn.addEventListener('click',()=>{
+      $('weeklyTargetDate').value = weekStart;
+      $('weeklyPatternSelect').value = patternId;
+      updateWeeklyModalWeekLabel();
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm btn-danger';
+    delBtn.textContent = 'Remove';
+    delBtn.addEventListener('click',()=>{
+      const targetEmp = findEmployee(currentWeeklyEmpId);
+      if(!targetEmp) return;
+      delete targetEmp.weeklyPatterns[weekStart];
+      renderWeeklyPatternList();
+      markDirtySections('employees','schedule','daily');
+    });
+
+    right.append(useBtn,delBtn);
+    item.append(left,right);
+    frag.appendChild(item);
+  });
+
+  box.appendChild(frag);
+}
+
+function saveWeeklyPatternOverride(){
+  const emp = findEmployee(currentWeeklyEmpId);
+  if(!emp) return;
+
+  const targetDate = $('weeklyTargetDate').value;
+  const patternId = $('weeklyPatternSelect').value;
+
+  if(!targetDate){
+    alert('Please choose a target date.');
+    return;
+  }
+  if(!patternId){
+    alert('Please choose a pattern.');
+    return;
+  }
+
+  const weekStart = getWeekStart(targetDate);
+  if(!emp.weeklyPatterns) emp.weeklyPatterns = {};
+  emp.weeklyPatterns[weekStart] = patternId;
+
+  renderWeeklyPatternList();
+  markDirtySections('employees','schedule','daily');
+}
+
+function removeSelectedWeeklyOverride(){
+  const emp = findEmployee(currentWeeklyEmpId);
+  if(!emp) return;
+  const targetDate = $('weeklyTargetDate').value;
+  if(!targetDate){
+    alert('Please choose a target date.');
+    return;
+  }
+  const weekStart = getWeekStart(targetDate);
+  if(emp.weeklyPatterns && emp.weeklyPatterns[weekStart]){
+    delete emp.weeklyPatterns[weekStart];
+    renderWeeklyPatternList();
+    markDirtySections('employees','schedule','daily');
+  }else{
+    alert('No override exists for that week.');
+  }
 }
 
 function renderEmployees(){
-  const box = document.getElementById('employeeGrid');
-  let html = '';
+  const box = $('employeeGrid');
+  box.innerHTML = '';
+  const frag = document.createDocumentFragment();
+
   employees.forEach((e,i)=>{
     if(!e.weeklyPatterns) e.weeklyPatterns = {};
+
+    const card = document.createElement('div');
+    card.className = 'employee-card';
+
+    const idx = document.createElement('div');
+    idx.className = 'idx';
+    idx.textContent = i + 1;
+
+    const nameInput = document.createElement('input');
+    nameInput.className = 'emp-name';
+    nameInput.value = e.name;
+    nameInput.addEventListener('change',ev=>updateEmployee(e.id,'name',ev.target.value));
+    nameInput.addEventListener('focus',ev=>ev.target.select());
+
+    const regionSelect = document.createElement('select');
+    const optHK = document.createElement('option');
+    optHK.value = 'HK';
+    optHK.textContent = 'Hong Kong';
+    const optCN = document.createElement('option');
+    optCN.value = 'CN';
+    optCN.textContent = 'Mainland China';
+    regionSelect.append(optHK,optCN);
+    regionSelect.value = e.region;
+    regionSelect.addEventListener('change',ev=>updateEmployee(e.id,'region',ev.target.value));
+
+    const patternSelect = document.createElement('select');
+    patterns.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      patternSelect.appendChild(opt);
+    });
+    patternSelect.value = e.patternId;
+    patternSelect.addEventListener('change',ev=>updateEmployee(e.id,'patternId',ev.target.value));
+
     const pc = getPatternColor(e.patternId);
-    const patternOptions = patterns.map(p =>
-      `<option value="${p.id}" ${e.patternId===p.id?'selected':''}>${esc(p.name)}</option>`
-    ).join('');
-    html += `<div class="employee-card">
-  <div class="idx">${i+1}</div>
-  <input class="emp-name" value="${esc(e.name)}" onchange="updateEmployee('${e.id}','name',this.value)" onfocus="this.select()">
-  <select onchange="updateEmployee('${e.id}','region',this.value)">
-    <option value="HK" ${e.region==='HK'?'selected':''}>Hong Kong</option>
-    <option value="CN" ${e.region==='CN'?'selected':''}>Mainland China</option>
-  </select>
-  <select onchange="updateEmployee('${e.id}','patternId',this.value)">
-    ${patternOptions}
-  </select>
-  <span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(e.patternId))}</span>
-  <button class="btn btn-sm btn-ghost" onclick="setEmployeeWeeklyPattern('${e.id}')">Weekly Pattern</button>
-  <span class="del" onclick="removeEmployee('${e.id}')">&times;</span>
-</div>`;
+    const badge = document.createElement('span');
+    badge.className = 'pattern-badge';
+    badge.style.background = hexToRgba(pc,.12);
+    badge.style.color = pc;
+    badge.textContent = getPatternName(e.patternId);
+
+    const overrideCount = Object.keys(e.weeklyPatterns || {}).length;
+    const weeklyBtn = document.createElement('button');
+    weeklyBtn.className = 'btn btn-sm btn-ghost';
+    weeklyBtn.textContent = overrideCount ? `Weekly Pattern (${overrideCount})` : 'Weekly Pattern';
+    weeklyBtn.addEventListener('click',()=>openWeeklyPatternModal(e.id));
+
+    const del = document.createElement('span');
+    del.className = 'del';
+    del.innerHTML = '&times;';
+    del.addEventListener('click',()=>removeEmployee(e.id));
+
+    card.append(idx,nameInput,regionSelect,patternSelect,badge,weeklyBtn,del);
+    frag.appendChild(card);
   });
-  box.innerHTML = html;
-  document.getElementById('empCount').textContent = employees.length;
+
+  box.appendChild(frag);
+  $('empCount').textContent = employees.length;
 }
 
 /* ---------- Date range ---------- */
 function rebuildDaysOnly(){
-  const s = document.getElementById('cfgStart').value;
-  const e = document.getElementById('cfgEnd').value;
+  const s = $('cfgStart').value;
+  const e = $('cfgEnd').value;
   days = [];
   if(!s || !e) return;
-  for(let d=parseDate(s); d<=parseDate(e); d.setDate(d.getDate()+1)){
+
+  const start = parseDate(s);
+  const end = parseDate(e);
+  for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
     days.push(fmtDate(d));
   }
-  document.getElementById('dayCount').textContent = days.length;
-  if(!document.getElementById('detailDate').value && days.length){
-    document.getElementById('detailDate').value = days[0];
+
+  $('dayCount').textContent = days.length;
+
+  if((!$('detailDate').value || !days.includes($('detailDate').value)) && days.length){
+    $('detailDate').value = days[0];
   }
 }
+
 function rebuildDaysAndSave(){
   rebuildDaysOnly();
-  markDirty();
+  markDirtySections('schedule','daily');
 }
 
 /* ---------- Schedule ---------- */
-function cellKey(empId,ds){
-  return empId + '|' + ds;
-}
 function handleCellClick(e,empId,ds){
   const key = cellKey(empId,ds);
   if(e.shiftKey && lastSelectedCell){
@@ -1537,25 +1867,23 @@ function handleCellClick(e,empId,ds){
     }else{
       selectedCells.add(key);
     }
-    lastSelectedCell = {
-      empId,
-      dateStr:ds
-    };
+    lastSelectedCell = { empId, dateStr:ds };
   }
   renderSelection();
 }
+
 function selectCellRange(fromEmpId,fromDate,toEmpId,toDate){
   const fromEmpIndex = employees.findIndex(e=>e.id===fromEmpId);
   const toEmpIndex = employees.findIndex(e=>e.id===toEmpId);
   const fromDateIndex = days.indexOf(fromDate);
   const toDateIndex = days.indexOf(toDate);
-  if(fromEmpIndex === -1 || toEmpIndex === -1 || fromDateIndex === -1 || toDateIndex === -1){
-    return;
-  }
+  if(fromEmpIndex === -1 || toEmpIndex === -1 || fromDateIndex === -1 || toDateIndex === -1) return;
+
   const empStart = Math.min(fromEmpIndex,toEmpIndex);
   const empEnd = Math.max(fromEmpIndex,toEmpIndex);
   const dateStart = Math.min(fromDateIndex,toDateIndex);
   const dateEnd = Math.max(fromDateIndex,toDateIndex);
+
   selectedCells.clear();
   for(let ei=empStart; ei<=empEnd; ei++){
     const emp = employees[ei];
@@ -1564,45 +1892,53 @@ function selectCellRange(fromEmpId,fromDate,toEmpId,toDate){
     }
   }
 }
+
 function clearSelectedCells(){
   selectedCells.clear();
   lastSelectedCell = null;
   renderSelection();
 }
+
 function renderSelection(){
   document.querySelectorAll('.schedule-cell').forEach(td=>{
     td.classList.toggle('selected',selectedCells.has(td.dataset.key));
   });
 }
+
 function deleteSelectedArrangements(){
   if(!selectedCells.size) return false;
   selectedCells.forEach(k=>{
     const [empId,ds] = k.split('|');
     clearEntry(empId,ds);
   });
-  markDirty();
+  markDirtySections('schedule','daily');
   return true;
 }
+
 function deleteSelectedArrangementsWithConfirm(){
   if(!selectedCells.size){
     alert('Please select one or more cells first.');
     return;
   }
-  if(!confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)){
-    return;
-  }
+  if(!confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)) return;
   deleteSelectedArrangements();
 }
+
 function openShiftPopup(empId,ds){
   const emp = findEmployee(empId);
   if(!emp) return;
+
   currentEditEmpId = empId;
   currentEditDate = ds;
+
   const entry = getEntry(empId,ds);
   const rest = isPatternRestDay(emp,ds);
   const holiday = getHolidayInfo(ds,emp.region);
-  document.getElementById('popupTitle').textContent = `${emp.name} · ${ds} ${DAY_NAMES[dow(ds)]}`;
-  let sub = `Pattern: <b style="color:${getPatternColor(emp.patternId)}">${esc(getPatternName(emp.patternId))}</b>`;
+  const effectivePatternId = getEffectivePatternId(emp,ds);
+
+  $('popupTitle').textContent = `${emp.name} · ${ds} ${DAY_NAMES[dow(ds)]}`;
+
+  let sub = `Pattern: <b style="color:${getPatternColor(effectivePatternId)}">${esc(getPatternName(effectivePatternId))}</b>`;
   sub += ` · Region: <b>${emp.region==='HK'?'Hong Kong':'Mainland China'}</b>`;
   if(rest){
     sub += `<br><span style="color:#b91c1c;font-weight:800;">This is a pattern rest day.</span>`;
@@ -1610,108 +1946,155 @@ function openShiftPopup(empId,ds){
   if(holiday){
     sub += `<br><span style="color:#d97706;font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}</span>`;
   }
-  document.getElementById('popupSub').innerHTML = sub;
-  document.getElementById('leaveType').value = entry.leave?.type || '';
-  document.getElementById('leaveDays').value = String(entry.leave?.days || '1');
-  let html = '';
+  $('popupSub').innerHTML = sub;
+
+  $('leaveType').value = entry.leave?.type || '';
+  $('leaveDays').value = String(entry.leave?.days || '1');
+
+  const list = $('shiftCheckList');
+  list.innerHTML = '';
+  const frag = document.createDocumentFragment();
+
   shifts.forEach(s=>{
-    const checked = entry.shifts.includes(s.id);
-    html += `<div class="shift-option ${checked?'checked':''}" onclick="toggleShiftOption(this)">
-      <input type="checkbox" value="${s.id}" ${checked?'checked':''}>
-      <span class="dot" style="background:${s.color}"></span>
-      <span style="font-weight:800;color:${s.color};">${esc(s.name)}</span>
-      <span class="time">${esc(s.time)}${s.overnight?' +1':''}</span>
-    </div>`;
-  });
-  document.getElementById('shiftCheckList').innerHTML = html;
-  document.getElementById('restDayOtBox').innerHTML = rest
-    ? `<label style="display:flex;align-items:center;gap:6px;color:#b91c1c;font-weight:800;">
-        <input type="checkbox" id="popupOvertime" ${entry.overtime?'checked':''}>
-        Rest Day OT
-      </label>`
-    : `<input type="checkbox" id="popupOvertime" style="display:none;">`;
-  document.getElementById('popupClearBtn').onclick = function(){
-    document.querySelectorAll('#shiftCheckList .shift-option').forEach(el=>{
-      el.classList.remove('checked');
-      el.querySelector('input').checked = false;
+    const option = document.createElement('div');
+    option.className = 'shift-option' + (entry.shifts.includes(s.id) ? ' checked' : '');
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = s.id;
+    cb.checked = entry.shifts.includes(s.id);
+
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.style.background = s.color;
+
+    const name = document.createElement('span');
+    name.style.fontWeight = '800';
+    name.style.color = s.color;
+    name.textContent = s.name;
+
+    const time = document.createElement('span');
+    time.className = 'time';
+    time.textContent = `${s.time}${s.overnight ? ' +1' : ''}`;
+
+    option.addEventListener('click',()=>{
+      cb.checked = !cb.checked;
+      option.classList.toggle('checked',cb.checked);
     });
-    document.getElementById('leaveType').value = '';
-    document.getElementById('leaveDays').value = '1';
-    const ot = document.getElementById('popupOvertime');
-    if(ot) ot.checked = false;
-  };
-  document.getElementById('shiftPopup').style.display = 'flex';
+
+    option.append(cb,dot,name,time);
+    frag.appendChild(option);
+  });
+
+  list.appendChild(frag);
+
+  const otBox = $('restDayOtBox');
+  otBox.innerHTML = '';
+  if(rest){
+    const label = document.createElement('label');
+    label.style.display = 'flex';
+    label.style.alignItems = 'center';
+    label.style.gap = '6px';
+    label.style.color = '#b91c1c';
+    label.style.fontWeight = '800';
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = 'popupOvertime';
+    input.checked = entry.overtime;
+
+    label.append(input,document.createTextNode('Rest Day OT'));
+    otBox.appendChild(label);
+  }else{
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = 'popupOvertime';
+    input.style.display = 'none';
+    otBox.appendChild(input);
+  }
+
+  $('shiftPopup').style.display = 'flex';
 }
-function toggleShiftOption(el){
-  const cb = el.querySelector('input');
-  cb.checked = !cb.checked;
-  el.classList.toggle('checked',cb.checked);
-}
+
 function autoFillForwardWorkBlock(empId,sourceDate,sourceEntry){
   const emp = findEmployee(empId);
   if(!emp) return;
+
   const sourceIndex = days.indexOf(sourceDate);
   if(sourceIndex === -1) return;
   if(isPatternRestDay(emp,sourceDate)) return;
   if(sourceEntry.leave) return;
   if(!sourceEntry.shifts || !sourceEntry.shifts.length) return;
+
   const sourceWeekStart = getWeekStart(sourceDate);
-const sourceWeekStart = getWeekStart(sourceDate);
-for(let i=sourceIndex+1; i<days.length; i++){
-  const ds = days[i];
-  if(getWeekStart(ds) !== sourceWeekStart) break;
-  if(isPatternRestDay(emp,ds)) break;
-  const existing = getEntry(empId,ds);
-  if(existing.manual) continue;
-  setEntry(empId,ds,{
-    shifts:[...sourceEntry.shifts],
-    overtime:false,
-    manual:false,
-    leave:null
-  });
+
+  for(let i=sourceIndex+1; i<days.length; i++){
+    const ds = days[i];
+    if(getWeekStart(ds) !== sourceWeekStart) break;
+    if(isPatternRestDay(emp,ds)) break;
+
+    const existing = getEntry(empId,ds);
+    if(existing.manual) continue;
+
+    setEntry(empId,ds,{
+      shifts:[...sourceEntry.shifts],
+      overtime:false,
+      manual:false,
+      leave:null
+    });
+  }
 }
+
 function saveShiftAssignment(){
   const emp = findEmployee(currentEditEmpId);
   if(!emp) return;
+
   const shiftIds = [...document.querySelectorAll('#shiftCheckList input:checked')].map(cb=>cb.value);
-  const leaveType = document.getElementById('leaveType').value;
-  const leaveDays = parseFloat(document.getElementById('leaveDays').value);
+  const leaveType = $('leaveType').value;
+  const leaveDays = parseFloat($('leaveDays').value);
   const leave = leaveType ? {
     type:leaveType,
     days:leaveDays,
     hours:leaveDays === 0.5 ? 4 : 9
   } : null;
+
   const rest = isPatternRestDay(emp,currentEditDate);
-  const overtime = document.getElementById('popupOvertime')?.checked || false;
+  const overtime = $('popupOvertime')?.checked || false;
+
   if(leave && shiftIds.length){
     if(!confirm('This cell has both leave and shift assignments. Continue?')) return;
   }
   if(rest && shiftIds.length && !overtime){
     if(!confirm('This is a rest day. Shifts will not count as coverage unless Rest Day OT is selected. Continue?')) return;
   }
+
   const newEntry = {
     shifts:shiftIds,
     overtime,
     manual:true,
     leave
   };
+
   setEntry(currentEditEmpId,currentEditDate,newEntry);
   autoFillForwardWorkBlock(currentEditEmpId,currentEditDate,newEntry);
   closeShiftPopup();
-  markDirty();
+  markDirtySections('schedule','daily');
 }
+
 function closeShiftPopup(e){
-  if(e && e.target !== document.getElementById('shiftPopup')) return;
-  document.getElementById('shiftPopup').style.display = 'none';
+  if(e && e.target !== $('shiftPopup')) return;
+  $('shiftPopup').style.display = 'none';
 }
+
 function clearAllSchedule(){
   if(!confirm('Clear all arrangements?')) return;
   scheduleData = {};
   employees.forEach(e=>scheduleData[e.id]={});
   selectedCells.clear();
   lastSelectedCell = null;
-  markDirty();
+  markDirtySections('schedule','daily');
 }
+
 function getPinnedOffsets(){
   return {
     empLeft:0,
@@ -1719,116 +2102,207 @@ function getPinnedOffsets(){
     patternLeft:pinnedWidths.employee + pinnedWidths.region
   };
 }
+
+function createCellTag(text,cls){
+  const div = document.createElement('div');
+  div.className = cls;
+  div.textContent = text;
+  return div;
+}
+
 function renderScheduleTable(){
-  const wrap = document.getElementById('scheduleWrap');
+  const wrap = $('scheduleWrap');
+  wrap.innerHTML = '';
+
   if(!employees.length){
-    wrap.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Please add employees first.</div>';
+    const empty = document.createElement('div');
+    empty.style.padding = '30px';
+    empty.style.textAlign = 'center';
+    empty.style.color = 'var(--muted)';
+    empty.textContent = 'Please add employees first.';
+    wrap.appendChild(empty);
     return;
   }
+
   if(!days.length){
-    wrap.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">Please set the date range first.</div>';
+    const empty = document.createElement('div');
+    empty.style.padding = '30px';
+    empty.style.textAlign = 'center';
+    empty.style.color = 'var(--muted)';
+    empty.textContent = 'Please set the date range first.';
+    wrap.appendChild(empty);
     return;
   }
 
   const offsets = getPinnedOffsets();
 
-  let html = `<div class="copy-tip">
-    Click to select a cell. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit.
-    Ctrl/⌘ + C / V is supported. Press Delete / Backspace to delete selected arrangement data.
-  </div>`;
+  const copyTip = document.createElement('div');
+  copyTip.className = 'copy-tip';
+  copyTip.textContent = 'Click to select a cell. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit. Ctrl/⌘ + C / V is supported. Press Delete / Backspace to delete selected arrangement data.';
+  wrap.appendChild(copyTip);
 
-  html += `<table class="schedule-table">
-    <colgroup>
-      <col style="width:${pinnedWidths.employee}px;">
-      <col style="width:${pinnedWidths.region}px;">
-      <col style="width:${pinnedWidths.pattern}px;">
-    </colgroup>
-    <thead><tr>
-    <th class="emp-col col-resize-th" style="left:${offsets.empLeft}px;width:${pinnedWidths.employee}px;min-width:${pinnedWidths.employee}px;">
-      Employee
-      <span class="col-resizer" onmousedown="startResize(event,'employee')"></span>
-    </th>
-    <th class="region-col col-resize-th" style="left:${offsets.regionLeft}px;width:${pinnedWidths.region}px;min-width:${pinnedWidths.region}px;">
-      Region
-      <span class="col-resizer" onmousedown="startResize(event,'region')"></span>
-    </th>
-    <th class="pattern-col col-resize-th" style="left:${offsets.patternLeft}px;width:${pinnedWidths.pattern}px;min-width:${pinnedWidths.pattern}px;">
-      Pattern
-      <span class="col-resizer" onmousedown="startResize(event,'pattern')"></span>
-    </th>`;
+  const table = document.createElement('table');
+  table.className = 'schedule-table';
+
+  const colgroup = document.createElement('colgroup');
+  ['employee','region','pattern'].forEach(key=>{
+    const col = document.createElement('col');
+    col.style.width = `${pinnedWidths[key]}px`;
+    colgroup.appendChild(col);
+  });
+  table.appendChild(colgroup);
+
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+
+  function makePinnedTh(label, className, leftPx, widthPx, colKey){
+    const th = document.createElement('th');
+    th.className = `${className} col-resize-th`;
+    th.style.left = `${leftPx}px`;
+    th.style.width = `${widthPx}px`;
+    th.style.minWidth = `${widthPx}px`;
+    th.textContent = label;
+
+    const resizer = document.createElement('span');
+    resizer.className = 'col-resizer';
+    resizer.addEventListener('mousedown',e=>startResize(e,colKey));
+    th.appendChild(resizer);
+    return th;
+  }
+
+  headRow.appendChild(makePinnedTh('Employee','emp-col',offsets.empLeft,pinnedWidths.employee,'employee'));
+  headRow.appendChild(makePinnedTh('Region','region-col',offsets.regionLeft,pinnedWidths.region,'region'));
+  headRow.appendChild(makePinnedTh('Pattern','pattern-col',offsets.patternLeft,pinnedWidths.pattern,'pattern'));
+
   days.forEach(ds=>{
     const d = parseDate(ds);
     const anyHoliday = getAnyHolidayInfo(ds);
-    html += `<th class="day-col">
-      ${d.getMonth()+1}/${d.getDate()}${anyHoliday?' *':''}<br>
-      <span style="color:var(--muted);">${DAY_NAMES[d.getDay()]}</span>
-    </th>`;
+    const th = document.createElement('th');
+    th.className = 'day-col';
+    th.innerHTML = `${d.getMonth()+1}/${d.getDate()}${anyHoliday?' *':''}<br><span style="color:var(--muted);">${DAY_NAMES[d.getDay()]}</span>`;
+    headRow.appendChild(th);
   });
-  html += '</tr></thead><tbody>';
+
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  const tbodyFrag = document.createDocumentFragment();
 
   employees.forEach(emp=>{
+    const tr = document.createElement('tr');
+
+    const empTd = document.createElement('td');
+    empTd.className = 'emp-col';
+    empTd.style.left = `${offsets.empLeft}px`;
+    empTd.style.width = `${pinnedWidths.employee}px`;
+    empTd.style.minWidth = `${pinnedWidths.employee}px`;
+    empTd.textContent = emp.name;
+
+    const regionTd = document.createElement('td');
+    regionTd.className = 'region-col';
+    regionTd.style.left = `${offsets.regionLeft}px`;
+    regionTd.style.width = `${pinnedWidths.region}px`;
+    regionTd.style.minWidth = `${pinnedWidths.region}px`;
+    regionTd.textContent = emp.region === 'HK' ? 'HK' : 'CN';
+
+    const patternTd = document.createElement('td');
+    patternTd.className = 'pattern-col';
+    patternTd.style.left = `${offsets.patternLeft}px`;
+    patternTd.style.width = `${pinnedWidths.pattern}px`;
+    patternTd.style.minWidth = `${pinnedWidths.pattern}px`;
+
     const pc = getPatternColor(emp.patternId);
-    html += `<tr>
-      <td class="emp-col" style="left:${offsets.empLeft}px;width:${pinnedWidths.employee}px;min-width:${pinnedWidths.employee}px;">${esc(emp.name)}</td>
-      <td class="region-col" style="left:${offsets.regionLeft}px;width:${pinnedWidths.region}px;min-width:${pinnedWidths.region}px;">${emp.region==='HK'?'HK':'CN'}</td>
-      <td class="pattern-col" style="left:${offsets.patternLeft}px;width:${pinnedWidths.pattern}px;min-width:${pinnedWidths.pattern}px;">
-        <span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(emp.patternId))}</span>
-      </td>`;
+    const badge = document.createElement('span');
+    badge.className = 'pattern-badge';
+    badge.style.background = hexToRgba(pc,.12);
+    badge.style.color = pc;
+    badge.textContent = getPatternName(emp.patternId);
+    patternTd.appendChild(badge);
+
+    tr.append(empTd,regionTd,patternTd);
+
     days.forEach(ds=>{
       const entry = getEntry(emp.id,ds);
       const rest = isPatternRestDay(emp,ds);
       const holiday = getHolidayInfo(ds,emp.region);
       const selected = selectedCells.has(cellKey(emp.id,ds));
-      let content = '';
-      if(rest) content += `<div class="off-label">OFF</div>`;
-      if(holiday) content += `<div class="holiday-label">${holiday.flag} PH</div>`;
-      if(entry.leave) content += `<div class="leave-label">${entry.leave.type} ${entry.leave.days}D</div>`;
+      const effectivePatternId = getEffectivePatternId(emp,ds);
+
+      const td = document.createElement('td');
+      td.className = `schedule-cell ${rest ? 'rest-cell' : 'work-cell'} ${selected ? 'selected' : ''}`;
+      td.dataset.key = cellKey(emp.id,ds);
+      td.addEventListener('click',e=>handleCellClick(e,emp.id,ds));
+      td.addEventListener('dblclick',()=>openShiftPopup(emp.id,ds));
+
+      if(rest) td.appendChild(createCellTag('OFF','off-label'));
+      if(holiday) td.appendChild(createCellTag(`${holiday.flag} PH`,'holiday-label'));
+
+      if(emp.weeklyPatterns?.[getWeekStart(ds)]){
+        const hint = document.createElement('div');
+        hint.className = 'cell-hint';
+        hint.style.fontWeight = '800';
+        hint.style.color = getPatternColor(effectivePatternId);
+        hint.textContent = getPatternName(effectivePatternId);
+        td.appendChild(hint);
+      }
+
+      if(entry.leave){
+        td.appendChild(createCellTag(`${entry.leave.type} ${entry.leave.days}D`,'leave-label'));
+      }
+
       if(entry.shifts.length){
-        content += `<div>`;
+        const row = document.createElement('div');
         entry.shifts.forEach(id=>{
           const s = findShift(id);
-          if(s){
-            content += `<span class="shift-dot" style="background:${s.color}" title="${esc(s.name)} ${esc(s.time)}"></span>`;
-          }
+          if(!s) return;
+          const dot = document.createElement('span');
+          dot.className = 'shift-dot';
+          dot.style.background = s.color;
+          dot.title = `${s.name} ${s.time}`;
+          row.appendChild(dot);
         });
-        if(entry.overtime) content += `<span class="ot-label">OT</span>`;
-        content += `</div>`;
+        if(entry.overtime){
+          const ot = createCellTag('OT','ot-label');
+          row.appendChild(ot);
+        }
+        td.appendChild(row);
       }
+
       if(!entry.shifts.length && !entry.leave){
-        content += `<div class="cell-hint">${rest?'Double-click for OT':'Double-click'}</div>`;
+        const hint = document.createElement('div');
+        hint.className = 'cell-hint';
+        hint.textContent = rest ? 'Double-click for OT' : 'Double-click';
+        td.appendChild(hint);
       }
-      const cls = [
-        'schedule-cell',
-        rest ? 'rest-cell' : 'work-cell',
-        selected ? 'selected' : ''
-      ].join(' ');
-      html += `<td class="${cls}" data-key="${cellKey(emp.id,ds)}"
-        onclick="handleCellClick(event,'${emp.id}','${ds}')"
-        ondblclick="openShiftPopup('${emp.id}','${ds}')">${content}</td>`;
+
+      tr.appendChild(td);
     });
-    html += '</tr>';
+
+    tbodyFrag.appendChild(tr);
   });
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
+
+  tbody.appendChild(tbodyFrag);
+  table.appendChild(tbody);
+  wrap.appendChild(table);
 }
 
 /* ---------- Column resize ---------- */
 function startResize(event,colKey){
   event.preventDefault();
   event.stopPropagation();
+
   const startX = event.clientX;
   const startWidth = pinnedWidths[colKey];
-  const minMap = {
-    employee:100,
-    region:70,
-    pattern:80
-  };
+  const minMap = { employee:100, region:70, pattern:80 };
 
   function onMove(e){
     const delta = e.clientX - startX;
     pinnedWidths[colKey] = Math.max(minMap[colKey], startWidth + delta);
-    renderScheduleTable();
+    dirtyFlags.schedule = true;
+    refreshDirty();
   }
+
   function onUp(){
     document.removeEventListener('mousemove',onMove);
     document.removeEventListener('mouseup',onUp);
@@ -1845,18 +2319,16 @@ function getFirstSelected(){
   const arr = [...selectedCells];
   if(!arr.length) return null;
   const [empId,ds] = arr[0].split('|');
-  return {
-    empId,
-    dateStr:ds
-  };
+  return { empId, dateStr:ds };
 }
+
 function copySelectedCell(){
   const first = getFirstSelected();
   if(!first) return false;
-  const e = getEntry(first.empId,first.dateStr);
-  copiedCellData = JSON.parse(JSON.stringify(e));
+  copiedCellData = JSON.parse(JSON.stringify(getEntry(first.empId,first.dateStr)));
   return true;
 }
+
 function copySelectedCellWithFeedback(){
   if(!selectedCells.size){
     alert('Please select one cell to copy first.');
@@ -1866,6 +2338,7 @@ function copySelectedCellWithFeedback(){
     alert('Selected cell copied. You can now select one or more target cells and paste.');
   }
 }
+
 function pasteToSelectedCells(){
   if(!copiedCellData || !selectedCells.size) return false;
   selectedCells.forEach(k=>{
@@ -1875,9 +2348,10 @@ function pasteToSelectedCells(){
       manual:true
     });
   });
-  markDirty();
+  markDirtySections('schedule','daily');
   return true;
 }
+
 function pasteToSelectedCellsWithFeedback(){
   if(!copiedCellData){
     alert('No copied cell found. Please copy one cell first.');
@@ -1888,20 +2362,15 @@ function pasteToSelectedCellsWithFeedback(){
     return;
   }
   const count = selectedCells.size;
-  if(!confirm(`Paste the copied arrangement to ${count} selected cell(s)?`)){
-    return;
-  }
+  if(!confirm(`Paste the copied arrangement to ${count} selected cell(s)?`)) return;
   pasteToSelectedCells();
 }
 
 /* ---------- Coverage ---------- */
-function getShiftBlocks(shift){
+function getShiftBlocksForToday(shift){
   const blocks = new Set();
   if(shift.overnight){
     for(let m=shift.startMin; m<1440; m+=30){
-      blocks.add(Math.floor(m/30));
-    }
-    for(let m=0; m<shift.endMin; m+=30){
       blocks.add(Math.floor(m/30));
     }
   }else{
@@ -1911,36 +2380,63 @@ function getShiftBlocks(shift){
   }
   return [...blocks].sort((a,b)=>a-b);
 }
+
+function getShiftBlocksFromPreviousDay(shift){
+  const blocks = new Set();
+  if(!shift.overnight) return [];
+  for(let m=0; m<shift.endMin; m+=30){
+    blocks.add(Math.floor(m/30));
+  }
+  return [...blocks].sort((a,b)=>a-b);
+}
+
 function computeDailyCoverage(ds){
   const coverage = new Array(48).fill(0);
   const coveredBy = new Array(48).fill(null).map(()=>[]);
   const shiftAssignments = new Map();
+
+  const prevDate = parseDate(ds);
+  prevDate.setDate(prevDate.getDate()-1);
+  const prevDs = fmtDate(prevDate);
+
   employees.forEach(emp=>{
-    const entry = getEntry(emp.id,ds);
-    if(entry.leave && entry.leave.days >= 1) return;
-    if(isPatternRestDay(emp,ds) && !entry.overtime) return;
-    entry.shifts.forEach(shiftId=>{
-      const s = findShift(shiftId);
-      if(!s) return;
-      if(!shiftAssignments.has(shiftId)){
-        shiftAssignments.set(shiftId,[]);
-      }
-      shiftAssignments.get(shiftId).push(emp.name);
-      getShiftBlocks(s).forEach(b=>{
-        coverage[b]++;
-        coveredBy[b].push(emp.name);
+    const todayEntry = getEntry(emp.id,ds);
+
+    if(!(todayEntry.leave && todayEntry.leave.days >= 1) && (!isPatternRestDay(emp,ds) || todayEntry.overtime)){
+      todayEntry.shifts.forEach(shiftId=>{
+        const s = findShift(shiftId);
+        if(!s) return;
+        if(!shiftAssignments.has(shiftId)) shiftAssignments.set(shiftId,[]);
+        shiftAssignments.get(shiftId).push(emp.name);
+        getShiftBlocksForToday(s).forEach(b=>{
+          coverage[b]++;
+          coveredBy[b].push(emp.name);
+        });
       });
-    });
+    }
+
+    const prevEntry = getEntry(emp.id,prevDs);
+    if(!(prevEntry.leave && prevEntry.leave.days >= 1) && (!isPatternRestDay(emp,prevDs) || prevEntry.overtime)){
+      prevEntry.shifts.forEach(shiftId=>{
+        const s = findShift(shiftId);
+        if(!s || !s.overnight) return;
+        if(!shiftAssignments.has(shiftId)) shiftAssignments.set(shiftId,[]);
+        shiftAssignments.get(shiftId).push(emp.name);
+        getShiftBlocksFromPreviousDay(s).forEach(b=>{
+          coverage[b]++;
+          coveredBy[b].push(emp.name);
+        });
+      });
+    }
   });
+
   for(let i=0;i<48;i++){
     coveredBy[i] = [...new Set(coveredBy[i])];
   }
-  return {
-    coverage,
-    coveredBy,
-    shiftAssignments
-  };
+
+  return { coverage, coveredBy, shiftAssignments };
 }
+
 function findGaps(cov){
   const gaps = [];
   let start = -1;
@@ -1948,99 +2444,172 @@ function findGaps(cov){
     if(cov[i] === 0){
       if(start === -1) start = i;
     }else if(start !== -1){
-      gaps.push({
-        start,
-        end:i-1
-      });
+      gaps.push({ start, end:i-1 });
       start = -1;
     }
   }
   if(start !== -1){
-    gaps.push({
-      start,
-      end:47
-    });
+    gaps.push({ start, end:47 });
   }
   return gaps;
 }
+
 function fmtBlockTime(i){
   const h = Math.floor(i/2);
   const m = (i%2)*30;
   return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
 }
+
 function renderDailyView(){
-  let ds = document.getElementById('detailDate').value;
+  let ds = $('detailDate').value;
   if(!ds && days.length){
     ds = days[0];
-    document.getElementById('detailDate').value = ds;
+    $('detailDate').value = ds;
   }
   if(!ds) return;
-  const {
-    coverage,
-    shiftAssignments
-  } = computeDailyCoverage(ds);
+
+  const { coverage, shiftAssignments } = computeDailyCoverage(ds);
   const gaps = findGaps(coverage);
   const anyHoliday = getAnyHolidayInfo(ds);
-  let tagHtml = `<span class="day-tag" style="background:#e5e7eb;color:#374151;">${DAY_NAMES[dow(ds)]}</span>`;
+
+  const dayTags = $('dayTags');
+  dayTags.innerHTML = '';
+  const tag1 = document.createElement('span');
+  tag1.className = 'day-tag';
+  tag1.style.background = '#e5e7eb';
+  tag1.style.color = '#374151';
+  tag1.textContent = DAY_NAMES[dow(ds)];
+  dayTags.appendChild(tag1);
+
   if(anyHoliday){
-    tagHtml += `<span class="day-tag" style="background:#fffbeb;color:#d97706;">${esc(anyHoliday.label)} · ${esc(anyHoliday.name)}</span>`;
+    const tag2 = document.createElement('span');
+    tag2.className = 'day-tag';
+    tag2.style.background = '#fffbeb';
+    tag2.style.color = '#d97706';
+    tag2.textContent = `${anyHoliday.label} · ${anyHoliday.name}`;
+    dayTags.appendChild(tag2);
   }
-  document.getElementById('dayTags').innerHTML = tagHtml;
-  let html = `<div class="coverage-timeline">
-    <h3>📶 24-Hour Coverage Heatmap</h3>
-    <div class="coverage-bar-wrap">`;
+
+  const content = $('dailyContent');
+  content.innerHTML = '';
+
+  const timeline = document.createElement('div');
+  timeline.className = 'coverage-timeline';
+
+  const title = document.createElement('h3');
+  title.textContent = '📶 24-Hour Coverage Heatmap';
+  timeline.appendChild(title);
+
+  const barWrap = document.createElement('div');
+  barWrap.className = 'coverage-bar-wrap';
+
   gaps.forEach(g=>{
     const left = g.start / 48 * 100;
     const width = (g.end - g.start + 1) / 48 * 100;
     const mid = left + width / 2;
-    html += `<div class="gap-marker" style="left:${left}%;width:${width}%"></div>
-      <div class="gap-label" style="left:${mid}%">⚠ ${fmtBlockTime(g.start)}-${fmtBlockTime(g.end+1)}</div>`;
+
+    const marker = document.createElement('div');
+    marker.className = 'gap-marker';
+    marker.style.left = `${left}%`;
+    marker.style.width = `${width}%`;
+
+    const label = document.createElement('div');
+    label.className = 'gap-label';
+    label.style.left = `${mid}%`;
+    label.textContent = `⚠ ${fmtBlockTime(g.start)}-${fmtBlockTime(g.end+1)}`;
+
+    barWrap.append(marker,label);
   });
-  html += `<div class="coverage-bar">`;
+
+  const bar = document.createElement('div');
+  bar.className = 'coverage-bar';
+
   let prev = coverage[0];
   let seg = 0;
   for(let i=1;i<=48;i++){
     if(i === 48 || coverage[i] !== prev){
       const width = (i - seg) / 48 * 100;
       const cls = prev === 0 ? 'cover-0' : prev === 1 ? 'cover-1' : prev === 2 ? 'cover-2' : prev === 3 ? 'cover-3' : 'cover-4p';
-      html += `<div class="coverage-seg ${cls}" style="width:${width}%"
-        title="${prev} staff ${fmtBlockTime(seg)}-${fmtBlockTime(i)}"></div>`;
+      const segDiv = document.createElement('div');
+      segDiv.className = `coverage-seg ${cls}`;
+      segDiv.style.width = `${width}%`;
+      segDiv.title = `${prev} staff ${fmtBlockTime(seg)}-${fmtBlockTime(i)}`;
+      bar.appendChild(segDiv);
       seg = i;
       prev = i < 48 ? coverage[i] : 0;
     }
   }
-  html += `</div></div><div class="coverage-labels">`;
-  for(let h=0; h<=24; h+=2){
-    html += `<span>${String(h).padStart(2,'0')}:00</span>`;
-  }
-  html += `</div></div>`;
 
-  html += `<h3>🕐 Slot Assignment Detail</h3>
-    <table class="slot-table">
-      <thead>
-        <tr>
-          <th>Shift</th>
-          <th>Time</th>
-          <th>Staff on Duty</th>
-          <th>Headcount</th>
-        </tr>
-      </thead>
-      <tbody>`;
-  shifts.forEach(s=>{
-    const staff = shiftAssignments.get(s.id) || [];
-    html += `<tr>
-      <td style="font-weight:900;color:${s.color};">
-        <span class="shift-dot" style="background:${s.color};width:10px;height:10px;"></span>
-        ${esc(s.name)}
-      </td>
-      <td>${esc(s.time)}${s.overnight?' +1':''}</td>
-      <td>${staff.length ? esc(staff.join(', ')) : '<span class="empty-cell">No coverage</span>'}</td>
-      <td class="${staff.length?'emp-cell':'empty-cell'}">${staff.length}</td>
-    </tr>`;
+  barWrap.appendChild(bar);
+  timeline.appendChild(barWrap);
+
+  const labels = document.createElement('div');
+  labels.className = 'coverage-labels';
+  for(let h=0; h<=24; h+=2){
+    const span = document.createElement('span');
+    span.textContent = `${String(h).padStart(2,'0')}:00`;
+    labels.appendChild(span);
+  }
+  timeline.appendChild(labels);
+  content.appendChild(timeline);
+
+  const h3 = document.createElement('h3');
+  h3.textContent = '🕐 Slot Assignment Detail';
+  content.appendChild(h3);
+
+  const table = document.createElement('table');
+  table.className = 'slot-table';
+
+  const thead = document.createElement('thead');
+  const trh = document.createElement('tr');
+  ['Shift','Time','Staff on Duty','Headcount'].forEach(t=>{
+    const th = document.createElement('th');
+    th.textContent = t;
+    trh.appendChild(th);
   });
-  html += `</tbody></table>`;
-  document.getElementById('dailyContent').innerHTML = html;
-  const warn = document.getElementById('gapWarning');
+  thead.appendChild(trh);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  shifts.forEach(s=>{
+    const tr = document.createElement('tr');
+
+    const td1 = document.createElement('td');
+    td1.style.fontWeight = '900';
+    td1.style.color = s.color;
+    const dot = document.createElement('span');
+    dot.className = 'shift-dot';
+    dot.style.background = s.color;
+    dot.style.width = '10px';
+    dot.style.height = '10px';
+    td1.append(dot,document.createTextNode(' ' + s.name));
+
+    const td2 = document.createElement('td');
+    td2.textContent = `${s.time}${s.overnight ? ' +1' : ''}`;
+
+    const td3 = document.createElement('td');
+    const staff = [...new Set(shiftAssignments.get(s.id) || [])];
+    if(staff.length){
+      td3.textContent = staff.join(', ');
+    }else{
+      const span = document.createElement('span');
+      span.className = 'empty-cell';
+      span.textContent = 'No coverage';
+      td3.appendChild(span);
+    }
+
+    const td4 = document.createElement('td');
+    td4.className = staff.length ? 'emp-cell' : 'empty-cell';
+    td4.textContent = String(staff.length);
+
+    tr.append(td1,td2,td3,td4);
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  content.appendChild(table);
+
+  const warn = $('gapWarning');
   if(gaps.length){
     warn.className = 'gap-warning err';
     warn.textContent = '⚠ Coverage gap: ' + gaps.map(g=>fmtBlockTime(g.start)+'-'+fmtBlockTime(g.end+1)).join(', ');
@@ -2049,53 +2618,46 @@ function renderDailyView(){
     warn.textContent = '✅ Full 24-hour coverage, zero gaps.';
   }
 }
+
 function shiftDay(delta){
-  const el = document.getElementById('detailDate');
+  const el = $('detailDate');
   const base = el.value || days[0] || fmtDate(new Date());
   const d = parseDate(base);
   d.setDate(d.getDate()+delta);
   el.value = fmtDate(d);
-  renderDailyView();
+  dirtyFlags.daily = true;
+  refreshDirty();
 }
+
 function goToToday(){
-  document.getElementById('detailDate').value = fmtDate(new Date());
-  renderDailyView();
-}
-
-/* ---------- Render ---------- */
-function refreshAll(){
-  renderPatternEditor();
-  renderShiftEditor();
-  renderShiftLegendInline();
-  renderEmployees();
-  renderScheduleTable();
-  renderDailyView();
-}
-
-/* ---------- Save helpers ---------- */
-function markDirty(){
-  refreshAll();
-  saveToLocalCacheOnly();
-  scheduleOnlineSave();
+  $('detailDate').value = fmtDate(new Date());
+  dirtyFlags.daily = true;
+  refreshDirty();
 }
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown',e=>{
   const tag = document.activeElement?.tagName?.toLowerCase();
   const isTyping = ['input','select','textarea'].includes(tag);
+
   if(e.key === 'Escape'){
     closeShiftPopup();
+    closeWeeklyPatternModal();
   }
-  if(e.key === 'Enter' && document.activeElement === document.getElementById('newEmpName')){
+
+  if(e.key === 'Enter' && document.activeElement === $('newEmpName')){
     addEmployee();
   }
+
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && selectedCells.size && !isTyping){
     copySelectedCell();
   }
+
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v' && selectedCells.size && !isTyping){
     e.preventDefault();
     pasteToSelectedCells();
   }
+
   if((e.key === 'Delete' || e.key === 'Backspace') && selectedCells.size && !isTyping){
     e.preventDefault();
     if(confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)){
@@ -2104,29 +2666,76 @@ document.addEventListener('keydown',e=>{
   }
 });
 
+/* ---------- Event bindings ---------- */
+function bindStaticEvents(){
+  $('btnSaveOnline').addEventListener('click',saveOnlineNow);
+  $('btnLoadOnline').addEventListener('click',loadOnline);
+  $('btnSaveLocal').addEventListener('click',()=>saveToLocal());
+  $('btnLoadLocal').addEventListener('click',loadFromLocal);
+  $('btnExportBackup').addEventListener('click',exportBackupJSON);
+  $('btnImportBackup').addEventListener('click',()=>$('backupFileInput').click());
+  $('backupFileInput').addEventListener('change',importBackupJSON);
+  $('btnPrint').addEventListener('click',()=>window.print());
+
+  $('btnAddPattern').addEventListener('click',addPattern);
+  $('btnAddShift').addEventListener('click',addShift);
+  $('btnAddEmployee').addEventListener('click',()=>addEmployee());
+  $('btnAddBatchEmployees').addEventListener('click',addBatchEmployees);
+
+  $('cfgStart').addEventListener('change',rebuildDaysAndSave);
+  $('cfgEnd').addEventListener('change',rebuildDaysAndSave);
+  $('btnRebuildDays').addEventListener('click',rebuildDaysAndSave);
+
+  $('btnCopySelected').addEventListener('click',copySelectedCellWithFeedback);
+  $('btnPasteSelected').addEventListener('click',pasteToSelectedCellsWithFeedback);
+  $('btnDeleteSelected').addEventListener('click',deleteSelectedArrangementsWithConfirm);
+  $('btnClearSelection').addEventListener('click',clearSelectedCells);
+  $('btnClearAllSchedule').addEventListener('click',clearAllSchedule);
+
+  $('btnPrevDay').addEventListener('click',()=>shiftDay(-1));
+  $('btnPrevWeek').addEventListener('click',()=>shiftDay(-7));
+  $('btnNextWeek').addEventListener('click',()=>shiftDay(7));
+  $('btnNextDay').addEventListener('click',()=>shiftDay(1));
+  $('btnToday').addEventListener('click',goToToday);
+  $('detailDate').addEventListener('change',()=>{
+    dirtyFlags.daily = true;
+    refreshDirty();
+  });
+
+  $('shiftPopup').addEventListener('click',e=>closeShiftPopup(e));
+  $('popupCancelBtn').addEventListener('click',()=>closeShiftPopup());
+  $('popupConfirmBtn').addEventListener('click',saveShiftAssignment);
+  $('popupClearBtn').addEventListener('click',()=>{
+    document.querySelectorAll('#shiftCheckList input').forEach(cb=>{
+      cb.checked = false;
+      cb.closest('.shift-option')?.classList.remove('checked');
+    });
+    $('leaveType').value = '';
+    $('leaveDays').value = '1';
+    const ot = $('popupOvertime');
+    if(ot) ot.checked = false;
+  });
+
+  $('weeklyPatternModal').addEventListener('click',e=>{
+    if(e.target === $('weeklyPatternModal')) closeWeeklyPatternModal();
+  });
+  $('weeklyPatternCloseBtn').addEventListener('click',closeWeeklyPatternModal);
+  $('weeklyPatternSaveBtn').addEventListener('click',saveWeeklyPatternOverride);
+  $('weeklyPatternRemoveBtn').addEventListener('click',removeSelectedWeeklyOverride);
+  $('weeklyTargetDate').addEventListener('change',updateWeeklyModalWeekLabel);
+
+  $('localLoadInput').addEventListener('change',handleLocalFileLoad);
+}
+
 /* ---------- Init ---------- */
 function initDefaults(){
   patterns = [
-    {
-      id:'p1',
-      name:'Mon-Fri',
-      restDays:[0,6],
-      color:'#1677ff'
-    },
-    {
-      id:'p2',
-      name:'Tue-Sat',
-      restDays:[0,1],
-      color:'#52c41a'
-    },
-    {
-      id:'p3',
-      name:'Sun-Thu',
-      restDays:[5,6],
-      color:'#fa8c16'
-    }
+    { id:'p1', name:'Mon-Fri', restDays:[0,6], color:'#1677ff' },
+    { id:'p2', name:'Tue-Sat', restDays:[0,1], color:'#52c41a' },
+    { id:'p3', name:'Sun-Thu', restDays:[5,6], color:'#fa8c16' }
   ];
   patternIdCounter = 3;
+
   shifts = [
     {id:'s1',name:'Shift 1',time:'08:00-17:00',startMin:480,endMin:1020,overnight:false,color:'#0891b2'},
     {id:'s2',name:'Shift 2',time:'08:30-17:30',startMin:510,endMin:1050,overnight:false,color:'#1677ff'},
@@ -2141,28 +2750,31 @@ function initDefaults(){
     {id:'s11',name:'Night 3',time:'23:00-08:00',startMin:1380,endMin:480,overnight:true,color:'#8c8c8c'}
   ];
   shiftIdCounter = 11;
+
   employees = [];
   scheduleData = {};
   employeeIdCounter = 0;
-  pinnedWidths = {
-    employee:150,
-    region:82,
-    pattern:96
-  };
+
+  pinnedWidths = { employee:150, region:82, pattern:96 };
+
   for(let i=0;i<14;i++){
     const id = newEmployeeId();
     employees.push({
-  id,
-  name:'Staff ' + (i+1),
-  region:i%2===0 ? 'HK' : 'CN',
-  patternId:patterns[i%patterns.length].id,
-  weeklyPatterns:{}
-});
+      id,
+      name:'Staff ' + (i+1),
+      region:i%2===0 ? 'HK' : 'CN',
+      patternId:patterns[i % patterns.length].id,
+      weeklyPatterns:{}
+    });
     scheduleData[id] = {};
   }
-  document.getElementById('detailDate').value = document.getElementById('cfgStart').value;
+
+  $('detailDate').value = $('cfgStart').value;
 }
+
 async function init(){
+  bindStaticEvents();
+
   const raw = localStorage.getItem(LOCAL_KEY);
   if(raw){
     try{
@@ -2171,20 +2783,27 @@ async function init(){
       console.warn(err);
       initDefaults();
       rebuildDaysOnly();
-      refreshAll();
+      Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
+      refreshDirty();
     }
   }else{
     initDefaults();
     rebuildDaysOnly();
-    refreshAll();
+    Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
+    refreshDirty();
   }
+
   await loadOnline();
   connectRealtime();
-  if(!document.getElementById('detailDate').value && days.length){
-    document.getElementById('detailDate').value = days[0];
+
+  if(!$('detailDate').value && days.length){
+    $('detailDate').value = days[0];
   }
-  refreshAll();
+
+  Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
+  refreshDirty();
 }
+
 init();
 </script>
 </body>
