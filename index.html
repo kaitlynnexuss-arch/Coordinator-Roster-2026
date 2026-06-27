@@ -224,31 +224,42 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   top:0;
   z-index:20;
 }
-.emp-col{
+
+.emp-col,
+.region-col,
+.pattern-col{
   position:sticky;
-  left:0;
   background:#f8fafc!important;
+}
+
+.emp-col{
+  left:0;
   z-index:21;
   min-width:150px;
   width:150px;
   text-align:left!important;
   font-weight:800;
 }
+
 .region-col{
-  position:sticky;
   left:150px;
-  background:#f8fafc!important;
   z-index:21;
   min-width:82px;
   width:82px;
 }
+
 .pattern-col{
-  position:sticky;
   left:232px;
-  background:#f8fafc!important;
   z-index:21;
   min-width:96px;
   width:96px;
+}
+
+.schedule-table thead .emp-col,
+.schedule-table thead .region-col,
+.schedule-table thead .pattern-col{
+  top:0;
+  z-index:30;
 }
 .day-col{min-width:88px;font-size:10px}
 .schedule-cell{
