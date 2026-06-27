@@ -867,9 +867,46 @@ function getPatternColor(id){
   const p = findPattern(id);
   return p ? p.color : '#999';
 }
+function getWeekStart(ds){
+  const d = parseDate(ds);
+  const day = d.getDay();
+  d.setDate(d.getDate() - day);
+  return fmtDate(d);
+}
+function getEffectivePatternId(emp,ds){
+  if(!emp) return '';
+  const weekStart = getWeekStart(ds);
+  if(emp.weeklyPatterns && emp.weeklyPatterns[weekStart]){
+    return emp.weeklyPatterns[weekStart];
+  }
+  return emp.patternId;
+}
+function getEffectivePattern(emp,ds){
+  return findPattern(getEffectivePatternId(emp,ds));
+}
+  function getWeekStart(ds){
+  const d = parseDate(ds);
+  const day = d.getDay(); // Sun = 0
+  d.setDate(d.getDate() - day);
+  return fmtDate(d);
+}
+
+function getEffectivePatternId(emp,ds){
+  if(!emp) return '';
+  const weekStart = getWeekStart(ds);
+  if(emp.weeklyPatterns && emp.weeklyPatterns[weekStart]){
+    return emp.weeklyPatterns[weekStart];
+  }
+  return emp.patternId;
+}
+
+function getEffectivePattern(emp,ds){
+  return findPattern(getEffectivePatternId(emp,ds));
+}
 function isPatternRestDay(emp,ds){
-  const p = findPattern(emp.patternId);
+  const p = getEffectivePattern(emp,ds);
   return p ? p.restDays.includes(dow(ds)) : false;
+}
 }
 function parseTimeRange(range){
   const clean = String(range || '').replace(/[–—]/g,'-').trim();
@@ -964,9 +1001,10 @@ function applyState(state){
   shiftIdCounter = state.counters?.shiftIdCounter ?? Math.max(0,...shifts.map(s=>parseInt(String(s.id).slice(1),10)||0));
   employeeIdCounter = state.counters?.employeeIdCounter ?? Math.max(0,...employees.map(e=>parseInt(String(e.id).slice(1),10)||0));
   employees.forEach(e=>{
-    if(!scheduleData[e.id]) scheduleData[e.id] = {};
-    if(!e.region) e.region = 'HK';
-  });
+  if(!scheduleData[e.id]) scheduleData[e.id] = {};
+  if(!e.region) e.region = 'HK';
+  if(!e.weeklyPatterns) e.weeklyPatterns = {};
+});
   rebuildDaysOnly();
   refreshAll();
   saveToLocalCacheOnly();
@@ -1345,12 +1383,14 @@ function addEmployee(name){
     id,
     name:n,
     region:'HK',
-    patternId:patterns[0]?.id || ''
+    patternId:patterns[0]?.id || '',
+    weeklyPatterns:{}
   });
   scheduleData[id] = {};
   input.value = '';
   markDirty();
 }
+
 function addBatchEmployees(){
   const n = parseInt(prompt('How many employees would you like to add?','14'),10);
   if(!n || n <= 0) return;
@@ -1360,12 +1400,53 @@ function addBatchEmployees(){
       id,
       name:'Staff ' + (employees.length + 1),
       region:'HK',
-      patternId:patterns[employees.length % patterns.length]?.id || ''
+      patternId:patterns[employees.length % patterns.length]?.id || '',
+      weeklyPatterns:{}
     });
     scheduleData[id] = {};
   }
   markDirty();
 }
+
+function setEmployeeWeeklyPattern(empId){
+  const emp = findEmployee(empId);
+  if(!emp) return;
+
+  const defaultDate = days[0] || fmtDate(new Date());
+  const inputDate = prompt('Enter any date in the target week (YYYY-MM-DD):', defaultDate);
+  if(!inputDate) return;
+
+  const weekStart = getWeekStart(inputDate);
+
+  let msg = `Select pattern for week starting ${weekStart}:\n`;
+  patterns.forEach((p,i)=>{
+    msg += `${i+1}. ${p.name}\n`;
+  });
+  msg += `\nEnter number.\nEnter 0 to clear weekly override.`;
+
+  const picked = prompt(msg, '1');
+  if(picked === null) return;
+
+  const num = parseInt(picked,10);
+
+  if(num === 0){
+    if(!emp.weeklyPatterns) emp.weeklyPatterns = {};
+    delete emp.weeklyPatterns[weekStart];
+    markDirty();
+    return;
+  }
+
+  const targetPattern = patterns[num - 1];
+  if(!targetPattern){
+    alert('Invalid selection.');
+    return;
+  }
+
+  if(!emp.weeklyPatterns) emp.weeklyPatterns = {};
+  emp.weeklyPatterns[weekStart] = targetPattern.id;
+  markDirty();
+}
+
 function updateEmployee(id,key,value){
   const e = findEmployee(id);
   if(!e) return;
@@ -1383,6 +1464,7 @@ function updateEmployee(id,key,value){
   if(key === 'patternId') e.patternId = value;
   markDirty();
 }
+
 function removeEmployee(id){
   const e = findEmployee(id);
   if(!e) return;
@@ -1392,27 +1474,30 @@ function removeEmployee(id){
   selectedCells = new Set([...selectedCells].filter(k=>!k.startsWith(id+'|')));
   markDirty();
 }
+
 function renderEmployees(){
   const box = document.getElementById('employeeGrid');
   let html = '';
   employees.forEach((e,i)=>{
+    if(!e.weeklyPatterns) e.weeklyPatterns = {};
     const pc = getPatternColor(e.patternId);
     const patternOptions = patterns.map(p =>
       `<option value="${p.id}" ${e.patternId===p.id?'selected':''}>${esc(p.name)}</option>`
     ).join('');
     html += `<div class="employee-card">
-      <div class="idx">${i+1}</div>
-      <input class="emp-name" value="${esc(e.name)}" onchange="updateEmployee('${e.id}','name',this.value)" onfocus="this.select()">
-      <select onchange="updateEmployee('${e.id}','region',this.value)">
-        <option value="HK" ${e.region==='HK'?'selected':''}>Hong Kong</option>
-        <option value="CN" ${e.region==='CN'?'selected':''}>Mainland China</option>
-      </select>
-      <select onchange="updateEmployee('${e.id}','patternId',this.value)">
-        ${patternOptions}
-      </select>
-      <span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(e.patternId))}</span>
-      <span class="del" onclick="removeEmployee('${e.id}')">&times;</span>
-    </div>`;
+  <div class="idx">${i+1}</div>
+  <input class="emp-name" value="${esc(e.name)}" onchange="updateEmployee('${e.id}','name',this.value)" onfocus="this.select()">
+  <select onchange="updateEmployee('${e.id}','region',this.value)">
+    <option value="HK" ${e.region==='HK'?'selected':''}>Hong Kong</option>
+    <option value="CN" ${e.region==='CN'?'selected':''}>Mainland China</option>
+  </select>
+  <select onchange="updateEmployee('${e.id}','patternId',this.value)">
+    ${patternOptions}
+  </select>
+  <span class="pattern-badge" style="background:${hexToRgba(pc,.12)};color:${pc};">${esc(getPatternName(e.patternId))}</span>
+  <button class="btn btn-sm btn-ghost" onclick="setEmployeeWeeklyPattern('${e.id}')">Weekly Pattern</button>
+  <span class="del" onclick="removeEmployee('${e.id}')">&times;</span>
+</div>`;
   });
   box.innerHTML = html;
   document.getElementById('empCount').textContent = employees.length;
@@ -1570,18 +1655,20 @@ function autoFillForwardWorkBlock(empId,sourceDate,sourceEntry){
   if(isPatternRestDay(emp,sourceDate)) return;
   if(sourceEntry.leave) return;
   if(!sourceEntry.shifts || !sourceEntry.shifts.length) return;
-  for(let i=sourceIndex+1; i<days.length; i++){
-    const ds = days[i];
-    if(isPatternRestDay(emp,ds)) break;
-    const existing = getEntry(empId,ds);
-    if(existing.manual) continue;
-    setEntry(empId,ds,{
-      shifts:[...sourceEntry.shifts],
-      overtime:false,
-      manual:false,
-      leave:null
-    });
-  }
+  const sourceWeekStart = getWeekStart(sourceDate);
+const sourceWeekStart = getWeekStart(sourceDate);
+for(let i=sourceIndex+1; i<days.length; i++){
+  const ds = days[i];
+  if(getWeekStart(ds) !== sourceWeekStart) break;
+  if(isPatternRestDay(emp,ds)) break;
+  const existing = getEntry(empId,ds);
+  if(existing.manual) continue;
+  setEntry(empId,ds,{
+    shifts:[...sourceEntry.shifts],
+    overtime:false,
+    manual:false,
+    leave:null
+  });
 }
 function saveShiftAssignment(){
   const emp = findEmployee(currentEditEmpId);
@@ -2065,11 +2152,12 @@ function initDefaults(){
   for(let i=0;i<14;i++){
     const id = newEmployeeId();
     employees.push({
-      id,
-      name:'Staff ' + (i+1),
-      region:i%2===0 ? 'HK' : 'CN',
-      patternId:patterns[i%patterns.length].id
-    });
+  id,
+  name:'Staff ' + (i+1),
+  region:i%2===0 ? 'HK' : 'CN',
+  patternId:patterns[i%patterns.length].id,
+  weeklyPatterns:{}
+});
     scheduleData[id] = {};
   }
   document.getElementById('detailDate').value = document.getElementById('cfgStart').value;
