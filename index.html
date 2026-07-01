@@ -262,7 +262,8 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   height:52px;
   cursor:pointer;
   position:relative;
-  user-select:text;
+  user-select:none;
+  -webkit-user-select:none;
 }
 .schedule-cell:hover{background:#eff6ff}
 .schedule-cell.rest-cell{background:#fff1f2}
@@ -272,7 +273,9 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   outline-offset:-2px;
   box-shadow:inset 0 0 0 2px rgba(22,119,255,.22);
 }
-.off-label,.leave-label,.holiday-label,.ot-label{
+.schedule-cell.custom-rest-cell{background:#fff7ed}
+.schedule-cell.custom-rest-cell:hover{background:#ffedd5}
+.off-label,.leave-label,.holiday-label,.ot-label,.custom-label{
   display:inline-block;
   font-size:9px;
   font-weight:900;
@@ -284,6 +287,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
 .leave-label{color:#7c3aed;background:#ede9fe;border:1px solid #c4b5fd}
 .holiday-label{color:#d97706;background:#fffbeb;border:1px solid #fde68a}
 .ot-label{color:#d97706;background:#fff7ed;border:1px solid #fed7aa}
+.custom-label{color:#9a3412;background:#ffedd5;border:1px solid #fdba74}
 .cell-hint{font-size:9px;color:var(--muted)}
 .shift-dot{
   width:8px;
@@ -565,9 +569,23 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   align-items:center;
 }
 .modal-row{margin-bottom:10px}
+.quick-edit-bar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  padding:8px 10px;
+  background:#f8fafc;
+  border-bottom:1px solid var(--border);
+}
+.quick-edit-bar label{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:700;
+}
 @media print{
   body{background:#fff;padding:0}
-  .app-header,.btn,.note,.add-line,.day-picker,.popup-overlay,.col-resizer{display:none!important}
+  .app-header,.btn,.note,.add-line,.day-picker,.popup-overlay,.col-resizer,.quick-edit-bar{display:none!important}
   .card{box-shadow:none;border:1px solid #ddd}
   @page{size:A3 landscape;margin:8mm}
 }
@@ -594,7 +612,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <button class="btn btn-outline" id="btnPrint">🖨 Print</button>
     </div>
   </div>
-
   <div class="card">
     <div class="note">
       <span>
@@ -603,7 +620,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <span>Employees: <b id="empCount">0</b></span>
     </div>
   </div>
-
   <div class="card">
     <div class="card-header">
       <h2>🔀 Shift Pattern Manager</h2>
@@ -616,7 +632,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <div class="add-line" id="btnAddPattern">+ Add New Shift Pattern</div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-header">
       <h2>🕐 Shift Manager</h2>
@@ -629,7 +644,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <div id="shiftEditor"></div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-header">
       <h2>👥 Employee Roster</h2>
@@ -643,7 +657,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       <div class="employee-grid" id="employeeGrid"></div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-header">
       <h2>📆 Date Range</h2>
@@ -659,7 +672,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       </div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-header">
       <div class="manpower-header-row">
@@ -680,10 +692,23 @@ input[type="color"]{padding:1px;width:34px;height:28px}
       </div>
     </div>
     <div class="card-body" style="padding:8px;">
+      <div class="quick-edit-bar">
+        <label>Selected Cells Quick Edit:</label>
+        <button class="btn btn-sm btn-ghost" id="btnQuickSetOff">Set OFF</button>
+        <button class="btn btn-sm btn-ghost" id="btnQuickUnsetOff">Unset OFF</button>
+        <label for="quickHolidayType">Holiday</label>
+        <select id="quickHolidayType">
+          <option value="">No Override</option>
+          <option value="HK">HK PH</option>
+          <option value="CN">CN PH</option>
+          <option value="BOTH">HK/CN PH</option>
+          <option value="NONE">Force No PH</option>
+        </select>
+        <button class="btn btn-sm btn-primary" id="btnApplyHolidayOverride">Apply Holiday Override</button>
+      </div>
       <div class="schedule-wrap" id="scheduleWrap"></div>
     </div>
   </div>
-
   <div class="card" id="dailyCard">
     <div class="card-header">
       <h2>🔍 Daily Coverage Detail</h2>
@@ -701,7 +726,6 @@ input[type="color"]{padding:1px;width:34px;height:28px}
     <div class="coverage-section" id="dailyContent"></div>
   </div>
 </div>
-
 <div class="popup-overlay" id="shiftPopup" style="display:none;">
   <div class="popup-box" role="dialog" aria-modal="true">
     <h3 id="popupTitle">Edit Arrangement</h3>
@@ -721,6 +745,23 @@ input[type="color"]{padding:1px;width:34px;height:28px}
         </select>
       </div>
     </div>
+    <div class="leave-box">
+      <div class="leave-box-title">Day Override</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:800;color:#9a3412;">
+          <input type="checkbox" id="popupManualOff">
+          Manual OFF
+        </label>
+        <label style="font-size:12px;color:var(--muted);">Holiday Override</label>
+        <select id="popupHolidayOverride">
+          <option value="">Use Calendar Default</option>
+          <option value="HK">HK PH</option>
+          <option value="CN">CN PH</option>
+          <option value="BOTH">HK/CN PH</option>
+          <option value="NONE">Force No PH</option>
+        </select>
+      </div>
+    </div>
     <div class="shift-check-list" id="shiftCheckList"></div>
     <div id="restDayOtBox" style="margin-bottom:12px;"></div>
     <div class="popup-actions">
@@ -730,35 +771,29 @@ input[type="color"]{padding:1px;width:34px;height:28px}
     </div>
   </div>
 </div>
-
 <div class="popup-overlay" id="weeklyPatternModal" style="display:none;">
   <div class="popup-box" role="dialog" aria-modal="true">
     <h3 id="weeklyModalTitle">Weekly Pattern Override</h3>
     <div class="popup-sub">Set or remove a weekly pattern override for the selected employee.</div>
-
     <div class="modal-row">
       <div class="modal-grid">
         <label for="weeklyTargetDate">Target Date</label>
         <input type="date" id="weeklyTargetDate">
       </div>
     </div>
-
     <div class="modal-row">
       <div class="modal-grid">
         <label for="weeklyPatternSelect">Pattern</label>
         <select id="weeklyPatternSelect"></select>
       </div>
     </div>
-
     <div class="modal-row" style="font-size:12px;color:var(--muted);">
       Week Start: <b id="weeklyWeekStartLabel">-</b>
     </div>
-
     <div class="leave-box" style="margin-top:8px;">
       <div class="leave-box-title">Existing Weekly Overrides</div>
       <div id="weeklyPatternList" class="weekly-list"></div>
     </div>
-
     <div class="popup-actions">
       <button class="btn btn-sm btn-ghost" id="weeklyPatternCloseBtn">Close</button>
       <button class="btn btn-sm btn-danger" id="weeklyPatternRemoveBtn">Remove Selected Week Override</button>
@@ -766,25 +801,20 @@ input[type="color"]{padding:1px;width:34px;height:28px}
     </div>
   </div>
 </div>
-
 <input type="file" id="localLoadInput" accept=".json,application/json" style="display:none">
-
 <script>
 const FIREBASE_DB_URL = 'https://coordinator-roster-2026-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FIREBASE_PATH = 'sharedRoster2026';
 const LOCAL_KEY = 'coordinator_roster_2026_shared_v3';
 const CLIENT_ID = 'client_' + Math.random().toString(36).slice(2) + Date.now();
-
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const PATTERN_COLORS = ['#1677ff','#52c41a','#fa8c16','#722ed1','#13c2c2','#eb2f96','#2f54eb','#d46b08','#389e0d','#c41d7f'];
-
 const HK_HOLIDAYS_2026 = new Set([
   '2026-01-01','2026-02-17','2026-02-18','2026-02-19',
   '2026-04-03','2026-04-04','2026-04-05','2026-04-06',
   '2026-05-01','2026-05-24','2026-06-19','2026-07-01',
   '2026-09-27','2026-10-01','2026-10-18','2026-12-25','2026-12-26'
 ]);
-
 const CN_HOLIDAYS_2026 = new Set([
   '2026-01-01','2026-01-02','2026-01-03',
   '2026-02-17','2026-02-18','2026-02-19','2026-02-20','2026-02-21','2026-02-22','2026-02-23',
@@ -794,7 +824,6 @@ const CN_HOLIDAYS_2026 = new Set([
   '2026-09-25','2026-09-26','2026-09-27',
   '2026-10-01','2026-10-02','2026-10-03','2026-10-04','2026-10-05','2026-10-06','2026-10-07'
 ]);
-
 const HOLIDAY_NAMES = {
   '2026-01-01':"New Year's Day",
   '2026-01-02':'New Year Holiday',
@@ -835,34 +864,28 @@ const HOLIDAY_NAMES = {
   '2026-12-25':'Christmas Day',
   '2026-12-26':'Boxing Day'
 };
-
 let patterns = [];
 let shifts = [];
 let employees = [];
 let days = [];
 let scheduleData = {};
-
 let selectedCells = new Set();
 let lastSelectedCell = null;
 let copiedCellData = null;
 let currentEditEmpId = null;
 let currentEditDate = null;
 let currentWeeklyEmpId = null;
-
 let patternIdCounter = 0;
 let shiftIdCounter = 0;
 let employeeIdCounter = 0;
-
 let saveTimer = null;
 let realtimeSource = null;
 let applyingRemote = false;
-
 let pinnedWidths = {
   employee:150,
   region:82,
   pattern:96
 };
-
 const dirtyFlags = {
   patterns:true,
   shifts:true,
@@ -870,9 +893,7 @@ const dirtyFlags = {
   schedule:true,
   daily:true
 };
-
 function $(id){ return document.getElementById(id); }
-
 function esc(s){
   return String(s ?? '').replace(/[&<>"']/g,m=>({
     '&':'&amp;',
@@ -882,32 +903,25 @@ function esc(s){
     "'":'&#39;'
   }[m]));
 }
-
 function fmtDate(d){
   const x = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
   return x.toISOString().slice(0,10);
 }
-
 function parseDate(s){
   return new Date(s + 'T00:00:00');
 }
-
 function dow(ds){
   return parseDate(ds).getDay();
 }
-
 function compactDateStr(ds){
   return String(ds || '').replaceAll('-','');
 }
-
 function todayCompact(){
   return compactDateStr(fmtDate(new Date()));
 }
-
 function newPatternId(){ return 'p' + (++patternIdCounter); }
 function newShiftId(){ return 's' + (++shiftIdCounter); }
 function newEmployeeId(){ return 'e' + (++employeeIdCounter); }
-
 function hexToRgba(hex,a){
   if(!hex || !hex.startsWith('#')) return `rgba(0,0,0,${a})`;
   const r = parseInt(hex.slice(1,3),16);
@@ -915,24 +929,43 @@ function hexToRgba(hex,a){
   const b = parseInt(hex.slice(5,7),16);
   return `rgba(${r},${g},${b},${a})`;
 }
-
 function setSyncStatus(type,text){
   const el = $('syncStatus');
   el.className = 'status ' + type;
   el.textContent = text;
 }
-
-function getHolidayInfo(ds,region){
+function getDefaultHolidayInfo(ds,region){
   const isHK = region === 'HK' && HK_HOLIDAYS_2026.has(ds);
   const isCN = region === 'CN' && CN_HOLIDAYS_2026.has(ds);
   if(!isHK && !isCN) return null;
   return {
     region,
     flag: region === 'HK' ? 'HK' : 'CN',
-    name: HOLIDAY_NAMES[ds] || 'Public Holiday'
+    name: HOLIDAY_NAMES[ds] || 'Public Holiday',
+    source:'default'
   };
 }
-
+function getHolidayOverrideLabel(v){
+  if(v === 'HK') return 'HK';
+  if(v === 'CN') return 'CN';
+  if(v === 'BOTH') return 'HK/CN';
+  return '';
+}
+function getEffectiveHolidayInfo(empId,ds,region){
+  const entry = getEntry(empId,ds);
+  const override = entry.holidayOverride || '';
+  if(override === 'NONE') return null;
+  if(override === 'HK'){
+    return { region:'HK', flag:'HK', name:HOLIDAY_NAMES[ds] || 'Public Holiday', source:'override' };
+  }
+  if(override === 'CN'){
+    return { region:'CN', flag:'CN', name:HOLIDAY_NAMES[ds] || 'Public Holiday', source:'override' };
+  }
+  if(override === 'BOTH'){
+    return { region:'BOTH', flag:'HK/CN', name:HOLIDAY_NAMES[ds] || 'Public Holiday', source:'override' };
+  }
+  return getDefaultHolidayInfo(ds,region);
+}
 function getAnyHolidayInfo(ds){
   const hk = HK_HOLIDAYS_2026.has(ds);
   const cn = CN_HOLIDAYS_2026.has(ds);
@@ -942,28 +975,42 @@ function getAnyHolidayInfo(ds){
     name: HOLIDAY_NAMES[ds] || 'Public Holiday'
   };
 }
-
+function getAnyHolidayInfoForView(ds){
+  const selected = [...selectedCells];
+  for(const key of selected){
+    const [empId,cellDs] = key.split('|');
+    if(cellDs === ds){
+      const emp = findEmployee(empId);
+      if(emp){
+        const info = getEffectiveHolidayInfo(empId,ds,emp.region);
+        if(info){
+          return {
+            label: `${info.flag} Public Holiday`,
+            name: info.name
+          };
+        }
+      }
+    }
+  }
+  return getAnyHolidayInfo(ds);
+}
 function findPattern(id){ return patterns.find(p=>p.id===id); }
 function findShift(id){ return shifts.find(s=>s.id===id); }
 function findEmployee(id){ return employees.find(e=>e.id===id); }
-
 function getPatternName(id){
   const p = findPattern(id);
   return p ? p.name : 'Unknown';
 }
-
 function getPatternColor(id){
   const p = findPattern(id);
   return p ? p.color : '#999';
 }
-
 function getWeekStart(ds){
   const d = parseDate(ds);
   const day = d.getDay();
   d.setDate(d.getDate() - day);
   return fmtDate(d);
 }
-
 function getEffectivePatternId(emp,ds){
   if(!emp) return '';
   const weekStart = getWeekStart(ds);
@@ -972,31 +1019,32 @@ function getEffectivePatternId(emp,ds){
   }
   return emp.patternId;
 }
-
 function getEffectivePattern(emp,ds){
   return findPattern(getEffectivePatternId(emp,ds));
 }
-
 function isPatternRestDay(emp,ds){
   const p = getEffectivePattern(emp,ds);
   return p ? p.restDays.includes(dow(ds)) : false;
 }
-
+function isManualOffDay(empId,ds){
+  const entry = getEntry(empId,ds);
+  return !!entry.manualOff;
+}
+function isEffectiveOffDay(emp,ds){
+  if(!emp) return false;
+  return isPatternRestDay(emp,ds) || isManualOffDay(emp.id,ds);
+}
 function parseTimeRange(range){
   const clean = String(range || '').replace(/[–—]/g,'-').trim();
   const m = clean.match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
   if(!m) return null;
-
   const sh = parseInt(m[1],10);
   const sm = parseInt(m[2],10);
   const eh = parseInt(m[3],10);
   const em = parseInt(m[4],10);
-
   if(sh > 23 || eh > 23 || sm > 59 || em > 59) return null;
-
   const startMin = sh * 60 + sm;
   const endMin = eh * 60 + em;
-
   return {
     time: `${String(sh).padStart(2,'0')}:${String(sm).padStart(2,'0')}-${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`,
     startMin,
@@ -1004,7 +1052,6 @@ function parseTimeRange(range){
     overnight:endMin <= startMin
   };
 }
-
 function getEntry(empId,ds){
   if(!scheduleData[empId]) scheduleData[empId] = {};
   const e = scheduleData[empId][ds];
@@ -1013,49 +1060,50 @@ function getEntry(empId,ds){
       shifts:[],
       overtime:false,
       manual:false,
-      leave:null
+      leave:null,
+      manualOff:false,
+      holidayOverride:''
     };
   }
   return {
     shifts:Array.isArray(e.shifts) ? e.shifts : [],
     overtime:!!e.overtime,
     manual:!!e.manual,
-    leave:e.leave || null
+    leave:e.leave || null,
+    manualOff:!!e.manualOff,
+    holidayOverride:e.holidayOverride || ''
   };
 }
-
 function setEntry(empId,ds,entry){
   if(!scheduleData[empId]) scheduleData[empId] = {};
   const normalized = {
     shifts:Array.isArray(entry.shifts) ? [...entry.shifts] : [],
     overtime:!!entry.overtime,
     manual:!!entry.manual,
-    leave:entry.leave || null
+    leave:entry.leave || null,
+    manualOff:!!entry.manualOff,
+    holidayOverride:entry.holidayOverride || ''
   };
-  if(!normalized.shifts.length && !normalized.overtime && !normalized.manual && !normalized.leave){
+  if(!normalized.shifts.length && !normalized.overtime && !normalized.manual && !normalized.leave && !normalized.manualOff && !normalized.holidayOverride){
     delete scheduleData[empId][ds];
   }else{
     scheduleData[empId][ds] = normalized;
   }
 }
-
 function clearEntry(empId,ds){
   if(scheduleData[empId]){
     delete scheduleData[empId][ds];
   }
 }
-
 function cellKey(empId,ds){
   return empId + '|' + ds;
 }
-
 function markDirtySections(...sections){
   sections.forEach(s=> dirtyFlags[s] = true);
   refreshDirty();
   saveToLocalCacheOnly();
   scheduleOnlineSave();
 }
-
 function refreshDirty(){
   if(dirtyFlags.patterns) renderPatternEditor();
   if(dirtyFlags.shifts){
@@ -1065,17 +1113,14 @@ function refreshDirty(){
   if(dirtyFlags.employees) renderEmployees();
   if(dirtyFlags.schedule) renderScheduleTable();
   if(dirtyFlags.daily) renderDailyView();
-
   Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = false);
 }
-
 function markDirtyFull(){
   Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
   refreshDirty();
   saveToLocalCacheOnly();
   scheduleOnlineSave();
 }
-
 /* ---------- State / Backup ---------- */
 function getState(){
   return {
@@ -1093,16 +1138,13 @@ function getState(){
     }
   };
 }
-
 function normalizeState(state){
   patterns = Array.isArray(state.patterns) ? state.patterns : [];
   shifts = Array.isArray(state.shifts) ? state.shifts : [];
   employees = Array.isArray(state.employees) ? state.employees : [];
   scheduleData = state.scheduleData || {};
-
   if(state.cfgStart) $('cfgStart').value = state.cfgStart;
   if(state.cfgEnd) $('cfgEnd').value = state.cfgEnd;
-
   if(state.pinnedWidths){
     pinnedWidths = {
       employee:Math.max(100, parseInt(state.pinnedWidths.employee || 150,10)),
@@ -1110,18 +1152,15 @@ function normalizeState(state){
       pattern:Math.max(80, parseInt(state.pinnedWidths.pattern || 96,10))
     };
   }
-
   patternIdCounter = state.counters?.patternIdCounter ?? Math.max(0,...patterns.map(p=>parseInt(String(p.id).slice(1),10)||0));
   shiftIdCounter = state.counters?.shiftIdCounter ?? Math.max(0,...shifts.map(s=>parseInt(String(s.id).slice(1),10)||0));
   employeeIdCounter = state.counters?.employeeIdCounter ?? Math.max(0,...employees.map(e=>parseInt(String(e.id).slice(1),10)||0));
-
   employees.forEach(e=>{
     if(!scheduleData[e.id]) scheduleData[e.id] = {};
     if(!e.region) e.region = 'HK';
     if(!e.weeklyPatterns) e.weeklyPatterns = {};
   });
 }
-
 function applyState(state){
   if(!state) return;
   applyingRemote = true;
@@ -1132,7 +1171,6 @@ function applyState(state){
   saveToLocalCacheOnly();
   applyingRemote = false;
 }
-
 function exportBackupJSON(){
   const backup = {
     exportedAt:new Date().toISOString(),
@@ -1147,7 +1185,6 @@ function exportBackupJSON(){
   a.click();
   URL.revokeObjectURL(a.href);
 }
-
 function importBackupJSON(event){
   const file = event.target.files && event.target.files[0];
   if(!file) return;
@@ -1173,7 +1210,6 @@ function importBackupJSON(event){
   };
   reader.readAsText(file);
 }
-
 /* ---------- Firebase sharing ---------- */
 async function saveOnlineNow(){
   if(applyingRemote) return;
@@ -1196,13 +1232,11 @@ async function saveOnlineNow(){
     setSyncStatus('offline','Offline');
   }
 }
-
 function scheduleOnlineSave(){
   if(applyingRemote) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveOnlineNow,600);
 }
-
 async function loadOnline(){
   try{
     setSyncStatus('syncing','Loading');
@@ -1218,14 +1252,12 @@ async function loadOnline(){
     setSyncStatus('offline','Offline');
   }
 }
-
 function connectRealtime(){
   try{
     if(realtimeSource) realtimeSource.close();
     realtimeSource = new EventSource(`${FIREBASE_DB_URL}/${FIREBASE_PATH}.json`);
     realtimeSource.onopen = () => setSyncStatus('online','Online');
     realtimeSource.onerror = () => setSyncStatus('offline','Offline');
-
     const handle = e => {
       try{
         const msg = JSON.parse(e.data);
@@ -1245,16 +1277,13 @@ function connectRealtime(){
     setSyncStatus('offline','Offline');
   }
 }
-
 /* ---------- Local save/load ---------- */
 function saveToLocalCacheOnly(){
   localStorage.setItem(LOCAL_KEY,JSON.stringify(getState()));
 }
-
 function suggestLocalFileName(){
   return `${todayCompact()}.json`;
 }
-
 async function saveToLocal(showAlert=true){
   saveToLocalCacheOnly();
   const payload = {
@@ -1263,7 +1292,6 @@ async function saveToLocal(showAlert=true){
     version:'local_save_v1',
     state:getState()
   };
-
   try{
     const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json;charset=utf-8;'});
     const a = document.createElement('a');
@@ -1279,11 +1307,9 @@ async function saveToLocal(showAlert=true){
     alert('Failed to save local file.');
   }
 }
-
 async function loadFromLocal(){
   $('localLoadInput').click();
 }
-
 function handleLocalFileLoad(event){
   const file = event.target.files && event.target.files[0];
   if(!file) return;
@@ -1300,7 +1326,6 @@ function handleLocalFileLoad(event){
   };
   reader.readAsText(file);
 }
-
 function loadStateFromLocalText(text){
   const data = JSON.parse(text);
   const state = data.state || data;
@@ -1312,7 +1337,6 @@ function loadStateFromLocalText(text){
   markDirtyFull();
   alert('Local file loaded successfully.');
 }
-
 /* ---------- Pattern Manager ---------- */
 function addPattern(){
   const id = newPatternId();
@@ -1324,7 +1348,6 @@ function addPattern(){
   });
   markDirtySections('patterns','employees','schedule','daily');
 }
-
 function removePattern(id){
   if(patterns.length <= 1){
     alert('At least one pattern is required.');
@@ -1346,7 +1369,6 @@ function removePattern(id){
   });
   markDirtySections('patterns','employees','schedule','daily');
 }
-
 function updatePattern(id,key,value){
   const p = findPattern(id);
   if(!p) return;
@@ -1354,7 +1376,6 @@ function updatePattern(id,key,value){
   if(key === 'color') p.color = value;
   markDirtySections('patterns','employees','schedule','daily');
 }
-
 function togglePatternRestDay(id,d){
   const p = findPattern(id);
   if(!p) return;
@@ -1366,65 +1387,51 @@ function togglePatternRestDay(id,d){
   p.restDays.sort((a,b)=>a-b);
   markDirtySections('patterns','schedule','daily');
 }
-
 function renderPatternEditor(){
   const box = $('patternEditor');
   box.innerHTML = '';
   const frag = document.createDocumentFragment();
-
   patterns.forEach(p=>{
     const row = document.createElement('div');
     row.className = 'pattern-row';
-
     const color = document.createElement('div');
     color.className = 'pcolor';
     color.style.background = p.color;
-
     const nameInput = document.createElement('input');
     nameInput.value = p.name;
     nameInput.style.width = '150px';
     nameInput.style.fontWeight = '700';
     nameInput.addEventListener('change',e=>updatePattern(p.id,'name',e.target.value));
-
     const colorInput = document.createElement('input');
     colorInput.type = 'color';
     colorInput.value = p.color;
     colorInput.addEventListener('change',e=>updatePattern(p.id,'color',e.target.value));
-
     const checks = document.createElement('div');
     checks.className = 'day-checks';
-
     for(let d=0; d<7; d++){
       const wrap = document.createElement('div');
       wrap.className = 'day-check ' + (p.restDays.includes(d) ? 'rest' : 'work');
       wrap.addEventListener('click',()=>togglePatternRestDay(p.id,d));
-
       const boxDay = document.createElement('div');
       boxDay.className = 'dbox';
       boxDay.textContent = DAY_NAMES[d].slice(0,2);
-
       wrap.appendChild(boxDay);
       checks.appendChild(wrap);
     }
-
     const restText = document.createElement('span');
     restText.style.fontSize = '11px';
     restText.style.color = 'var(--red)';
     restText.style.fontWeight = '800';
     restText.textContent = 'Rest: ' + (p.restDays.length ? p.restDays.map(d=>DAY_NAMES[d]).join(', ') : 'None');
-
     const del = document.createElement('span');
     del.className = 'del';
     del.innerHTML = '&times;';
     del.addEventListener('click',()=>removePattern(p.id));
-
     row.append(color,nameInput,colorInput,checks,restText,del);
     frag.appendChild(row);
   });
-
   box.appendChild(frag);
 }
-
 /* ---------- Shift Manager ---------- */
 function addShift(){
   const id = newShiftId();
@@ -1439,11 +1446,9 @@ function addShift(){
   });
   markDirtySections('shifts','schedule','daily');
 }
-
 function updateShift(id,key,value){
   const s = findShift(id);
   if(!s) return;
-
   if(key === 'name') s.name = value.trim() || s.name;
   if(key === 'color') s.color = value;
   if(key === 'time'){
@@ -1459,10 +1464,8 @@ function updateShift(id,key,value){
     s.endMin = parsed.endMin;
     s.overnight = parsed.overnight;
   }
-
   markDirtySections('shifts','schedule','daily');
 }
-
 function removeShift(id){
   if(!confirm('Delete this shift? Existing assignments using this shift will be removed.')) return;
   shifts = shifts.filter(s=>s.id!==id);
@@ -1475,76 +1478,59 @@ function removeShift(id){
   });
   markDirtySections('shifts','schedule','daily');
 }
-
 function renderShiftEditor(){
   const box = $('shiftEditor');
   box.innerHTML = '';
   const frag = document.createDocumentFragment();
-
   shifts.forEach(s=>{
     const row = document.createElement('div');
     row.className = 'shift-row';
-
     const dot = document.createElement('div');
     dot.className = 'shift-color-dot';
     dot.style.background = s.color;
-
     const nameInput = document.createElement('input');
     nameInput.value = s.name;
     nameInput.style.width = '130px';
     nameInput.style.fontWeight = '700';
     nameInput.addEventListener('change',e=>updateShift(s.id,'name',e.target.value));
-
     const timeInput = document.createElement('input');
     timeInput.value = s.time;
     timeInput.style.width = '110px';
     timeInput.addEventListener('change',e=>updateShift(s.id,'time',e.target.value));
-
     const colorInput = document.createElement('input');
     colorInput.type = 'color';
     colorInput.value = s.color;
     colorInput.addEventListener('change',e=>updateShift(s.id,'color',e.target.value));
-
     const typeText = document.createElement('span');
     typeText.style.fontSize = '11px';
     typeText.style.color = 'var(--muted)';
     typeText.textContent = s.overnight ? 'Overnight shift' : 'Day shift';
-
     const del = document.createElement('span');
     del.className = 'del';
     del.innerHTML = '&times;';
     del.addEventListener('click',()=>removeShift(s.id));
-
     row.append(dot,nameInput,timeInput,colorInput,typeText,del);
     frag.appendChild(row);
   });
-
   box.appendChild(frag);
 }
-
 function renderShiftLegendInline(){
   const box = $('shiftLegendInline');
   box.innerHTML = '';
   const frag = document.createDocumentFragment();
-
   shifts.forEach(s=>{
     const item = document.createElement('div');
     item.className = 'legend-item';
-
     const dot = document.createElement('span');
     dot.className = 'legend-dot';
     dot.style.background = s.color;
-
     const bold = document.createElement('b');
     bold.textContent = `${s.time}${s.overnight ? '+1' : ''}`;
-
     item.append(dot,bold);
     frag.appendChild(item);
   });
-
   box.appendChild(frag);
 }
-
 /* ---------- Employees ---------- */
 function addEmployee(name){
   const input = $('newEmpName');
@@ -1566,7 +1552,6 @@ function addEmployee(name){
   input.value = '';
   markDirtySections('employees','schedule','daily');
 }
-
 function addBatchEmployees(){
   const n = parseInt(prompt('How many employees would you like to add?','14'),10);
   if(!n || n <= 0) return;
@@ -1583,7 +1568,63 @@ function addBatchEmployees(){
   }
   markDirtySections('employees','schedule','daily');
 }
-
+function remapEmployeeScheduleForPatternChange(emp,oldPatternId,newPatternId){
+  if(!emp || oldPatternId === newPatternId) return;
+  const oldPattern = findPattern(oldPatternId);
+  const newPattern = findPattern(newPatternId);
+  if(!oldPattern || !newPattern) return;
+  const oldWorkDays = [];
+  const newWorkDays = [];
+  for(let d=0; d<7; d++){
+    if(!oldPattern.restDays.includes(d)) oldWorkDays.push(d);
+    if(!newPattern.restDays.includes(d)) newWorkDays.push(d);
+  }
+  const weekStarts = [...new Set(days.map(getWeekStart))];
+  weekStarts.forEach(weekStart=>{
+    const weekDays = [];
+    const start = parseDate(weekStart);
+    for(let i=0;i<7;i++){
+      const x = new Date(start);
+      x.setDate(start.getDate()+i);
+      const ds = fmtDate(x);
+      if(days.includes(ds)) weekDays.push(ds);
+    }
+    const movableEntries = [];
+    weekDays.forEach(ds=>{
+      const dayIndex = dow(ds);
+      const entry = getEntry(emp.id,ds);
+      if(oldWorkDays.includes(dayIndex)){
+        const workPos = oldWorkDays.indexOf(dayIndex);
+        if(entry.shifts.length || entry.leave || entry.overtime || entry.manual || entry.manualOff || entry.holidayOverride){
+          movableEntries.push({ workPos, entry:JSON.parse(JSON.stringify(entry)), ds });
+        }
+      }
+    });
+    weekDays.forEach(ds=>{
+      const dayIndex = dow(ds);
+      if(oldWorkDays.includes(dayIndex) || newWorkDays.includes(dayIndex)){
+        clearEntry(emp.id,ds);
+      }
+    });
+    weekDays.forEach(ds=>{
+      const dayIndex = dow(ds);
+      if(!newWorkDays.includes(dayIndex)){
+        return;
+      }
+      const newPos = newWorkDays.indexOf(dayIndex);
+      const source = movableEntries.find(x=>x.workPos === newPos);
+      if(source){
+        const cloned = JSON.parse(JSON.stringify(source.entry));
+        if(newPattern.restDays.includes(dayIndex)){
+          cloned.shifts = [];
+          cloned.overtime = false;
+          cloned.leave = null;
+        }
+        setEntry(emp.id,ds,cloned);
+      }
+    });
+  });
+}
 function updateEmployee(id,key,value){
   const e = findEmployee(id);
   if(!e) return;
@@ -1599,10 +1640,13 @@ function updateEmployee(id,key,value){
     e.name = v;
   }
   if(key === 'region') e.region = value;
-  if(key === 'patternId') e.patternId = value;
+  if(key === 'patternId'){
+    const oldPatternId = e.patternId;
+    e.patternId = value;
+    remapEmployeeScheduleForPatternChange(e,oldPatternId,value);
+  }
   markDirtySections('employees','schedule','daily');
 }
-
 function removeEmployee(id){
   const e = findEmployee(id);
   if(!e) return;
@@ -1612,16 +1656,13 @@ function removeEmployee(id){
   selectedCells = new Set([...selectedCells].filter(k=>!k.startsWith(id+'|')));
   markDirtySections('employees','schedule','daily');
 }
-
 function openWeeklyPatternModal(empId){
   const emp = findEmployee(empId);
   if(!emp) return;
   currentWeeklyEmpId = empId;
   $('weeklyModalTitle').textContent = `Weekly Pattern Override · ${emp.name}`;
-
   const defaultDate = days[0] || fmtDate(new Date());
   $('weeklyTargetDate').value = defaultDate;
-
   const select = $('weeklyPatternSelect');
   select.innerHTML = '';
   patterns.forEach(p=>{
@@ -1630,35 +1671,28 @@ function openWeeklyPatternModal(empId){
     opt.textContent = p.name;
     select.appendChild(opt);
   });
-
   updateWeeklyModalWeekLabel();
   renderWeeklyPatternList();
   $('weeklyPatternModal').style.display = 'flex';
 }
-
 function closeWeeklyPatternModal(){
   $('weeklyPatternModal').style.display = 'none';
   currentWeeklyEmpId = null;
 }
-
 function updateWeeklyModalWeekLabel(){
   const ds = $('weeklyTargetDate').value || (days[0] || fmtDate(new Date()));
   $('weeklyWeekStartLabel').textContent = getWeekStart(ds);
   const emp = findEmployee(currentWeeklyEmpId);
   if(!emp) return;
-
   const weekStart = getWeekStart(ds);
   const patternId = emp.weeklyPatterns?.[weekStart] || emp.patternId;
   $('weeklyPatternSelect').value = patternId;
 }
-
 function renderWeeklyPatternList(){
   const box = $('weeklyPatternList');
   box.innerHTML = '';
-
   const emp = findEmployee(currentWeeklyEmpId);
   if(!emp) return;
-
   const overrides = Object.entries(emp.weeklyPatterns || {}).sort((a,b)=>a[0].localeCompare(b[0]));
   if(!overrides.length){
     const empty = document.createElement('div');
@@ -1667,31 +1701,24 @@ function renderWeeklyPatternList(){
     box.appendChild(empty);
     return;
   }
-
   const frag = document.createDocumentFragment();
   overrides.forEach(([weekStart,patternId])=>{
     const item = document.createElement('div');
     item.className = 'weekly-item';
-
     const left = document.createElement('div');
     left.className = 'weekly-left';
-
     const tag = document.createElement('span');
     tag.className = 'weekly-chip';
     tag.textContent = weekStart;
-
     const badge = document.createElement('span');
     badge.className = 'pattern-badge';
     badge.style.background = hexToRgba(getPatternColor(patternId),.12);
     badge.style.color = getPatternColor(patternId);
     badge.textContent = getPatternName(patternId);
-
     left.append(tag,badge);
-
     const right = document.createElement('div');
     right.style.display = 'flex';
     right.style.gap = '6px';
-
     const useBtn = document.createElement('button');
     useBtn.className = 'btn btn-sm btn-ghost';
     useBtn.textContent = 'Load';
@@ -1700,7 +1727,6 @@ function renderWeeklyPatternList(){
       $('weeklyPatternSelect').value = patternId;
       updateWeeklyModalWeekLabel();
     });
-
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-sm btn-danger';
     delBtn.textContent = 'Remove';
@@ -1711,22 +1737,17 @@ function renderWeeklyPatternList(){
       renderWeeklyPatternList();
       markDirtySections('employees','schedule','daily');
     });
-
     right.append(useBtn,delBtn);
     item.append(left,right);
     frag.appendChild(item);
   });
-
   box.appendChild(frag);
 }
-
 function saveWeeklyPatternOverride(){
   const emp = findEmployee(currentWeeklyEmpId);
   if(!emp) return;
-
   const targetDate = $('weeklyTargetDate').value;
   const patternId = $('weeklyPatternSelect').value;
-
   if(!targetDate){
     alert('Please choose a target date.');
     return;
@@ -1735,15 +1756,12 @@ function saveWeeklyPatternOverride(){
     alert('Please choose a pattern.');
     return;
   }
-
   const weekStart = getWeekStart(targetDate);
   if(!emp.weeklyPatterns) emp.weeklyPatterns = {};
   emp.weeklyPatterns[weekStart] = patternId;
-
-  renderWeeklyPatternList();
   markDirtySections('employees','schedule','daily');
+  renderWeeklyPatternList();
 }
-
 function removeSelectedWeeklyOverride(){
   const emp = findEmployee(currentWeeklyEmpId);
   if(!emp) return;
@@ -1761,28 +1779,22 @@ function removeSelectedWeeklyOverride(){
     alert('No override exists for that week.');
   }
 }
-
 function renderEmployees(){
   const box = $('employeeGrid');
   box.innerHTML = '';
   const frag = document.createDocumentFragment();
-
   employees.forEach((e,i)=>{
     if(!e.weeklyPatterns) e.weeklyPatterns = {};
-
     const card = document.createElement('div');
     card.className = 'employee-card';
-
     const idx = document.createElement('div');
     idx.className = 'idx';
     idx.textContent = i + 1;
-
     const nameInput = document.createElement('input');
     nameInput.className = 'emp-name';
     nameInput.value = e.name;
     nameInput.addEventListener('change',ev=>updateEmployee(e.id,'name',ev.target.value));
     nameInput.addEventListener('focus',ev=>ev.target.select());
-
     const regionSelect = document.createElement('select');
     const optHK = document.createElement('option');
     optHK.value = 'HK';
@@ -1793,7 +1805,6 @@ function renderEmployees(){
     regionSelect.append(optHK,optCN);
     regionSelect.value = e.region;
     regionSelect.addEventListener('change',ev=>updateEmployee(e.id,'region',ev.target.value));
-
     const patternSelect = document.createElement('select');
     patterns.forEach(p=>{
       const opt = document.createElement('option');
@@ -1803,66 +1814,58 @@ function renderEmployees(){
     });
     patternSelect.value = e.patternId;
     patternSelect.addEventListener('change',ev=>updateEmployee(e.id,'patternId',ev.target.value));
-
     const pc = getPatternColor(e.patternId);
     const badge = document.createElement('span');
     badge.className = 'pattern-badge';
     badge.style.background = hexToRgba(pc,.12);
     badge.style.color = pc;
     badge.textContent = getPatternName(e.patternId);
-
     const overrideCount = Object.keys(e.weeklyPatterns || {}).length;
     const weeklyBtn = document.createElement('button');
     weeklyBtn.className = 'btn btn-sm btn-ghost';
     weeklyBtn.textContent = overrideCount ? `Weekly Pattern (${overrideCount})` : 'Weekly Pattern';
     weeklyBtn.addEventListener('click',()=>openWeeklyPatternModal(e.id));
-
     const del = document.createElement('span');
     del.className = 'del';
     del.innerHTML = '&times;';
     del.addEventListener('click',()=>removeEmployee(e.id));
-
     card.append(idx,nameInput,regionSelect,patternSelect,badge,weeklyBtn,del);
     frag.appendChild(card);
   });
-
   box.appendChild(frag);
   $('empCount').textContent = employees.length;
 }
-
 /* ---------- Date range ---------- */
 function rebuildDaysOnly(){
   const s = $('cfgStart').value;
   const e = $('cfgEnd').value;
   days = [];
   if(!s || !e) return;
-
   const start = parseDate(s);
   const end = parseDate(e);
   for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)){
     days.push(fmtDate(d));
   }
-
   $('dayCount').textContent = days.length;
-
   if((!$('detailDate').value || !days.includes($('detailDate').value)) && days.length){
     $('detailDate').value = days[0];
   }
 }
-
 function rebuildDaysAndSave(){
   rebuildDaysOnly();
   markDirtySections('schedule','daily');
 }
-
 /* ---------- Schedule ---------- */
 function handleCellClick(e,empId,ds){
+  e.preventDefault();
+  e.stopPropagation();
   const key = cellKey(empId,ds);
   if(e.shiftKey && lastSelectedCell){
+    if(!e.ctrlKey && !e.metaKey) selectedCells.clear();
     selectCellRange(lastSelectedCell.empId,lastSelectedCell.dateStr,empId,ds);
   }else{
     if(!e.ctrlKey && !e.metaKey) selectedCells.clear();
-    if(selectedCells.has(key)){
+    if(selectedCells.has(key) && (e.ctrlKey || e.metaKey)){
       selectedCells.delete(key);
     }else{
       selectedCells.add(key);
@@ -1871,20 +1874,16 @@ function handleCellClick(e,empId,ds){
   }
   renderSelection();
 }
-
 function selectCellRange(fromEmpId,fromDate,toEmpId,toDate){
   const fromEmpIndex = employees.findIndex(e=>e.id===fromEmpId);
   const toEmpIndex = employees.findIndex(e=>e.id===toEmpId);
   const fromDateIndex = days.indexOf(fromDate);
   const toDateIndex = days.indexOf(toDate);
   if(fromEmpIndex === -1 || toEmpIndex === -1 || fromDateIndex === -1 || toDateIndex === -1) return;
-
   const empStart = Math.min(fromEmpIndex,toEmpIndex);
   const empEnd = Math.max(fromEmpIndex,toEmpIndex);
   const dateStart = Math.min(fromDateIndex,toDateIndex);
   const dateEnd = Math.max(fromDateIndex,toDateIndex);
-
-  selectedCells.clear();
   for(let ei=empStart; ei<=empEnd; ei++){
     const emp = employees[ei];
     for(let di=dateStart; di<=dateEnd; di++){
@@ -1892,19 +1891,16 @@ function selectCellRange(fromEmpId,fromDate,toEmpId,toDate){
     }
   }
 }
-
 function clearSelectedCells(){
   selectedCells.clear();
   lastSelectedCell = null;
   renderSelection();
 }
-
 function renderSelection(){
   document.querySelectorAll('.schedule-cell').forEach(td=>{
     td.classList.toggle('selected',selectedCells.has(td.dataset.key));
   });
 }
-
 function deleteSelectedArrangements(){
   if(!selectedCells.size) return false;
   selectedCells.forEach(k=>{
@@ -1914,7 +1910,6 @@ function deleteSelectedArrangements(){
   markDirtySections('schedule','daily');
   return true;
 }
-
 function deleteSelectedArrangementsWithConfirm(){
   if(!selectedCells.size){
     alert('Please select one or more cells first.');
@@ -1923,86 +1918,108 @@ function deleteSelectedArrangementsWithConfirm(){
   if(!confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)) return;
   deleteSelectedArrangements();
 }
-
+function applyManualOffToSelectedCells(isOff){
+  if(!selectedCells.size){
+    alert('Please select one or more cells first.');
+    return;
+  }
+  selectedCells.forEach(k=>{
+    const [empId,ds] = k.split('|');
+    const entry = getEntry(empId,ds);
+    entry.manualOff = !!isOff;
+    if(isOff){
+      entry.shifts = [];
+      entry.overtime = false;
+      entry.leave = null;
+      entry.manual = true;
+    }
+    setEntry(empId,ds,entry);
+  });
+  markDirtySections('schedule','daily');
+}
+function applyHolidayOverrideToSelectedCells(){
+  if(!selectedCells.size){
+    alert('Please select one or more cells first.');
+    return;
+  }
+  const type = $('quickHolidayType').value;
+  selectedCells.forEach(k=>{
+    const [empId,ds] = k.split('|');
+    const entry = getEntry(empId,ds);
+    entry.holidayOverride = type;
+    entry.manual = true;
+    setEntry(empId,ds,entry);
+  });
+  markDirtySections('schedule','daily');
+}
 function openShiftPopup(empId,ds){
   const emp = findEmployee(empId);
   if(!emp) return;
-
   currentEditEmpId = empId;
   currentEditDate = ds;
-
   const entry = getEntry(empId,ds);
-  const rest = isPatternRestDay(emp,ds);
-  const holiday = getHolidayInfo(ds,emp.region);
+  const patternRest = isPatternRestDay(emp,ds);
+  const effectiveOff = isEffectiveOffDay(emp,ds);
+  const holiday = getEffectiveHolidayInfo(empId,ds,emp.region);
   const effectivePatternId = getEffectivePatternId(emp,ds);
-
   $('popupTitle').textContent = `${emp.name} · ${ds} ${DAY_NAMES[dow(ds)]}`;
-
   let sub = `Pattern: <b style="color:${getPatternColor(effectivePatternId)}">${esc(getPatternName(effectivePatternId))}</b>`;
   sub += ` · Region: <b>${emp.region==='HK'?'Hong Kong':'Mainland China'}</b>`;
-  if(rest){
+  if(patternRest){
     sub += `<br><span style="color:#b91c1c;font-weight:800;">This is a pattern rest day.</span>`;
   }
+  if(entry.manualOff){
+    sub += `<br><span style="color:#9a3412;font-weight:800;">This day is manually marked as OFF.</span>`;
+  }
   if(holiday){
-    sub += `<br><span style="color:#d97706;font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}</span>`;
+    sub += `<br><span style="color:#d97706;font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}${holiday.source==='override'?' (override)':''}</span>`;
   }
   $('popupSub').innerHTML = sub;
-
   $('leaveType').value = entry.leave?.type || '';
   $('leaveDays').value = String(entry.leave?.days || '1');
-
+  $('popupManualOff').checked = !!entry.manualOff;
+  $('popupHolidayOverride').value = entry.holidayOverride || '';
   const list = $('shiftCheckList');
   list.innerHTML = '';
   const frag = document.createDocumentFragment();
-
   shifts.forEach(s=>{
     const option = document.createElement('div');
     option.className = 'shift-option' + (entry.shifts.includes(s.id) ? ' checked' : '');
-
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.value = s.id;
     cb.checked = entry.shifts.includes(s.id);
-
     const dot = document.createElement('span');
     dot.className = 'dot';
     dot.style.background = s.color;
-
     const name = document.createElement('span');
     name.style.fontWeight = '800';
     name.style.color = s.color;
     name.textContent = s.name;
-
     const time = document.createElement('span');
     time.className = 'time';
     time.textContent = `${s.time}${s.overnight ? ' +1' : ''}`;
-
     option.addEventListener('click',()=>{
       cb.checked = !cb.checked;
       option.classList.toggle('checked',cb.checked);
     });
-
     option.append(cb,dot,name,time);
     frag.appendChild(option);
   });
-
   list.appendChild(frag);
-
   const otBox = $('restDayOtBox');
   otBox.innerHTML = '';
-  if(rest){
+  if(effectiveOff){
     const label = document.createElement('label');
     label.style.display = 'flex';
     label.style.alignItems = 'center';
     label.style.gap = '6px';
     label.style.color = '#b91c1c';
     label.style.fontWeight = '800';
-
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.id = 'popupOvertime';
     input.checked = entry.overtime;
-
     label.append(input,document.createTextNode('Rest Day OT'));
     otBox.appendChild(label);
   }else{
@@ -2012,43 +2029,36 @@ function openShiftPopup(empId,ds){
     input.style.display = 'none';
     otBox.appendChild(input);
   }
-
   $('shiftPopup').style.display = 'flex';
 }
-
 function autoFillForwardWorkBlock(empId,sourceDate,sourceEntry){
   const emp = findEmployee(empId);
   if(!emp) return;
-
   const sourceIndex = days.indexOf(sourceDate);
   if(sourceIndex === -1) return;
-  if(isPatternRestDay(emp,sourceDate)) return;
+  if(isEffectiveOffDay(emp,sourceDate)) return;
   if(sourceEntry.leave) return;
   if(!sourceEntry.shifts || !sourceEntry.shifts.length) return;
-
   const sourceWeekStart = getWeekStart(sourceDate);
-
   for(let i=sourceIndex+1; i<days.length; i++){
     const ds = days[i];
     if(getWeekStart(ds) !== sourceWeekStart) break;
-    if(isPatternRestDay(emp,ds)) break;
-
+    if(isEffectiveOffDay(emp,ds)) break;
     const existing = getEntry(empId,ds);
     if(existing.manual) continue;
-
     setEntry(empId,ds,{
       shifts:[...sourceEntry.shifts],
       overtime:false,
       manual:false,
-      leave:null
+      leave:null,
+      manualOff:existing.manualOff || false,
+      holidayOverride:existing.holidayOverride || ''
     });
   }
 }
-
 function saveShiftAssignment(){
   const emp = findEmployee(currentEditEmpId);
   if(!emp) return;
-
   const shiftIds = [...document.querySelectorAll('#shiftCheckList input:checked')].map(cb=>cb.value);
   const leaveType = $('leaveType').value;
   const leaveDays = parseFloat($('leaveDays').value);
@@ -2057,35 +2067,36 @@ function saveShiftAssignment(){
     days:leaveDays,
     hours:leaveDays === 0.5 ? 4 : 9
   } : null;
-
-  const rest = isPatternRestDay(emp,currentEditDate);
+  const manualOff = $('popupManualOff').checked;
+  const holidayOverride = $('popupHolidayOverride').value || '';
+  const rest = isPatternRestDay(emp,currentEditDate) || manualOff;
   const overtime = $('popupOvertime')?.checked || false;
-
   if(leave && shiftIds.length){
     if(!confirm('This cell has both leave and shift assignments. Continue?')) return;
+  }
+  if(manualOff && shiftIds.length){
+    if(!confirm('This day is marked as Manual OFF. Shifts will only count if Rest Day OT is selected. Continue?')) return;
   }
   if(rest && shiftIds.length && !overtime){
     if(!confirm('This is a rest day. Shifts will not count as coverage unless Rest Day OT is selected. Continue?')) return;
   }
-
   const newEntry = {
-    shifts:shiftIds,
+    shifts:manualOff && !overtime ? [] : shiftIds,
     overtime,
     manual:true,
-    leave
+    leave:manualOff ? null : leave,
+    manualOff,
+    holidayOverride
   };
-
   setEntry(currentEditEmpId,currentEditDate,newEntry);
   autoFillForwardWorkBlock(currentEditEmpId,currentEditDate,newEntry);
   closeShiftPopup();
   markDirtySections('schedule','daily');
 }
-
 function closeShiftPopup(e){
   if(e && e.target !== $('shiftPopup')) return;
   $('shiftPopup').style.display = 'none';
 }
-
 function clearAllSchedule(){
   if(!confirm('Clear all arrangements?')) return;
   scheduleData = {};
@@ -2094,7 +2105,6 @@ function clearAllSchedule(){
   lastSelectedCell = null;
   markDirtySections('schedule','daily');
 }
-
 function getPinnedOffsets(){
   return {
     empLeft:0,
@@ -2102,18 +2112,15 @@ function getPinnedOffsets(){
     patternLeft:pinnedWidths.employee + pinnedWidths.region
   };
 }
-
 function createCellTag(text,cls){
   const div = document.createElement('div');
   div.className = cls;
   div.textContent = text;
   return div;
 }
-
 function renderScheduleTable(){
   const wrap = $('scheduleWrap');
   wrap.innerHTML = '';
-
   if(!employees.length){
     const empty = document.createElement('div');
     empty.style.padding = '30px';
@@ -2123,7 +2130,6 @@ function renderScheduleTable(){
     wrap.appendChild(empty);
     return;
   }
-
   if(!days.length){
     const empty = document.createElement('div');
     empty.style.padding = '30px';
@@ -2133,17 +2139,13 @@ function renderScheduleTable(){
     wrap.appendChild(empty);
     return;
   }
-
   const offsets = getPinnedOffsets();
-
   const copyTip = document.createElement('div');
   copyTip.className = 'copy-tip';
   copyTip.textContent = 'Click to select a cell. Ctrl/⌘ + click for multiple cells. Shift + click to select a range. Double-click to edit. Ctrl/⌘ + C / V is supported. Press Delete / Backspace to delete selected arrangement data.';
   wrap.appendChild(copyTip);
-
   const table = document.createElement('table');
   table.className = 'schedule-table';
-
   const colgroup = document.createElement('colgroup');
   ['employee','region','pattern'].forEach(key=>{
     const col = document.createElement('col');
@@ -2151,10 +2153,8 @@ function renderScheduleTable(){
     colgroup.appendChild(col);
   });
   table.appendChild(colgroup);
-
   const thead = document.createElement('thead');
   const headRow = document.createElement('tr');
-
   function makePinnedTh(label, className, leftPx, widthPx, colKey){
     const th = document.createElement('th');
     th.className = `${className} col-resize-th`;
@@ -2162,18 +2162,15 @@ function renderScheduleTable(){
     th.style.width = `${widthPx}px`;
     th.style.minWidth = `${widthPx}px`;
     th.textContent = label;
-
     const resizer = document.createElement('span');
     resizer.className = 'col-resizer';
     resizer.addEventListener('mousedown',e=>startResize(e,colKey));
     th.appendChild(resizer);
     return th;
   }
-
   headRow.appendChild(makePinnedTh('Employee','emp-col',offsets.empLeft,pinnedWidths.employee,'employee'));
   headRow.appendChild(makePinnedTh('Region','region-col',offsets.regionLeft,pinnedWidths.region,'region'));
   headRow.appendChild(makePinnedTh('Pattern','pattern-col',offsets.patternLeft,pinnedWidths.pattern,'pattern'));
-
   days.forEach(ds=>{
     const d = parseDate(ds);
     const anyHoliday = getAnyHolidayInfo(ds);
@@ -2182,36 +2179,29 @@ function renderScheduleTable(){
     th.innerHTML = `${d.getMonth()+1}/${d.getDate()}${anyHoliday?' *':''}<br><span style="color:var(--muted);">${DAY_NAMES[d.getDay()]}</span>`;
     headRow.appendChild(th);
   });
-
   thead.appendChild(headRow);
   table.appendChild(thead);
-
   const tbody = document.createElement('tbody');
   const tbodyFrag = document.createDocumentFragment();
-
   employees.forEach(emp=>{
     const tr = document.createElement('tr');
-
     const empTd = document.createElement('td');
     empTd.className = 'emp-col';
     empTd.style.left = `${offsets.empLeft}px`;
     empTd.style.width = `${pinnedWidths.employee}px`;
     empTd.style.minWidth = `${pinnedWidths.employee}px`;
     empTd.textContent = emp.name;
-
     const regionTd = document.createElement('td');
     regionTd.className = 'region-col';
     regionTd.style.left = `${offsets.regionLeft}px`;
     regionTd.style.width = `${pinnedWidths.region}px`;
     regionTd.style.minWidth = `${pinnedWidths.region}px`;
     regionTd.textContent = emp.region === 'HK' ? 'HK' : 'CN';
-
     const patternTd = document.createElement('td');
     patternTd.className = 'pattern-col';
     patternTd.style.left = `${offsets.patternLeft}px`;
     patternTd.style.width = `${pinnedWidths.pattern}px`;
     patternTd.style.minWidth = `${pinnedWidths.pattern}px`;
-
     const pc = getPatternColor(emp.patternId);
     const badge = document.createElement('span');
     badge.className = 'pattern-badge';
@@ -2219,25 +2209,26 @@ function renderScheduleTable(){
     badge.style.color = pc;
     badge.textContent = getPatternName(emp.patternId);
     patternTd.appendChild(badge);
-
     tr.append(empTd,regionTd,patternTd);
-
     days.forEach(ds=>{
       const entry = getEntry(emp.id,ds);
-      const rest = isPatternRestDay(emp,ds);
-      const holiday = getHolidayInfo(ds,emp.region);
+      const patternRest = isPatternRestDay(emp,ds);
+      const effectiveOff = isEffectiveOffDay(emp,ds);
+      const holiday = getEffectiveHolidayInfo(emp.id,ds,emp.region);
       const selected = selectedCells.has(cellKey(emp.id,ds));
       const effectivePatternId = getEffectivePatternId(emp,ds);
-
       const td = document.createElement('td');
-      td.className = `schedule-cell ${rest ? 'rest-cell' : 'work-cell'} ${selected ? 'selected' : ''}`;
+      td.className = `schedule-cell ${effectiveOff ? 'rest-cell' : 'work-cell'} ${selected ? 'selected' : ''} ${entry.manualOff && !patternRest ? 'custom-rest-cell' : ''}`;
       td.dataset.key = cellKey(emp.id,ds);
       td.addEventListener('click',e=>handleCellClick(e,emp.id,ds));
-      td.addEventListener('dblclick',()=>openShiftPopup(emp.id,ds));
-
-      if(rest) td.appendChild(createCellTag('OFF','off-label'));
+      td.addEventListener('dblclick',e=>{
+        e.preventDefault();
+        openShiftPopup(emp.id,ds);
+      });
+      td.addEventListener('mousedown',e=>e.preventDefault());
+      if(patternRest || entry.manualOff) td.appendChild(createCellTag('OFF','off-label'));
+      if(entry.manualOff && !patternRest) td.appendChild(createCellTag('Manual','custom-label'));
       if(holiday) td.appendChild(createCellTag(`${holiday.flag} PH`,'holiday-label'));
-
       if(emp.weeklyPatterns?.[getWeekStart(ds)]){
         const hint = document.createElement('div');
         hint.className = 'cell-hint';
@@ -2246,11 +2237,9 @@ function renderScheduleTable(){
         hint.textContent = getPatternName(effectivePatternId);
         td.appendChild(hint);
       }
-
       if(entry.leave){
         td.appendChild(createCellTag(`${entry.leave.type} ${entry.leave.days}D`,'leave-label'));
       }
-
       if(entry.shifts.length){
         const row = document.createElement('div');
         entry.shifts.forEach(id=>{
@@ -2268,52 +2257,42 @@ function renderScheduleTable(){
         }
         td.appendChild(row);
       }
-
       if(!entry.shifts.length && !entry.leave){
         const hint = document.createElement('div');
         hint.className = 'cell-hint';
-        hint.textContent = rest ? 'Double-click for OT' : 'Double-click';
+        hint.textContent = effectiveOff ? 'Double-click for OT / edit' : 'Double-click';
         td.appendChild(hint);
       }
-
       tr.appendChild(td);
     });
-
     tbodyFrag.appendChild(tr);
   });
-
   tbody.appendChild(tbodyFrag);
   table.appendChild(tbody);
   wrap.appendChild(table);
 }
-
 /* ---------- Column resize ---------- */
 function startResize(event,colKey){
   event.preventDefault();
   event.stopPropagation();
-
   const startX = event.clientX;
   const startWidth = pinnedWidths[colKey];
   const minMap = { employee:100, region:70, pattern:80 };
-
   function onMove(e){
     const delta = e.clientX - startX;
     pinnedWidths[colKey] = Math.max(minMap[colKey], startWidth + delta);
     dirtyFlags.schedule = true;
     refreshDirty();
   }
-
   function onUp(){
     document.removeEventListener('mousemove',onMove);
     document.removeEventListener('mouseup',onUp);
     saveToLocalCacheOnly();
     scheduleOnlineSave();
   }
-
   document.addEventListener('mousemove',onMove);
   document.addEventListener('mouseup',onUp);
 }
-
 /* ---------- Copy / paste ---------- */
 function getFirstSelected(){
   const arr = [...selectedCells];
@@ -2321,14 +2300,12 @@ function getFirstSelected(){
   const [empId,ds] = arr[0].split('|');
   return { empId, dateStr:ds };
 }
-
 function copySelectedCell(){
   const first = getFirstSelected();
   if(!first) return false;
   copiedCellData = JSON.parse(JSON.stringify(getEntry(first.empId,first.dateStr)));
   return true;
 }
-
 function copySelectedCellWithFeedback(){
   if(!selectedCells.size){
     alert('Please select one cell to copy first.');
@@ -2338,7 +2315,6 @@ function copySelectedCellWithFeedback(){
     alert('Selected cell copied. You can now select one or more target cells and paste.');
   }
 }
-
 function pasteToSelectedCells(){
   if(!copiedCellData || !selectedCells.size) return false;
   selectedCells.forEach(k=>{
@@ -2351,7 +2327,6 @@ function pasteToSelectedCells(){
   markDirtySections('schedule','daily');
   return true;
 }
-
 function pasteToSelectedCellsWithFeedback(){
   if(!copiedCellData){
     alert('No copied cell found. Please copy one cell first.');
@@ -2365,7 +2340,6 @@ function pasteToSelectedCellsWithFeedback(){
   if(!confirm(`Paste the copied arrangement to ${count} selected cell(s)?`)) return;
   pasteToSelectedCells();
 }
-
 /* ---------- Coverage ---------- */
 function getShiftBlocksForToday(shift){
   const blocks = new Set();
@@ -2380,7 +2354,6 @@ function getShiftBlocksForToday(shift){
   }
   return [...blocks].sort((a,b)=>a-b);
 }
-
 function getShiftBlocksFromPreviousDay(shift){
   const blocks = new Set();
   if(!shift.overnight) return [];
@@ -2389,20 +2362,16 @@ function getShiftBlocksFromPreviousDay(shift){
   }
   return [...blocks].sort((a,b)=>a-b);
 }
-
 function computeDailyCoverage(ds){
   const coverage = new Array(48).fill(0);
   const coveredBy = new Array(48).fill(null).map(()=>[]);
   const shiftAssignments = new Map();
-
   const prevDate = parseDate(ds);
   prevDate.setDate(prevDate.getDate()-1);
   const prevDs = fmtDate(prevDate);
-
   employees.forEach(emp=>{
     const todayEntry = getEntry(emp.id,ds);
-
-    if(!(todayEntry.leave && todayEntry.leave.days >= 1) && (!isPatternRestDay(emp,ds) || todayEntry.overtime)){
+    if(!(todayEntry.leave && todayEntry.leave.days >= 1) && (!isEffectiveOffDay(emp,ds) || todayEntry.overtime)){
       todayEntry.shifts.forEach(shiftId=>{
         const s = findShift(shiftId);
         if(!s) return;
@@ -2414,9 +2383,8 @@ function computeDailyCoverage(ds){
         });
       });
     }
-
     const prevEntry = getEntry(emp.id,prevDs);
-    if(!(prevEntry.leave && prevEntry.leave.days >= 1) && (!isPatternRestDay(emp,prevDs) || prevEntry.overtime)){
+    if(!(prevEntry.leave && prevEntry.leave.days >= 1) && (!isEffectiveOffDay(emp,prevDs) || prevEntry.overtime)){
       prevEntry.shifts.forEach(shiftId=>{
         const s = findShift(shiftId);
         if(!s || !s.overnight) return;
@@ -2429,14 +2397,11 @@ function computeDailyCoverage(ds){
       });
     }
   });
-
   for(let i=0;i<48;i++){
     coveredBy[i] = [...new Set(coveredBy[i])];
   }
-
   return { coverage, coveredBy, shiftAssignments };
 }
-
 function findGaps(cov){
   const gaps = [];
   let start = -1;
@@ -2453,13 +2418,11 @@ function findGaps(cov){
   }
   return gaps;
 }
-
 function fmtBlockTime(i){
   const h = Math.floor(i/2);
   const m = (i%2)*30;
   return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
 }
-
 function renderDailyView(){
   let ds = $('detailDate').value;
   if(!ds && days.length){
@@ -2467,11 +2430,9 @@ function renderDailyView(){
     $('detailDate').value = ds;
   }
   if(!ds) return;
-
   const { coverage, shiftAssignments } = computeDailyCoverage(ds);
   const gaps = findGaps(coverage);
-  const anyHoliday = getAnyHolidayInfo(ds);
-
+  const anyHoliday = getAnyHolidayInfoForView(ds);
   const dayTags = $('dayTags');
   dayTags.innerHTML = '';
   const tag1 = document.createElement('span');
@@ -2480,7 +2441,6 @@ function renderDailyView(){
   tag1.style.color = '#374151';
   tag1.textContent = DAY_NAMES[dow(ds)];
   dayTags.appendChild(tag1);
-
   if(anyHoliday){
     const tag2 = document.createElement('span');
     tag2.className = 'day-tag';
@@ -2489,41 +2449,31 @@ function renderDailyView(){
     tag2.textContent = `${anyHoliday.label} · ${anyHoliday.name}`;
     dayTags.appendChild(tag2);
   }
-
   const content = $('dailyContent');
   content.innerHTML = '';
-
   const timeline = document.createElement('div');
   timeline.className = 'coverage-timeline';
-
   const title = document.createElement('h3');
   title.textContent = '📶 24-Hour Coverage Heatmap';
   timeline.appendChild(title);
-
   const barWrap = document.createElement('div');
   barWrap.className = 'coverage-bar-wrap';
-
   gaps.forEach(g=>{
     const left = g.start / 48 * 100;
     const width = (g.end - g.start + 1) / 48 * 100;
     const mid = left + width / 2;
-
     const marker = document.createElement('div');
     marker.className = 'gap-marker';
     marker.style.left = `${left}%`;
     marker.style.width = `${width}%`;
-
     const label = document.createElement('div');
     label.className = 'gap-label';
     label.style.left = `${mid}%`;
     label.textContent = `⚠ ${fmtBlockTime(g.start)}-${fmtBlockTime(g.end+1)}`;
-
     barWrap.append(marker,label);
   });
-
   const bar = document.createElement('div');
   bar.className = 'coverage-bar';
-
   let prev = coverage[0];
   let seg = 0;
   for(let i=1;i<=48;i++){
@@ -2539,10 +2489,8 @@ function renderDailyView(){
       prev = i < 48 ? coverage[i] : 0;
     }
   }
-
   barWrap.appendChild(bar);
   timeline.appendChild(barWrap);
-
   const labels = document.createElement('div');
   labels.className = 'coverage-labels';
   for(let h=0; h<=24; h+=2){
@@ -2552,14 +2500,11 @@ function renderDailyView(){
   }
   timeline.appendChild(labels);
   content.appendChild(timeline);
-
   const h3 = document.createElement('h3');
   h3.textContent = '🕐 Slot Assignment Detail';
   content.appendChild(h3);
-
   const table = document.createElement('table');
   table.className = 'slot-table';
-
   const thead = document.createElement('thead');
   const trh = document.createElement('tr');
   ['Shift','Time','Staff on Duty','Headcount'].forEach(t=>{
@@ -2569,11 +2514,9 @@ function renderDailyView(){
   });
   thead.appendChild(trh);
   table.appendChild(thead);
-
   const tbody = document.createElement('tbody');
   shifts.forEach(s=>{
     const tr = document.createElement('tr');
-
     const td1 = document.createElement('td');
     td1.style.fontWeight = '900';
     td1.style.color = s.color;
@@ -2583,10 +2526,8 @@ function renderDailyView(){
     dot.style.width = '10px';
     dot.style.height = '10px';
     td1.append(dot,document.createTextNode(' ' + s.name));
-
     const td2 = document.createElement('td');
     td2.textContent = `${s.time}${s.overnight ? ' +1' : ''}`;
-
     const td3 = document.createElement('td');
     const staff = [...new Set(shiftAssignments.get(s.id) || [])];
     if(staff.length){
@@ -2597,18 +2538,14 @@ function renderDailyView(){
       span.textContent = 'No coverage';
       td3.appendChild(span);
     }
-
     const td4 = document.createElement('td');
     td4.className = staff.length ? 'emp-cell' : 'empty-cell';
     td4.textContent = String(staff.length);
-
     tr.append(td1,td2,td3,td4);
     tbody.appendChild(tr);
   });
-
   table.appendChild(tbody);
   content.appendChild(table);
-
   const warn = $('gapWarning');
   if(gaps.length){
     warn.className = 'gap-warning err';
@@ -2618,7 +2555,6 @@ function renderDailyView(){
     warn.textContent = '✅ Full 24-hour coverage, zero gaps.';
   }
 }
-
 function shiftDay(delta){
   const el = $('detailDate');
   const base = el.value || days[0] || fmtDate(new Date());
@@ -2628,36 +2564,30 @@ function shiftDay(delta){
   dirtyFlags.daily = true;
   refreshDirty();
 }
-
 function goToToday(){
   $('detailDate').value = fmtDate(new Date());
   dirtyFlags.daily = true;
   refreshDirty();
 }
-
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown',e=>{
   const tag = document.activeElement?.tagName?.toLowerCase();
   const isTyping = ['input','select','textarea'].includes(tag);
-
   if(e.key === 'Escape'){
     closeShiftPopup();
     closeWeeklyPatternModal();
   }
-
   if(e.key === 'Enter' && document.activeElement === $('newEmpName')){
     addEmployee();
   }
-
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && selectedCells.size && !isTyping){
+    e.preventDefault();
     copySelectedCell();
   }
-
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v' && selectedCells.size && !isTyping){
     e.preventDefault();
     pasteToSelectedCells();
   }
-
   if((e.key === 'Delete' || e.key === 'Backspace') && selectedCells.size && !isTyping){
     e.preventDefault();
     if(confirm(`Delete arrangement data from ${selectedCells.size} selected cell(s)?`)){
@@ -2665,7 +2595,22 @@ document.addEventListener('keydown',e=>{
     }
   }
 });
-
+document.addEventListener('copy',e=>{
+  const tag = document.activeElement?.tagName?.toLowerCase();
+  const isTyping = ['input','textarea'].includes(tag);
+  if(selectedCells.size && !isTyping){
+    e.preventDefault();
+    copySelectedCell();
+  }
+});
+document.addEventListener('paste',e=>{
+  const tag = document.activeElement?.tagName?.toLowerCase();
+  const isTyping = ['input','textarea'].includes(tag);
+  if(selectedCells.size && !isTyping){
+    e.preventDefault();
+    pasteToSelectedCells();
+  }
+});
 /* ---------- Event bindings ---------- */
 function bindStaticEvents(){
   $('btnSaveOnline').addEventListener('click',saveOnlineNow);
@@ -2676,22 +2621,21 @@ function bindStaticEvents(){
   $('btnImportBackup').addEventListener('click',()=>$('backupFileInput').click());
   $('backupFileInput').addEventListener('change',importBackupJSON);
   $('btnPrint').addEventListener('click',()=>window.print());
-
   $('btnAddPattern').addEventListener('click',addPattern);
   $('btnAddShift').addEventListener('click',addShift);
   $('btnAddEmployee').addEventListener('click',()=>addEmployee());
   $('btnAddBatchEmployees').addEventListener('click',addBatchEmployees);
-
   $('cfgStart').addEventListener('change',rebuildDaysAndSave);
   $('cfgEnd').addEventListener('change',rebuildDaysAndSave);
   $('btnRebuildDays').addEventListener('click',rebuildDaysAndSave);
-
   $('btnCopySelected').addEventListener('click',copySelectedCellWithFeedback);
   $('btnPasteSelected').addEventListener('click',pasteToSelectedCellsWithFeedback);
   $('btnDeleteSelected').addEventListener('click',deleteSelectedArrangementsWithConfirm);
   $('btnClearSelection').addEventListener('click',clearSelectedCells);
   $('btnClearAllSchedule').addEventListener('click',clearAllSchedule);
-
+  $('btnQuickSetOff').addEventListener('click',()=>applyManualOffToSelectedCells(true));
+  $('btnQuickUnsetOff').addEventListener('click',()=>applyManualOffToSelectedCells(false));
+  $('btnApplyHolidayOverride').addEventListener('click',applyHolidayOverrideToSelectedCells);
   $('btnPrevDay').addEventListener('click',()=>shiftDay(-1));
   $('btnPrevWeek').addEventListener('click',()=>shiftDay(-7));
   $('btnNextWeek').addEventListener('click',()=>shiftDay(7));
@@ -2701,7 +2645,6 @@ function bindStaticEvents(){
     dirtyFlags.daily = true;
     refreshDirty();
   });
-
   $('shiftPopup').addEventListener('click',e=>closeShiftPopup(e));
   $('popupCancelBtn').addEventListener('click',()=>closeShiftPopup());
   $('popupConfirmBtn').addEventListener('click',saveShiftAssignment);
@@ -2712,10 +2655,11 @@ function bindStaticEvents(){
     });
     $('leaveType').value = '';
     $('leaveDays').value = '1';
+    $('popupManualOff').checked = false;
+    $('popupHolidayOverride').value = '';
     const ot = $('popupOvertime');
     if(ot) ot.checked = false;
   });
-
   $('weeklyPatternModal').addEventListener('click',e=>{
     if(e.target === $('weeklyPatternModal')) closeWeeklyPatternModal();
   });
@@ -2723,10 +2667,8 @@ function bindStaticEvents(){
   $('weeklyPatternSaveBtn').addEventListener('click',saveWeeklyPatternOverride);
   $('weeklyPatternRemoveBtn').addEventListener('click',removeSelectedWeeklyOverride);
   $('weeklyTargetDate').addEventListener('change',updateWeeklyModalWeekLabel);
-
   $('localLoadInput').addEventListener('change',handleLocalFileLoad);
 }
-
 /* ---------- Init ---------- */
 function initDefaults(){
   patterns = [
@@ -2735,7 +2677,6 @@ function initDefaults(){
     { id:'p3', name:'Sun-Thu', restDays:[5,6], color:'#fa8c16' }
   ];
   patternIdCounter = 3;
-
   shifts = [
     {id:'s1',name:'Shift 1',time:'08:00-17:00',startMin:480,endMin:1020,overnight:false,color:'#0891b2'},
     {id:'s2',name:'Shift 2',time:'08:30-17:30',startMin:510,endMin:1050,overnight:false,color:'#1677ff'},
@@ -2750,13 +2691,10 @@ function initDefaults(){
     {id:'s11',name:'Night 3',time:'23:00-08:00',startMin:1380,endMin:480,overnight:true,color:'#8c8c8c'}
   ];
   shiftIdCounter = 11;
-
   employees = [];
   scheduleData = {};
   employeeIdCounter = 0;
-
   pinnedWidths = { employee:150, region:82, pattern:96 };
-
   for(let i=0;i<14;i++){
     const id = newEmployeeId();
     employees.push({
@@ -2768,13 +2706,10 @@ function initDefaults(){
     });
     scheduleData[id] = {};
   }
-
   $('detailDate').value = $('cfgStart').value;
 }
-
 async function init(){
   bindStaticEvents();
-
   const raw = localStorage.getItem(LOCAL_KEY);
   if(raw){
     try{
@@ -2792,18 +2727,14 @@ async function init(){
     Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
     refreshDirty();
   }
-
   await loadOnline();
   connectRealtime();
-
   if(!$('detailDate').value && days.length){
     $('detailDate').value = days[0];
   }
-
   Object.keys(dirtyFlags).forEach(k=> dirtyFlags[k] = true);
   refreshDirty();
 }
-
 init();
 </script>
 </body>
