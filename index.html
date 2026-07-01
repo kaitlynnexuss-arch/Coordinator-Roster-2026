@@ -273,9 +273,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
   outline-offset:-2px;
   box-shadow:inset 0 0 0 2px rgba(22,119,255,.22);
 }
-.schedule-cell.custom-rest-cell{background:#fff7ed}
-.schedule-cell.custom-rest-cell:hover{background:#ffedd5}
-.off-label,.leave-label,.holiday-label,.ot-label,.custom-label{
+.off-label,.leave-label,.holiday-label,.ot-label{
   display:inline-block;
   font-size:9px;
   font-weight:900;
@@ -285,9 +283,11 @@ input[type="color"]{padding:1px;width:34px;height:28px}
 }
 .off-label{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca}
 .leave-label{color:#7c3aed;background:#ede9fe;border:1px solid #c4b5fd}
-.holiday-label{color:#d97706;background:#fffbeb;border:1px solid #fde68a}
+.holiday-label{border:1px solid transparent}
+.holiday-label.hk-ph{color:#b45309;background:#fffbeb;border-color:#fde68a}
+.holiday-label.cn-ph{color:#166534;background:#dcfce7;border-color:#86efac}
+.holiday-label.both-ph{color:#3f6212;background:#ecfccb;border-color:#bef264}
 .ot-label{color:#d97706;background:#fff7ed;border:1px solid #fed7aa}
-.custom-label{color:#9a3412;background:#ffedd5;border:1px solid #fdba74}
 .cell-hint{font-size:9px;color:var(--muted)}
 .shift-dot{
   width:8px;
@@ -748,7 +748,7 @@ input[type="color"]{padding:1px;width:34px;height:28px}
     <div class="leave-box">
       <div class="leave-box-title">Day Override</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <label style="display:flex;align-items:center;gap:6px;font-weight:800;color:#9a3412;">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:800;color:#b91c1c;">
           <input type="checkbox" id="popupManualOff">
           Manual OFF
         </label>
@@ -945,12 +945,6 @@ function getDefaultHolidayInfo(ds,region){
     source:'default'
   };
 }
-function getHolidayOverrideLabel(v){
-  if(v === 'HK') return 'HK';
-  if(v === 'CN') return 'CN';
-  if(v === 'BOTH') return 'HK/CN';
-  return '';
-}
 function getEffectiveHolidayInfo(empId,ds,region){
   const entry = getEntry(empId,ds);
   const override = entry.holidayOverride || '';
@@ -993,6 +987,11 @@ function getAnyHolidayInfoForView(ds){
     }
   }
   return getAnyHolidayInfo(ds);
+}
+function getHolidayClass(flag){
+  if(flag === 'HK') return 'hk-ph';
+  if(flag === 'CN') return 'cn-ph';
+  return 'both-ph';
 }
 function findPattern(id){ return patterns.find(p=>p.id===id); }
 function findShift(id){ return shifts.find(s=>s.id===id); }
@@ -1121,7 +1120,6 @@ function markDirtyFull(){
   saveToLocalCacheOnly();
   scheduleOnlineSave();
 }
-/* ---------- State / Backup ---------- */
 function getState(){
   return {
     patterns,
@@ -1210,7 +1208,6 @@ function importBackupJSON(event){
   };
   reader.readAsText(file);
 }
-/* ---------- Firebase sharing ---------- */
 async function saveOnlineNow(){
   if(applyingRemote) return;
   try{
@@ -1277,7 +1274,6 @@ function connectRealtime(){
     setSyncStatus('offline','Offline');
   }
 }
-/* ---------- Local save/load ---------- */
 function saveToLocalCacheOnly(){
   localStorage.setItem(LOCAL_KEY,JSON.stringify(getState()));
 }
@@ -1337,7 +1333,6 @@ function loadStateFromLocalText(text){
   markDirtyFull();
   alert('Local file loaded successfully.');
 }
-/* ---------- Pattern Manager ---------- */
 function addPattern(){
   const id = newPatternId();
   patterns.push({
@@ -1432,7 +1427,6 @@ function renderPatternEditor(){
   });
   box.appendChild(frag);
 }
-/* ---------- Shift Manager ---------- */
 function addShift(){
   const id = newShiftId();
   shifts.push({
@@ -1531,7 +1525,6 @@ function renderShiftLegendInline(){
   });
   box.appendChild(frag);
 }
-/* ---------- Employees ---------- */
 function addEmployee(name){
   const input = $('newEmpName');
   const n = (name || input.value).trim();
@@ -1608,19 +1601,11 @@ function remapEmployeeScheduleForPatternChange(emp,oldPatternId,newPatternId){
     });
     weekDays.forEach(ds=>{
       const dayIndex = dow(ds);
-      if(!newWorkDays.includes(dayIndex)){
-        return;
-      }
+      if(!newWorkDays.includes(dayIndex)) return;
       const newPos = newWorkDays.indexOf(dayIndex);
       const source = movableEntries.find(x=>x.workPos === newPos);
       if(source){
-        const cloned = JSON.parse(JSON.stringify(source.entry));
-        if(newPattern.restDays.includes(dayIndex)){
-          cloned.shifts = [];
-          cloned.overtime = false;
-          cloned.leave = null;
-        }
-        setEntry(emp.id,ds,cloned);
+        setEntry(emp.id,ds,JSON.parse(JSON.stringify(source.entry)));
       }
     });
   });
@@ -1835,7 +1820,6 @@ function renderEmployees(){
   box.appendChild(frag);
   $('empCount').textContent = employees.length;
 }
-/* ---------- Date range ---------- */
 function rebuildDaysOnly(){
   const s = $('cfgStart').value;
   const e = $('cfgEnd').value;
@@ -1855,7 +1839,6 @@ function rebuildDaysAndSave(){
   rebuildDaysOnly();
   markDirtySections('schedule','daily');
 }
-/* ---------- Schedule ---------- */
 function handleCellClick(e,empId,ds){
   e.preventDefault();
   e.stopPropagation();
@@ -1969,10 +1952,11 @@ function openShiftPopup(empId,ds){
     sub += `<br><span style="color:#b91c1c;font-weight:800;">This is a pattern rest day.</span>`;
   }
   if(entry.manualOff){
-    sub += `<br><span style="color:#9a3412;font-weight:800;">This day is manually marked as OFF.</span>`;
+    sub += `<br><span style="color:#b91c1c;font-weight:800;">This day is manually marked as OFF.</span>`;
   }
   if(holiday){
-    sub += `<br><span style="color:#d97706;font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}${holiday.source==='override'?' (override)':''}</span>`;
+    const color = holiday.flag === 'HK' ? '#b45309' : holiday.flag === 'CN' ? '#166534' : '#3f6212';
+    sub += `<br><span style="color:${color};font-weight:800;">${holiday.flag} Public Holiday: ${esc(holiday.name)}${holiday.source==='override'?' (override)':''}</span>`;
   }
   $('popupSub').innerHTML = sub;
   $('leaveType').value = entry.leave?.type || '';
@@ -2112,9 +2096,9 @@ function getPinnedOffsets(){
     patternLeft:pinnedWidths.employee + pinnedWidths.region
   };
 }
-function createCellTag(text,cls){
+function createCellTag(text,cls,extraClass=''){
   const div = document.createElement('div');
-  div.className = cls;
+  div.className = `${cls} ${extraClass}`.trim();
   div.textContent = text;
   return div;
 }
@@ -2212,13 +2196,12 @@ function renderScheduleTable(){
     tr.append(empTd,regionTd,patternTd);
     days.forEach(ds=>{
       const entry = getEntry(emp.id,ds);
-      const patternRest = isPatternRestDay(emp,ds);
       const effectiveOff = isEffectiveOffDay(emp,ds);
       const holiday = getEffectiveHolidayInfo(emp.id,ds,emp.region);
       const selected = selectedCells.has(cellKey(emp.id,ds));
       const effectivePatternId = getEffectivePatternId(emp,ds);
       const td = document.createElement('td');
-      td.className = `schedule-cell ${effectiveOff ? 'rest-cell' : 'work-cell'} ${selected ? 'selected' : ''} ${entry.manualOff && !patternRest ? 'custom-rest-cell' : ''}`;
+      td.className = `schedule-cell ${effectiveOff ? 'rest-cell' : 'work-cell'} ${selected ? 'selected' : ''}`;
       td.dataset.key = cellKey(emp.id,ds);
       td.addEventListener('click',e=>handleCellClick(e,emp.id,ds));
       td.addEventListener('dblclick',e=>{
@@ -2226,9 +2209,8 @@ function renderScheduleTable(){
         openShiftPopup(emp.id,ds);
       });
       td.addEventListener('mousedown',e=>e.preventDefault());
-      if(patternRest || entry.manualOff) td.appendChild(createCellTag('OFF','off-label'));
-      if(entry.manualOff && !patternRest) td.appendChild(createCellTag('Manual','custom-label'));
-      if(holiday) td.appendChild(createCellTag(`${holiday.flag} PH`,'holiday-label'));
+      if(effectiveOff) td.appendChild(createCellTag('OFF','off-label'));
+      if(holiday) td.appendChild(createCellTag(`${holiday.flag} PH`,'holiday-label',getHolidayClass(holiday.flag)));
       if(emp.weeklyPatterns?.[getWeekStart(ds)]){
         const hint = document.createElement('div');
         hint.className = 'cell-hint';
@@ -2271,7 +2253,6 @@ function renderScheduleTable(){
   table.appendChild(tbody);
   wrap.appendChild(table);
 }
-/* ---------- Column resize ---------- */
 function startResize(event,colKey){
   event.preventDefault();
   event.stopPropagation();
@@ -2293,7 +2274,6 @@ function startResize(event,colKey){
   document.addEventListener('mousemove',onMove);
   document.addEventListener('mouseup',onUp);
 }
-/* ---------- Copy / paste ---------- */
 function getFirstSelected(){
   const arr = [...selectedCells];
   if(!arr.length) return null;
@@ -2340,7 +2320,6 @@ function pasteToSelectedCellsWithFeedback(){
   if(!confirm(`Paste the copied arrangement to ${count} selected cell(s)?`)) return;
   pasteToSelectedCells();
 }
-/* ---------- Coverage ---------- */
 function getShiftBlocksForToday(shift){
   const blocks = new Set();
   if(shift.overnight){
@@ -2444,8 +2423,16 @@ function renderDailyView(){
   if(anyHoliday){
     const tag2 = document.createElement('span');
     tag2.className = 'day-tag';
-    tag2.style.background = '#fffbeb';
-    tag2.style.color = '#d97706';
+    if(anyHoliday.label.startsWith('HK / CN') || anyHoliday.label.startsWith('HK/CN')){
+      tag2.style.background = '#ecfccb';
+      tag2.style.color = '#3f6212';
+    }else if(anyHoliday.label.startsWith('HK')){
+      tag2.style.background = '#fffbeb';
+      tag2.style.color = '#b45309';
+    }else{
+      tag2.style.background = '#dcfce7';
+      tag2.style.color = '#166534';
+    }
     tag2.textContent = `${anyHoliday.label} · ${anyHoliday.name}`;
     dayTags.appendChild(tag2);
   }
@@ -2569,7 +2556,6 @@ function goToToday(){
   dirtyFlags.daily = true;
   refreshDirty();
 }
-/* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown',e=>{
   const tag = document.activeElement?.tagName?.toLowerCase();
   const isTyping = ['input','select','textarea'].includes(tag);
@@ -2611,7 +2597,6 @@ document.addEventListener('paste',e=>{
     pasteToSelectedCells();
   }
 });
-/* ---------- Event bindings ---------- */
 function bindStaticEvents(){
   $('btnSaveOnline').addEventListener('click',saveOnlineNow);
   $('btnLoadOnline').addEventListener('click',loadOnline);
@@ -2669,7 +2654,6 @@ function bindStaticEvents(){
   $('weeklyTargetDate').addEventListener('change',updateWeeklyModalWeekLabel);
   $('localLoadInput').addEventListener('change',handleLocalFileLoad);
 }
-/* ---------- Init ---------- */
 function initDefaults(){
   patterns = [
     { id:'p1', name:'Mon-Fri', restDays:[0,6], color:'#1677ff' },
